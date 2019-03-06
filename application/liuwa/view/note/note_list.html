@@ -3,18 +3,18 @@
         width:80px;height:80px
     }
 </style>
-<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 商品管理 <span class="c-gray en">&gt;</span> 商品列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 游记管理 <span class="c-gray en">&gt;</span> 游记列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
 <div class="page-container">
     <section id="formAjax">
         <div class="text-c">
             <button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
-            <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder=" 商品名" style="width:250px" class="input-text">
-            <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找商品</button>
+            <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder=" 游记名" style="width:250px" class="input-text">
+            <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找游记</button>
         </div>
     </section>
     <div class="cl pd-5 bg-1 bk-gray mt-20">
         <span class="l">
-            <a class="btn btn-primary radius" data-title="添加商品" data-href="article-add.html" onclick="add_info('添加商品','{:url("Free/goodsAdd")}')" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加商品
+            <a class="btn btn-primary radius" data-title="添加游记" data-href="article-add.html" onclick="add_info('添加游记','{:url("Note/noteAdd")}')" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加游记
             </a>
         </span>
         <span class="r">共有数据：<strong>{$page.count}</strong> 条</span> </div>
@@ -22,9 +22,9 @@
         <thead>
         <tr class="text-c">
             <th width="25">#</th>
-            <th width="100">商品图片</th>
-            <th>商品名</th>
-            <th width="60">商品价值</th>
+            <th width="100">游记图片</th>
+            <th>游记名</th>
+            <th width="60">游记价值</th>
             <th width="90">有效时长</th>
             <th width="80">所需人数</th>
             <th width="80">已完成数量</th>
@@ -40,7 +40,7 @@
                 <td>
                     <div style="width: 80px;height: 80px;background-image: url('{if $li['pic']}{$li.pic}{else /}/static/src/image/default.jpg{/if}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
                 </td>
-                <td>{$li.goods_name}</td>
+                <td>{$li.note_name}</td>
                 <td>{$li.price}</td>
                 <td>{$li.times}</td>
                 <td>{$li.neednum}</td>
@@ -48,15 +48,15 @@
                 <td>{$li.create_time|date="Y-m-d H:i:s"}</td>
                 <td class="td-manage">
                     {if $li['status'] == '1'}
-                    <a style="text-decoration:none" onClick="goods_hide(this,{$li.id})" href="javascript:;" title="下架">
+                    <a style="text-decoration:none" onClick="note_hide(this,{$li.id})" href="javascript:;" title="下架">
                         <i class="Hui-iconfont">&#xe6de;</i>
                     </a>
                     {else /}
-                    <a style="text-decoration:none" onClick="goods_show(this,{$li.id})" href="javascript:;" title="上架">
+                    <a style="text-decoration:none" onClick="note_show(this,{$li.id})" href="javascript:;" title="上架">
                         <i class="Hui-iconfont">&#xe603;</i>
                     </a>
                     {/if}
-                    <a style="text-decoration:none" onclick="add_info('商品信息','{:url("Free/goodsDetail",array("id"=>$li["id"]))}')" class="ml-5" href="javascript:;" title="查看商品">
+                    <a style="text-decoration:none" onclick="add_info('游记信息','{:url("Free/goodsDetail",array("id"=>$li["id"]))}')" class="ml-5" href="javascript:;" title="查看游记">
                         <i class="Hui-iconfont">&#xe6df;</i>
                     </a>
                 </td>
@@ -102,7 +102,7 @@
         window.location.href = '{:url("Free/goodsList")}' + '?' + str;
     });
 
-    /*添加商品*/
+    /*添加游记*/
     function add_info(title,url){
         var index = layer.open({
             type: 2,
@@ -113,7 +113,7 @@
     }
 
     /*下架*/
-    function goods_hide(obj,id){
+    function note_hide(obj,id){
         layer.confirm('确认要下架吗？',function(index){
             $.ajax({
                 url:"{:url('Free/goodsHide')}",
@@ -123,7 +123,7 @@
                 success:function(data) {
                     console.log(data)
                     if(data.code == 1) {
-                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="goods_show(this,'+id+')" href="javascript:;" title="上架"><i class="Hui-iconfont">&#xe603;</i></a>');
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="note_show(this,'+id+')" href="javascript:;" title="上架"><i class="Hui-iconfont">&#xe603;</i></a>');
                         $(obj).remove();
                         layer.msg('已下架!',{icon: 1,time:1000});
                     }else {
@@ -138,7 +138,7 @@
         });
     }
     /*上架*/
-    function goods_show(obj,id){
+    function note_show(obj,id){
         layer.confirm('确认要上架吗？',function(index){
             $.ajax({
                 url:"{:url('Free/goodsShow')}",
@@ -148,7 +148,7 @@
                 success:function(data) {
                     console.log(data);
                     if(data.code == 1) {
-                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="goods_hide(this,'+id+')" href="javascript:;" title="下架"><i class="Hui-iconfont">&#xe6de;</i></a>');
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="note_hide(this,'+id+')" href="javascript:;" title="下架"><i class="Hui-iconfont">&#xe6de;</i></a>');
                         $(obj).remove();
                         layer.msg('已上架!',{icon: 1,time:1000});
                     }else {

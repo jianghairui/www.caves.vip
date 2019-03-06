@@ -4,20 +4,20 @@
 <article class="page-container">
     <form class="form form-horizontal" id="form-article-add">
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>商品名：</label>
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>游记名：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.goods_name}" placeholder="" id="goods_name" name="goods_name">
+                <input type="text" class="input-text" value="{$info.note_name}" placeholder="" id="note_name" name="note_name">
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">商品价格：</label>
+            <label class="form-label col-xs-4 col-sm-2">游记价格：</label>
             <div class="formControls col-xs-8 col-sm-9">
                 <input type="text" class="input-text" value="{$info.price}" placeholder="金额格式 0.00" id="price" name="price">
             </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">
-                <span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">商品图片</span>
+                <span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">游记图片</span>
             </label>
             <div class="formControls col-xs-8 col-sm-9">
                 <div class="uploader-thum-container">
@@ -81,7 +81,7 @@
         //表单验证
         $("#form-article-add").validate({
             rules:{
-                goods_name:{
+                note_name:{
                     required:true,
                     maxlength:255
                 },
