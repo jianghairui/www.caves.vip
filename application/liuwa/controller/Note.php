@@ -5,12 +5,12 @@
  * Date: 2019/1/9
  * Time: 11:09
  */
-namespace  app\admin\controller;
+namespace  app\liuwa\controller;
 use think\Db;
 use think\facade\Request;
-class Free extends Common {
+class Note extends Common {
 
-    public function goodsList() {
+    public function noteList() {
         $param['search'] = input('param.search');
         $page['query'] = http_build_query(input('param.'));
 
@@ -18,15 +18,15 @@ class Free extends Common {
         $perpage = input('param.perpage',10);
         $where = [];
         if($param['search']) {
-            $where[] = ['goods_name','like',"%{$param['search']}%"];
+            $where[] = ['title','like',"%{$param['search']}%"];
         }
-        $count = Db::table('free_goods')->where($where)->count();
+        $count = Db::table('mp_note')->where($where)->count();
 
         $page['count'] = $count;
         $page['curr'] = $curr_page;
         $page['totalPage'] = ceil($count/$perpage);
         try {
-            $list = Db::table('free_goods')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
+            $list = Db::table('mp_note')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
             die('SQL错误: ' . $e->getMessage());
         }
@@ -36,47 +36,11 @@ class Free extends Common {
         return $this->fetch();
     }
 
-    public function goodsHide() {
-        $id = input('post.id','0');
-        $map = [
-            ['id','=',$id],
-            ['status','=',1]
-        ];
-        try {
-            $res = Db::table('free_goods')->where($map)->update(['status'=>0]);
-        }catch (\Exception $e) {
-            return ajax($e->getMessage(),-1);
-        }
-        if($res) {
-            return ajax();
-        }else {
-            return ajax('共修改0条记录',-1);
-        }
-    }
-
-    public function goodsShow() {
-        $id = input('post.id','0');
-        $map = [
-            ['id','=',$id],
-            ['status','=',0]
-        ];
-        try {
-            $res = Db::table('free_goods')->where($map)->update(['status'=>1]);
-        }catch (\Exception $e) {
-            return ajax($e->getMessage(),-1);
-        }
-        if($res) {
-            return ajax();
-        }else {
-            return ajax('共修改0条记录',-1);
-        }
-    }
-
-    public function goodsAdd() {
+    public function noteAdd() {
         return $this->fetch();
     }
 
-    public function goodsAddPost() {
+    public function noteAddPost() {
         if(Request::isAjax()) {
             $val['goods_name'] = input('post.goods_name');
             $val['price'] = input('post.price');
@@ -110,14 +74,14 @@ class Free extends Common {
         }
     }
 
-    public function goodsDetail() {
+    public function noteDetail() {
         $id = input('param.id');
         $info = Db::table('free_goods')->where('id','=',$id)->find();
         $this->assign('info',$info);
         return $this->fetch();
     }
 
-    public function goodsModPost() {
+    public function noteModPost() {
         if(Request::isAjax()) {
             $val['goods_name'] = input('post.goods_name');
             $val['price'] = input('post.price');
@@ -162,12 +126,6 @@ class Free extends Common {
                 return ajax('保存失败',-1);
             }
         }
-    }
-
-
-
-    public function test() {
-        return $this->fetch();
     }
 
 

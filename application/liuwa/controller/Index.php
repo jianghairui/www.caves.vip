@@ -1,5 +1,5 @@
 <?php
-namespace app\admin\controller;
+namespace app\liuwa\controller;
 use think\Db;
 use think\Exception;
 use think\facade\Request;

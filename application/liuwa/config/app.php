@@ -12,7 +12,7 @@ return array(
     'page'   =>  1,
     'perpage'   =>  5,
 
-    'login_key' => 'shwh',
+    'login_key' => 'jiang',
     'app_trace' => false,
     'trace'     =>  [
         //支持Html,Console

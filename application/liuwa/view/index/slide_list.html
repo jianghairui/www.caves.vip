@@ -10,7 +10,7 @@
             <span class="select-box inline">
                 <select id="type" name="type" class="select">
                     <option value="1">公众号</option>
-                    <option value="2">小程序</option>
+                    <option value="2">遛娃</option>
                 </select>
 		    </span>
             <span class="btn-upload form-group">
@@ -52,7 +52,7 @@
                     {if condition="$li['status'] == 1"}<span class="label label-success radius">已启用</span>{else /}<span class="label label-defaunt radius">已禁用</span>{/if}
                 </td>
                 <td>
-                    {if condition="$li['type'] == 1"}公众号{else /}小程序{/if}
+                    {if condition="$li['type'] == 1"}公众号{else /}遛娃{/if}
                 </td>
                 <td><input type="text" class="input-text text-c sort" value="{$li.sort}"></td>
                 <td class="f-14 product-brand-manage">

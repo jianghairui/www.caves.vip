@@ -1,21 +1,15 @@
 <article class="page-container">
     <form class="form form-horizontal" id="form-admin-add">
         <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>账号：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.username}" placeholder="" id="username" name="username" readonly>
+            </div>
+        </div>
+        <div class="row cl">
             <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>真实姓名：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.name}" placeholder="" id="name" name="name">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>昵称：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.nickname}" placeholder="" id="nickname" name="nickname">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>手机号：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.mobile}" placeholder="" id="mobile" name="mobile" readonly>
+                <input type="text" class="input-text" value="{$info.realname}" placeholder="" id="realname" name="realname">
             </div>
         </div>
         <div class="row cl">
@@ -34,13 +28,32 @@
             <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>性别：</label>
             <div class="formControls col-xs-8 col-sm-9 skin-minimal">
                 <div class="radio-box">
-                    <input name="sex" type="radio" id="sex-1" value="1" {if $info['sex'] == 1}checked{/if}>
+                    <input name="gender" type="radio" id="sex-1" value="1" {if $info['gender'] == 1}checked{/if}>
                     <label for="sex-1">男</label>
                 </div>
                 <div class="radio-box">
-                    <input name="sex" type="radio" id="sex-2" value="2" {if $info['sex'] == '2'}checked{/if}>
+                    <input name="gender" type="radio" id="sex-2" value="2" {if $info['gender'] == 2}checked{/if}>
                     <label for="sex-2">女</label>
                 </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>手机：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.tel}" placeholder="" id="tel" name="tel">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>邮箱：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.email}" placeholder="@" name="email" id="email">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3">备注：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea name="desc" cols="" rows="" maxlength="100" class="textarea"  placeholder="说点什么...100个字符以内" dragonfly="true" >{$info.desc}</textarea>
+                <p class="textarea-numberbar"><em class="textarea-length">0</em>/100</p>
             </div>
         </div>
         <div class="row cl">
@@ -67,7 +80,7 @@
 
         $("#form-admin-add").validate({
             rules:{
-                name:{
+                realname:{
                     required:true,
                     maxlength:16
                 },
@@ -80,12 +93,19 @@
                     // required:true,
                     equalTo: "#password"
                 },
-                sex:{
-                    required:true
-                },
-                mobile:{
+                gender:{
                     required:true,
-                    isPhone:true
+                    number:true,
+                    min:1,
+                    max:2
+                },
+                tel:{
+                    required:true,
+                    isPhone:true,
+                },
+                email:{
+                    required:true,
+                    email:true
                 }
             },
             focusCleanup:true,
