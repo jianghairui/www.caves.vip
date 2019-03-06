@@ -1,0 +1,235 @@
+<style>
+    .userinfo>td>img {
+        width:40px;height:40px;border-radius: 50%;
+    }
+</style>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 用户管理 <span class="c-gray en">&gt;</span> 用户列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+    <section id="formAjax">
+        <div class="text-c">
+            <button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+            <span class="select-box inline">
+                <select id="role" name="role" class="select">
+                    <option value="">全部</option>
+                    <option value="0" {if $role === "0"}selected{/if}>管理员</option>
+                    <option value="1" {if $role === "1"}selected{/if}>普通用户</option>
+                    <option value="2" {if $role === "2"}selected{/if}>博物馆</option>
+                    <option value="3" {if $role === "3"}selected{/if}>设计师</option>
+                    <option value="4" {if $role === "4"}selected{/if}>文创机构</option>
+                    <option value="5" {if $role === "5"}selected{/if}>工厂</option>
+                </select>
+		    </span>
+            日期范围：
+            <input type="text" onfocus="WdatePicker({ maxDate:'#F{ $dp.$D(\'logmax\')||\'%y-%M-%d\' }' })" id="logmin" value="{$Think.get.logmin}" class="input-text Wdate" style="width:120px;">
+            -
+            <input type="text" onfocus="WdatePicker({ minDate:'#F{ $dp.$D(\'logmin\') }' })" id="logmax" value="{$Think.get.logmax}" class="input-text Wdate" style="width:120px;">
+            <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder=" 用户名称或手机号" style="width:250px" class="input-text">
+            <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找用户</button>
+        </div>
+    </section>
+    <div class="cl pd-5 bg-1 bk-gray mt-20">
+        <span class="l">
+            <a href="javascript:;" onclick="multi_stop()" class="btn btn-danger radius">
+                <i class="Hui-iconfont">&#xe6e2;</i> 批量拉黑
+            </a>
+        </span>
+        <span class="r">共有数据：<strong>{$page.count}</strong> 条</span> </div>
+    <table class="table table-border table-bordered table-bg">
+        <thead>
+        <tr class="text-c">
+            <th width="25"><input type="checkbox" name="" value=""></th>
+            <th width="60">头像</th>
+            <th width="80">昵称</th>
+            <th width="80">真实姓名</th>
+            <th width="90">性别</th>
+            <th width="120">手机号</th>
+            <th width="60">分数</th>
+            <th>注册时间</th>
+            <th width="60">用户角色</th>
+            <th width="60">用户状态</th>
+            <th width="80">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <form id="multi-check">
+            {foreach $list as $li}
+            <tr class="text-c userinfo">
+                <td><input type="checkbox" value="{$li.id}" name="check[]"></td>
+                <td><img src="{if $li['photo']}{$li.photo}{else /}/static/src/image/default.jpg{/if}" alt=""></td>
+                <td>{$li.nickname}</td>
+                <td>{$li.name}</td>
+                <td>
+                    {if $li['sex'] == '1'}
+                    男
+                    {else /}
+                    女
+                    {/if}
+                </td>
+                <td>{$li.mobile}</td>
+                <td>{$li.score}</td>
+                <td>{$li.created_at}</td>
+                <td>{$li.role}</td>
+                <td class="td-status">
+                    {if $li['status'] == '1'}
+                    <span class="label label-success radius">正常</span>
+                    {else /}
+                    <span class="label label-danger radius">已拉黑</span>
+                    {/if}
+                </td>
+                <td class="td-manage">
+                    {if $li['status'] == '1'}
+                    <a style="text-decoration:none" onClick="user_stop(this,{$li.id})" href="javascript:;" title="拉进黑名单"><i class="Hui-iconfont">&#xe631;</i></a>
+                    {else /}
+                    <a style="text-decoration:none" onClick="user_start(this,{$li.id})" href="javascript:;" title="恢复">
+                        <i class="Hui-iconfont">&#xe66b;</i>
+                    </a>
+                    {/if}
+                    <a title="查看详情" href="javascript:;" onclick="user_detail('用户信息','{:url("User/userDetail",array("id"=>$li['id']))}')" class="ml-5" style="text-decoration:none">
+                    <i class="Hui-iconfont">&#xe6df;</i>
+                    </a>
+                </td>
+            </tr>
+            {/foreach}
+        </form>
+
+        <tr>
+            <td colspan="13" id="page" class="text-r"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript">
+
+    var url = '{:url("User/userList")}' + '?<?php echo $page["query"];?>'
+    var curr = '{$page.curr}'
+    laypage({
+        cont: 'page', //容器。值支持id名、原生dom对象，jquery对象。
+        pages: '{$page.totalPage}', //通过后台拿到的总页数
+        skip: false, //是否开启跳页
+        skin: '#5a98de',
+        curr: curr || 1, //当前页
+        jump: function(obj, first){ //触发分页后的回调
+            // console.log(obj)
+            if(!first) {
+                window.location.href = url+'&page=' + obj.curr;
+            }
+        }
+    });
+
+    $("#search-btn").click(function () {
+        var role = $("#formAjax").find("#role").val()
+        var logmin = $("#formAjax").find("#logmin").val()
+        var logmax = $("#formAjax").find("#logmax").val()
+        var search = $("#formAjax").find("#search").val()
+        var str = ''
+        if(role.length != '') {
+            str += '&role=' + role
+        }
+        if(logmin.length != '') {
+            str += '&logmin=' + logmin
+        }
+        if(logmax.length != '') {
+            str += '&logmax=' + logmax
+        }
+        if(search.length != '') {
+            str += '&search=' + search
+        }
+        window.location.href = '{:url("User/userList")}' + '?' + str;
+    });
+
+    /*查看用户信息*/
+    function user_detail(title,url){
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url
+        });
+        layer.full(index);
+    }
+
+
+    function user_stop(obj,id) {
+        layer.confirm('确认要拉黑吗？',function(index){
+            $.ajax({
+                url:"{:url('User/userStop')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-danger radius">已拉黑</span>')
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="user_start(this,'+id+')" href="javascript:;" title="恢复"><i class="Hui-iconfont">&#xe66b;</i></a>');
+                        $(obj).remove();
+                        layer.msg('已拉黑!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+        });
+    }
+
+    function user_start(obj,id) {
+        layer.confirm('确认恢复吗？',function(index){
+            $.ajax({
+                url:"{:url('User/userGetback')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">正常</span>')
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="user_stop(this,'+id+')" href="javascript:;" title="拉黑"><i class="Hui-iconfont">&#xe631;</i></a>');
+                        $(obj).remove();
+                        layer.msg('已恢复!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+        });
+    }
+
+
+    function multi_stop() {
+        layer.confirm('全部拉黑吗？', {
+                btn: ['确认','取消'],
+                shade: false,
+                closeBtn: 0
+            },
+            function() {
+                $('#multi-check').ajaxSubmit({
+                    type: 'post',
+                    url: "{:url('User/multiStop')}" ,
+                    success: function(data){
+                        console.log(data)
+                        if(data.code == 1) {
+                            layer.msg(data.data,{icon:1,time:1000});
+                            setTimeout("window.location.reload()", 1000)
+                        }else {
+                            layer.msg(data.data,{icon:2,time:1000});
+                        }
+
+                    },
+                    error: function(msg){
+                        //console.log(JSON.parse(msg.responseText))
+                        layer.msg('接口请求失败!',{icon:5,time:1000});
+                    }
+                });
+            })
+    }
+
+
+</script>

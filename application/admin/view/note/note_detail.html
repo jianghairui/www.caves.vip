@@ -1,0 +1,233 @@
+<style>
+    .thumbnail{ width:256px;height: 256px;background-size: cover;background-position: center;position: relative}
+</style>
+<link href="/lib/lightbox2/2.8.1/css/lightbox.css" rel="stylesheet" type="text/css" >
+<article class="page-container">
+    <form class="form form-horizontal" id="form-article-add">
+
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>笔记标题：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.title}" name="title" placeholder="" >
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">笔记内容：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea name="content" cols="" rows="" class="textarea"  placeholder="说点什么...最少输入10个字符" datatype="*10-100" dragonfly="true" nullmsg="备注不能为空！">{$info.content}</textarea>
+                <p class="textarea-numberbar"><em class="textarea-length">0</em>/255</p>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>相关商品(只读)：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.goods_name}" name="title" placeholder="" readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>发布人(只读)：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.nickname}" name="nickname" placeholder=""  readonly>
+            </div>
+        </div>
+
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                图片：
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <ul class="cl portfolio-area">
+                    <li class="item">
+                        <div class="portfoliobox">
+                            <input class="checkbox" name="" type="checkbox" value="">
+                            <div class="picbox"><a href="{$info.image_one_url}" data-lightbox="gallery" data-title=""><img src="{$info.image_one_url}"></a></div>
+                            <div class="textbox"></div>
+                        </div>
+                    </li>
+                    <li class="item">
+                        <div class="portfoliobox">
+                            <input class="checkbox" name="" type="checkbox" value="">
+                            <div class="picbox"><a href="{$info.image_two_url}" data-lightbox="gallery" data-title=""><img src="{$info.image_two_url}"></a></div>
+                            <div class="textbox"></div>
+                        </div>
+                    </li>
+                    <li class="item">
+                        <div class="portfoliobox">
+                            <input class="checkbox" name="" type="checkbox" value="">
+                            <div class="picbox"><a href="{$info.image_three_url}" data-lightbox="gallery" data-title=""><img src="{$info.image_three_url}"></a></div>
+                            <div class="textbox"></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">发布时间(只读)：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.created_at}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+                <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+            </div>
+        </div>
+        <input type="file" name="file1" id="file1" style="display: none;">
+        <input type="file" name="file2" id="file2" style="display: none;">
+        <input type="file" name="file3" id="file3" style="display: none;">
+        <input type="hidden" name="id" value="{$info.id}">
+    </form>
+</article>
+
+
+<script type="text/javascript" src="/lib/lightbox2/2.8.1/js/lightbox.min.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript">
+
+
+    $(function () {
+
+        var isclick = true;
+        //表单验证
+        $("#form-article-add").validate({
+            rules:{},
+            focusCleanup:true,
+            success:"valid",
+            submitHandler:function(form){
+                if(isclick === true) {
+                    isclick = false
+                    $(form).ajaxSubmit({
+                        type: 'post',
+                        url: "{:url('Store/storeModPost')}" ,
+                        success: function(data){
+                            console.log(data)
+                            if(data.code == 1) {
+                                layer.msg('保存成功!',{icon:1,time:1000});
+                                setTimeout("window.parent.location.reload()", 1000)
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000});
+                                isclick = true
+                            }
+
+                        },
+                        error: function(XmlHttpRequest, textStatus, errorThrown){
+                            layer.msg('error!',{icon:5,time:1000});
+                            isclick = true
+                        }
+                    });
+                }
+
+            }
+        });
+
+
+
+
+        $("#btn-star1").click(function(){
+            $("#file1").click();
+            $("#file1").change(function(e){
+                if(checkfile('file1') !== true) {
+                    $("#file").val('')
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList1").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+            });
+        })
+
+        $("#btn-star2").click(function(){
+            $("#file2").click();
+            $("#file2").change(function(e){
+                if(checkfile('file2') !== true) {
+                    $("#file2").val('')
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList2").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+            });
+        })
+
+        $("#btn-star3").click(function(){
+            $("#file3").click();
+            $("#file3").change(function(e){
+                if(checkfile('file3') !== true) {
+                    $("#file3").val('')
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList3").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+            });
+        })
+
+        function checkfile(fileId){
+
+            var maxsize = 512*1024;//512K
+            var errMsg = "上传的附件文件不能超过512K！！！";
+            var tipMsg = "您的浏览器暂不支持计算上传文件的大小，确保上传文件不要超过512K，建议使用IE、FireFox、Chrome浏览器。";
+            var browserCfg = {};
+
+            var ua = window.navigator.userAgent;
+            if (ua.indexOf("MSIE")>=1){
+                browserCfg.ie = true;
+            }else if(ua.indexOf("Firefox")>=1){
+                browserCfg.firefox = true;
+            }else if(ua.indexOf("Chrome")>=1){
+                browserCfg.chrome = true;
+            }
+
+            if(typeof FileReader != 'undefined'){
+                var file = document.getElementById(fileId).files[0];
+                if((file.type).indexOf("image/")==-1){
+                    alert('请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!!!!');
+                    return false;
+                }
+            }else{
+                var fileName=document.getElementById(fileId).value;
+                var suffixIndex=fileName.lastIndexOf(".");
+                var suffix=fileName.substring(suffixIndex+1).toUpperCase();
+                if(suffix!="BMP"&&suffix!="JPG"&&suffix!="JPEG"&&suffix!="PNG"&&suffix!="GIF"){
+                    alert("请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!");
+                    return false;
+                }
+            }
+
+            try{
+                var obj_file = document.getElementById(fileId);
+                if(obj_file.value==""){
+                    alert("请先选择上传文件");
+                    return false;
+                }
+                var filesize = 0;
+
+                if(browserCfg.firefox || browserCfg.chrome ){
+                    filesize = obj_file.files[0].size;
+                }else{
+                    alert(tipMsg);
+                    return false;
+                }
+
+                if(filesize==-1){
+                    alert(tipMsg);
+                    return false;
+                }else if(filesize>maxsize){
+                    alert(errMsg);
+                    return false;
+                }else{
+                    return true;
+                }
+            }catch(e){
+                alert(e);
+                return false;
+            }
+            return false;
+        }
+    })
+
+
+</script>

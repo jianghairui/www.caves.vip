@@ -1,0 +1,331 @@
+<style>
+    .thumbnail{ width:384px;height: 216px;background-size: cover;background-position: center;position: relative}
+</style>
+<article class="page-container">
+    <form class="form form-horizontal" id="form-article-add">
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>店铺名：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$store_name}" placeholder="" id="store_name" name="store_name" readonly>
+                <input type="hidden" class="input-text" value="{$store_id}" placeholder="" id="store_id" name="store_id">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>商品名：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder="" id="goods_name" name="goods_name">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">商品简介：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea name="goods_info" cols="" rows="" class="textarea"  placeholder="说点什么...最少输入10个字符" datatype="*10-100" dragonfly="true" nullmsg="备注不能为空！"></textarea>
+                <p class="textarea-numberbar"><em class="textarea-length">0</em>/200</p>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">图片1</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div id="fileList1" class="uploader-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span id="btn-star2" class="btn btn-primary btn-uploadstar radius ml-10">图片2</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div id="fileList2" class="uploader-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span id="btn-star3" class="btn btn-primary btn-uploadstar radius ml-10">图片3</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div id="fileList3" class="uploader-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span id="btn-star4" class="btn btn-primary btn-uploadstar radius ml-10">图片4</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div id="fileList4" class="uploader-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">库存数量：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder="输入数字" id="stock" name="stock">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">商品价格：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder="金额格式 0.00" id="price" name="price">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>是否包邮：</label>
+            <div class="formControls col-xs-8 col-sm-9 skin-minimal">
+                <div class="radio-box">
+                    <input name="is_shipping" type="radio" id="sex-1" checked value="0">
+                    <label for="sex-1">不包邮</label>
+                </div>
+                <div class="radio-box">
+                    <input name="is_shipping" type="radio" id="sex-2" value="1">
+                    <label for="sex-2">&nbsp;&nbsp;包邮</label>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">邮费：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder="金额格式 0.00" id="postage" name="postage">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>是否包邮：</label>
+            <div class="formControls col-xs-8 col-sm-9 skin-minimal">
+                <div class="radio-box">
+                    <input name="status" type="radio" id="ship-1" checked value="0">
+                    <label for="ship-1">不上架</label>
+                </div>
+                <div class="radio-box">
+                    <input name="status" type="radio" id="ship-2" value="1">
+                    <label for="ship-2">&nbsp;&nbsp;上架</label>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 添加</button>
+                <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+            </div>
+        </div>
+        <input type="file" name="file1" id="file1" style="display: none;">
+        <input type="file" name="file2" id="file2" style="display: none;">
+        <input type="file" name="file3" id="file3" style="display: none;">
+        <input type="file" name="file4" id="file4" style="display: none;">
+    </form>
+</article>
+
+
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+<script type="text/javascript">
+    $(function(){
+
+        $('.skin-minimal input').iCheck({
+            checkboxClass: 'icheckbox-blue',
+            radioClass: 'iradio-blue',
+            increaseArea: '20%'
+        });
+
+        var isclick = true
+        //表单验证
+        $("#form-article-add").validate({
+            rules:{
+                store_id:{
+                    required:true,
+                    maxlength:100
+                },
+                goods_name:{
+                    required:true,
+                    maxlength:255
+                },
+                price:{
+                    required:true
+                },
+                stock:{
+                    required:true,
+                    number:true
+                }
+            },
+            focusCleanup:true,
+            success:"valid",
+            submitHandler:function(form){
+                if(isclick === true) {
+                    isclick = false
+                    $(form).ajaxSubmit({
+                        type: 'post',
+                        url: "{:url('Store/goodsAddPost')}" ,
+                        success: function(data){
+                            console.log(data)
+                            if(data.code == 1) {
+                                layer.msg('添加成功!',{icon:1,time:1000});
+                                setTimeout("window.parent.location.reload()", 1000)
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000});
+                                isclick = true
+                            }
+
+                        },
+                        error: function(XmlHttpRequest, textStatus, errorThrown){
+                            layer.msg('error!',{icon:5,time:1000});
+                            isclick = true
+                        }
+                    });
+                }
+
+            }
+        });
+
+
+        $("#btn-star1").click(function(){
+            $("#file1").click();
+            $("#file1").change(function(e){
+                if(checkfile('file1') !== true) {
+                    $("#file").val('')
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList1").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+            });
+        })
+
+        $("#btn-star2").click(function(){
+            $("#file2").click();
+            $("#file2").change(function(e){
+                if(checkfile('file2') !== true) {
+                    $("#file2").val('')
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList2").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+            });
+        })
+
+        $("#btn-star3").click(function(){
+            $("#file3").click();
+            $("#file3").change(function(e){
+                if(checkfile('file3') !== true) {
+                    $("#file3").val('')
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList3").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+            });
+        })
+
+        $("#btn-star4").click(function(){
+            $("#file4").click();
+            $("#file4").change(function(e){
+                if(checkfile('file4') !== true) {
+                    $("#file4").val('')
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList4").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+            });
+        })
+
+
+
+        $(document).ready(function(){
+            bindKeyEvent($("#price"));
+        });
+        function bindKeyEvent(obj) {
+            obj.keyup(function () {
+                var reg = $(this).val().match(/\d+\.?\d{0,2}/);
+                var txt = '';
+                if (reg != null) {
+                    txt = reg[0];
+                }
+                $(this).val(txt);
+            }).change(function () {
+                $(this).keypress();
+                var v = $(this).val();
+                if (/\.$/.test(v)) {
+                    $(this).val(v.substr(0, v.length - 1));
+                }
+            });
+        }
+
+        function checkfile(fileId){
+
+            var maxsize = 512*1024;//512K
+            var errMsg = "上传的附件文件不能超过512K！！！";
+            var tipMsg = "您的浏览器暂不支持计算上传文件的大小，确保上传文件不要超过512K，建议使用IE、FireFox、Chrome浏览器。";
+            var browserCfg = {};
+
+            var ua = window.navigator.userAgent;
+            if (ua.indexOf("MSIE")>=1){
+                browserCfg.ie = true;
+            }else if(ua.indexOf("Firefox")>=1){
+                browserCfg.firefox = true;
+            }else if(ua.indexOf("Chrome")>=1){
+                browserCfg.chrome = true;
+            }
+
+            if(typeof FileReader != 'undefined'){
+                var file = document.getElementById(fileId).files[0];
+                if((file.type).indexOf("image/")==-1){
+                    alert('请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!!!!');
+                    return false;
+                }
+            }else{
+                var fileName=document.getElementById(fileId).value;
+                var suffixIndex=fileName.lastIndexOf(".");
+                var suffix=fileName.substring(suffixIndex+1).toUpperCase();
+                if(suffix!="BMP"&&suffix!="JPG"&&suffix!="JPEG"&&suffix!="PNG"&&suffix!="GIF"){
+                    alert("请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!");
+                    return false;
+                }
+            }
+
+            try{
+                var obj_file = document.getElementById(fileId);
+                if(obj_file.value==""){
+                    alert("请先选择上传文件");
+                    return false;
+                }
+                var filesize = 0;
+
+                if(browserCfg.firefox || browserCfg.chrome ){
+                    filesize = obj_file.files[0].size;
+                }else{
+                    alert(tipMsg);
+                    return false;
+                }
+
+                if(filesize==-1){
+                    alert(tipMsg);
+                    return false;
+                }else if(filesize>maxsize){
+                    alert(errMsg);
+                    return false;
+                }else{
+                    return true;
+                }
+            }catch(e){
+                alert(e);
+                return false;
+            }
+            return false;
+        }
+
+
+
+    });
+</script>

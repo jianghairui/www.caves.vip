@@ -1,0 +1,142 @@
+<style>
+    .thumbnail{ width:131px;height: 131px;background-size: cover;background-position: center;position: relative;border-radius: 50%}
+</style>
+<article class="page-container">
+    <form class="form form-horizontal" id="form-article-add">
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span class="c-red"></span>
+                <!--<span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">编辑</span>-->
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div id="fileList1" class="uploader-list">
+                        <div class="thumbnail" style="background-image: url('{$info.photo}');"><div class="file-panel"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>用户姓名：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" name="name" value="{$info.name}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>账户余额：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" name="wallet" value="{$info.wallet}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>用户昵称：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" name="nickname" value="{$info.nickname}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>性别：</label>
+            <div class="formControls col-xs-8 col-sm-9 skin-minimal">
+                <div class="radio-box">
+                    <input name="gender" type="radio" id="sex-1" value="1" {if $info['sex'] === 1}checked{/if} readonly>
+                    <label for="sex-1">男</label>
+                </div>
+                <div class="radio-box">
+                    <input name="gender" type="radio" id="sex-2" value="2" {if $info['sex'] === 2}checked{/if} readonly>
+                    <label for="sex-2">女</label>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">出生日期：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.birthday}" class="input-text" readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">手机号：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.mobile}" class="input-text" readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">OPENID：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.openid}" class="input-text" readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">积分：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.score}" class="input-text" readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>用户状态：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                {switch $info['status']}
+                {case 1}
+                <input type="text" class="input-text" value="正常" placeholder=""  readonly>
+                {/case}
+                {case 2}
+                <input type="text" class="input-text" value="已拉黑" placeholder=""  readonly>
+                {/case}
+                {default /}
+                <input type="text" class="input-text" value="其他" placeholder=""  readonly>
+                {/switch}
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>账号角色：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                {switch $info['role']}
+                {case 0}
+                <input type="text" class="input-text" value="管理员" placeholder=""  readonly>
+                {/case}
+                {case 1}
+                <input type="text" class="input-text" value="普通用户" placeholder=""  readonly>
+                {/case}
+                {case 2}
+                <input type="text" class="input-text" value="博物馆" placeholder=""  readonly>
+                {/case}
+                {case 3}
+                <input type="text" class="input-text" value="设计师" placeholder=""  readonly>
+                {/case}
+                {case 4}
+                <input type="text" class="input-text" value="文创机构" placeholder=""  readonly>
+                {/case}
+                {case 5}
+                <input type="text" class="input-text" value="工厂" placeholder=""  readonly>
+                {/case}
+                {default /}
+                <input type="text" class="input-text" value="其他" placeholder=""  readonly>
+                {/switch}
+            </div>
+        </div>
+
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">注册时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.created_at}" class="input-text" readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+                <button onClick="layer_close();" class="btn btn-primary radius" type="button">&nbsp;&nbsp;关闭选项卡&nbsp;&nbsp;</button>
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+            </div>
+        </div>
+
+    </form>
+</article>
+
+
+<script type="text/javascript" src="/lib/lightbox2/2.8.1/js/lightbox.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $(".portfolio-area li").Huihover();
+    });
+</script>

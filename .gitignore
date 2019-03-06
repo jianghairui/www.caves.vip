@@ -1,0 +1,5 @@
+.idea
+config/database.php
+public/cert
+*.log
+.DS_Store
