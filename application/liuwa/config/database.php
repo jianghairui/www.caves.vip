@@ -15,11 +15,11 @@ return [
     // 服务器地址
     'hostname'        => '127.0.0.1',
     // 数据库名
-    'database'        => 'xcx',
+    'database'        => 'liuwa',
     // 用户名
-    'username'        => 'xcx',
+    'username'        => 'liuwa',
     // 密码
-    'password'        => 'xcx123456',
+    'password'        => 'liuwa2019',
 
 //    'hostname'        => '127.0.0.1',
 //    'database'        => 'mpcave',
