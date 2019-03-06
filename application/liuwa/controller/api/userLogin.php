@@ -5,8 +5,8 @@
  * Date: 2018/9/20
  * Time: 16:36
  */
-namespace app\index\controller;
-use app\liuwa\controller\Base;
+namespace app\index\controller\api;
+use app\liuwa\controller\api\Base;
 use EasyWeChat\Factory;
 use think\Db;
 use think\Exception;

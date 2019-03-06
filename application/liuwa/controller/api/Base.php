@@ -5,7 +5,7 @@
  * Date: 2018/9/18
  * Time: 21:36
  */
-namespace app\liuwa\controller;
+namespace app\liuwa\controller\api;
 use think\Controller;
 use think\Db;
 use think\exception\HttpResponseException;
@@ -15,6 +15,7 @@ class Base extends Controller {
     protected $myinfo = [];
     protected $domain = '';
     protected $weburl = '';
+    protected $cmd = '';
 
 
     public function initialize()
@@ -24,6 +25,7 @@ class Base extends Controller {
             'openid' => '',
             'session_key' => ''
         ];
+        $this->cmd = request()->controller() . '/' . request()->action();
         $this->domain = 'www.caves.vip';
         $this->weburl = 'https://www.caves.vip/';
         $this->mp_config = [
