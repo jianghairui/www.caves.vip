@@ -8,17 +8,16 @@
 namespace app\admin\model;
 use think\Model;
 
-class Slideshow extends Model
+class Prize extends Model
 {
     protected $pk = 'id';
-    protected $table = 'mp_slideshow';
+    protected $table = 'mp_prize';
 
     protected static function init()
     {
-
         self::afterDelete(function ($data) {
             //控制需要用destroy方法触发,不可用delete
-            @unlink($data['pic']);
+            @unlink($data['cover']);
         });
 
     }

@@ -1,0 +1,198 @@
+<style>
+    #fileList .thumbnail{ width:200px;height: 200px;background-size: cover;background-position: center;position: relative}
+    #fileList .thumbnail div.file-panel{position: absolute; height: 25px;background: rgba( 0, 0, 0, 0.5 ); width: 100%; top: 0; left: 0; overflow: hidden; z-index: 300;}
+    #fileList .thumbnail div.file-panel span{width: 24px; height: 24px; display: inline; float: right; text-indent: -9999px; overflow: hidden; background: url(/lib/webuploader/0.1.5/images/icons.png) no-repeat; margin: 5px 1px 1px; cursor: pointer;}
+    #fileList .thumbnail div.file-panel span.cancel{background-position: -48px -24px;}
+    #fileList .thumbnail div.file-panel span.cancel:hover{background-position: -48px 0;}
+</style>
+<div class="page-container">
+    <form class="form form-horizontal" id="formAjax">
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>分类名称：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder="" id="" name="cate_name">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">分类级别：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$cate_name}" placeholder="" id="" name="" disabled>
+                <input type="hidden" class="input-text"  value="{$cate_id}" placeholder="" id="" name="pid">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span id="btn-star" class="btn btn-primary btn-uploadstar radius ml-10">选择图片</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div id="fileList" class="uploader-list">
+                        <!--<div id="cover" class="thumbnail" style="background-image: url('/static/200x150.jpg')">-->
+                            <!--<div class="file-panel">-->
+                                <!--<span class="cancel">删除</span>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe600;</i> 添加分类</button>
+                <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+<script type="text/javascript">
+
+    $(function() {
+        var isclick = true
+
+        $("#formAjax").validate({
+            rules:{
+                cate_name:{
+                    required:true,
+                    minlength:2,
+                    maxlength:30
+                },
+            },
+            onkeyup:false,
+            focusCleanup:true,
+            success:"valid",
+            submitHandler:function(form){
+                if(isclick === true) {
+                    isclick = false
+                    $(form).ajaxSubmit({
+                        type: 'post',
+                        url: "{:url('Index/cateadd_post')}" ,
+                        success: function(data){
+                            console.log(data)
+                            if(data.code == 1) {
+                                layer.msg('添加成功!',{icon:1,time:1000});
+                                setTimeout("window.parent.location.reload()", 1000)
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000});
+                                isclick = true
+                            }
+
+                        },
+                        error: function(msg){
+                            layer.msg('接口请求失败!',{icon:5,time:1000});
+                            isclick = true
+                        }
+                    });
+                }
+            }
+        });
+
+
+        $("#btn-star").click(function(){
+            var times = new Date()
+            var i = times.getTime()
+
+            var child_num = $('#fileList').children().length
+            console.log(child_num)
+            if(child_num >= 1) {
+                return false;
+            }
+            $("#formAjax").append('<input type="file" id="file' + i + '" name="file' + i + '" style="display: none">');
+
+            $(document).on('change',"#file" + i,function(e){
+                if(checkfile(i) !== true) {
+                    $("#file" + i).remove()
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList").append('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel" title="'+i+'"><span class="cancel">删除</span></div></div>');
+
+                $(".cancel").bind('click',function(){
+                    $('#file'+$(this).parent().attr('title')).remove()
+                    $(this).parent().parent().remove()
+                })
+            });
+
+            $("#file" + i).click();
+
+        })
+
+
+
+
+
+        function checkfile(fileId){
+
+            var maxsize = 512*1024;//512K
+            var errMsg = "上传的附件文件不能超过512K！！！";
+            var tipMsg = "您的浏览器暂不支持计算上传文件的大小，确保上传文件不要超过512K，建议使用IE、FireFox、Chrome浏览器。";
+            var browserCfg = {};
+
+            var ua = window.navigator.userAgent;
+            if (ua.indexOf("MSIE")>=1){
+                browserCfg.ie = true;
+            }else if(ua.indexOf("Firefox")>=1){
+                browserCfg.firefox = true;
+            }else if(ua.indexOf("Chrome")>=1){
+                browserCfg.chrome = true;
+            }
+
+            if(typeof FileReader != 'undefined'){
+                var file = document.getElementById("file" + fileId).files[0];
+                if((file.type).indexOf("image/")==-1){
+                    alert('请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!!!!');
+                    return false;
+                }
+            }else{
+                var fileName=document.getElementById("file" + fileId).value;
+                var suffixIndex=fileName.lastIndexOf(".");
+                var suffix=fileName.substring(suffixIndex+1).toUpperCase();
+                if(suffix!="BMP"&&suffix!="JPG"&&suffix!="JPEG"&&suffix!="PNG"&&suffix!="GIF"){
+                    alert("请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!");
+                    return false;
+                }
+            }
+
+            try{
+                var obj_file = document.getElementById("file" + fileId);
+                if(obj_file.value==""){
+                    alert("请先选择上传文件");
+                    return false;
+                }
+                var filesize = 0;
+
+                if(browserCfg.firefox || browserCfg.chrome ){
+                    filesize = obj_file.files[0].size;
+                }else if(browserCfg.ie){
+                    var obj_img = document.getElementById('img' + fileId);
+                    obj_img.dynsrc=obj_file.value;
+                    filesize = obj_img.fileSize;
+                }else{
+                    alert(tipMsg);
+                    return false;
+                }
+
+                if(filesize==-1){
+                    alert(tipMsg);
+                    return false;
+                }else if(filesize>maxsize){
+                    alert(errMsg);
+                    return false;
+                }else{
+                    return true;
+                }
+            }catch(e){
+                alert(e);
+                return false;
+            }
+            return false;
+        }
+
+    })
+
+</script>

@@ -1,0 +1,12 @@
+<div class="uploader-thum-container">
+    <div id="fileList" class="uploader-list">
+        {if $info['identity_pic']}
+        <?php $image = unserialize($info['identity_pic']);?>
+        {foreach $image as $li}
+        <div id="cover" class="thumbnail" style="background-image: url('/{$li}');">
+            <div class="file-panel"></div>
+        </div>
+        {/foreach}
+        {/if}
+    </div>
+</div>

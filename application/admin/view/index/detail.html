@@ -1,0 +1,217 @@
+<link href="/lib/lightbox2/2.8.1/css/lightbox.css" rel="stylesheet" type="text/css" >
+<article class="page-container">
+    <form class="form form-horizontal" id="form-article-add">
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>订单编号：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.order_sn}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>订单状态：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                {switch $info['status']}
+                {case -3}
+                <input type="text" class="input-text" value="已取消" placeholder=""  readonly>
+                {/case}
+                {case -2}
+                <input type="text" class="input-text" value="无人接单" placeholder=""  readonly>
+                {/case}
+                {case -1}
+                <input type="text" class="input-text" value="未通过审核" placeholder=""  readonly>
+                {/case}
+                {case 0}
+                <input type="text" class="input-text" value="待审核" placeholder=""  readonly>
+                {/case}
+                {case 1}
+                <input type="text" class="input-text" value="已审核,待接单" placeholder=""  readonly>
+                {/case}
+                {case 2}
+                <input type="text" class="input-text" value="进行中" placeholder=""  readonly>
+                {/case}
+                {case 3}
+                <input type="text" class="input-text" value="接单人已提交" placeholder=""  readonly>
+                {/case}
+                {case 4}
+                <input type="text" class="input-text" value="已完成" placeholder=""  readonly>
+                {/case}
+                {case 5}
+                <input type="text" class="input-text" value="未完成" placeholder=""  readonly>
+                {/case}
+                {default /}
+                <input type="text" class="input-text" value="其他" placeholder=""  readonly>
+                {/switch}
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>微信单号：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.trans_id}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>支付时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.pay_time|date='Y-m-d H:i:s'}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>需求标题：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.title}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>需求分类：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.cate_name}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">需求内容：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea name="abstract" cols="" rows="" class="textarea valid" placeholder="" readonly>{$info.content}</textarea>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">需求地点：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.address}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                图片：
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <ul class="cl portfolio-area">
+                    {if $info['image']}
+                    <?php $image = unserialize($info['image']);?>
+                    {foreach $image as $li}
+                    <li class="item">
+                        <div class="portfoliobox">
+                            <input class="checkbox" name="" type="checkbox" value="">
+                            <div class="picbox"><a href="/{$li}" data-lightbox="gallery" data-title=""><img src="/{$li}"></a></div>
+                            <div class="textbox"></div>
+                        </div>
+                    </li>
+                    {/foreach}
+                    {/if}
+                </ul>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">需求金额：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="￥ {$info.order_price}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">服务费率：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.rate*100} %" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">服务费：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="￥ {$info.fee}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">实付金额：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="￥ {$info.real_price}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">中介费：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="￥ {$info.agency}" placeholder=""  readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">发起人：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <a href="{:url("Member/userdetail",array("openid"=>$info['f_openid']))}" class="btn btn-link">查看发布人</a>
+            </div>
+        </div>
+        {if $info['to_openid']}
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">应邀人：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <a href="{:url("Member/userdetail",array("openid"=>$info['to_openid']))}" class="btn btn-link">查看应邀人</a>
+            </div>
+        </div>
+        {/if}
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">订单发布时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.create_time|date='Y-m-d H:i:s'}" class="input-text" readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">截止接单时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.end_time|date='Y-m-d H:i:s'}" class="input-text" readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">截止完成时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.deadline|date='Y-m-d H:i:s'}" class="input-text" readonly>
+            </div>
+        </div>
+        {if $info['take_time']}
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">订单生效时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.take_time|date='Y-m-d H:i:s'}" class="input-text" readonly>
+            </div>
+        </div>
+        {/if}
+        {if $info['submit_time']}
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">提交完成时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.submit_time|date='Y-m-d H:i:s'}" class="input-text" readonly>
+            </div>
+        </div>
+        {/if}
+        {if $info['finish_time']}
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">订单结束时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text"  value="{$info.finish_time|date='Y-m-d H:i:s'}" class="input-text" readonly>
+            </div>
+        </div>
+        {/if}
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+                <button onClick="layer_close();" class="btn btn-primary radius" type="button">&nbsp;&nbsp;关闭选项卡&nbsp;&nbsp;</button>
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+            </div>
+        </div>
+
+    </form>
+</article>
+
+
+<script type="text/javascript" src="/lib/lightbox2/2.8.1/js/lightbox.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $(".portfolio-area li").Huihover();
+    });
+    /*查看用户信息*/
+    function user_detail(title,url){
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url
+        });
+        layer.full(index);
+    }
+</script>

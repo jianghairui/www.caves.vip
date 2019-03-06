@@ -1,0 +1,183 @@
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页
+    <span class="c-gray en">&gt;</span>
+    系统管理
+    <span class="c-gray en">&gt;</span>
+    基本设置
+    <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+</nav>
+<div class="page-container">
+    <form class="form form-horizontal" id="formAjax">
+        <div id="tab-system" class="HuiTab">
+            <div class="tabBar cl">
+                <span>小程序设置</span>
+                <span>安全设置</span>
+            </div>
+            <div class="tabCon">
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2">
+                        <span class="c-red">*</span>
+                        需求服务费率 (val%)：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="text" id="website-title" placeholder="输入格式(1-99)" value="{$info.req_rate*100}" class="input-text" name="req_rate">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2">
+                        <span class="c-red">*</span>
+                        提现手续费率 (val%)：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="text" id="website-Keywords" placeholder="输入格式(1-99)" value="{$info.withdraw_rate*100}" class="input-text" name="withdraw_rate">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2">
+                        <span class="c-red">*</span>
+                        分享中介费率 (val%)：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="text" id="website-description" placeholder="输入格式(1-99)" value="{$info.agency_rate*100}" class="input-text" name="agency_rate">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2">
+                        <span class="c-red">*</span>
+                        最低提现金额：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="text" id="" placeholder="输入金额,不可少于1元" value="{$info.minimum}" class="input-text" name="minimum">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2">
+                        <span class="c-red">*</span>
+                        奖品运费：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="text" id="carriage" placeholder="输入整数" value="{$info.carriage}" class="input-text" name="carriage">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2">
+                        <span class="c-red">*</span>
+                        未完成订单扣除信誉值：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="text" id="credit" placeholder="输入整数" value="{$info.credit}" class="input-text" name="credit">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2">
+                        <span class="c-red">*</span>
+                        拉黑临界信誉值：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="text" id="min_credit" placeholder="输入整数" value="{$info.min_credit}" class="input-text" name="min_credit">
+                    </div>
+                </div>
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2">
+                        <span class="c-red">*</span>
+                        客服电话：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="text" id="contact" placeholder="输入手机号" value="{$info.contact}" class="input-text" name="contact">
+                    </div>
+                </div>
+            </div>
+            <div class="tabCon">
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2">允许访问后台的IP列表：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <textarea class="textarea" name="allow_ip" id="" placeholder="ip格式 x.x.x.x 多个ip用英文逗号隔开"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+                <button id="submit-btn" class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $("#tab-system").Huitab({
+            index:0
+        });
+
+        var isclick = true
+        //表单验证
+        $("#formAjax").validate({
+            rules:{
+                req_rate:{
+                    required:true,
+                    number:true,
+                    min:1,
+                    max:99
+                },
+                withdraw_rate:{
+                    required:true,
+                    number:true,
+                    min:1,
+                    max:99
+                },
+                agency_rate:{
+                    required:true,
+                    number:true,
+                    min:1,
+                    max:99
+                },
+                minimum:{
+                    required:true,
+                    number:true,
+                    min:1
+                },
+                carriage:{
+                    required:true,
+                    number:true
+                },
+                credit:{
+                    required:true,
+                    number:true
+                },
+                min_credit:{
+                    required:true,
+                    number:true
+                },
+                contact: {
+                    isPhone:true
+                }
+            },
+            focusCleanup:true,
+            success:"valid",
+            submitHandler:function(form){
+                if(isclick === true) {
+                    isclick = false
+                    $(form).ajaxSubmit({
+                        type: 'post',
+                        url: "{:url('System/settingMod')}" ,
+                        success: function(data){
+                            console.log(data)
+                            if(data.code == 1) {
+                                layer.msg('保存成功!',{icon:1,time:1000},function () {
+                                    isclick = true
+                                });
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000},function () {
+                                    isclick = true
+                                });
+                            }
+                        },
+                        error: function(msg){
+                            layer.msg('接口请求失败!',{icon:5,time:1000},function () {
+                                isclick = true
+                            });
+                        }
+                    });
+                }
+
+            }
+        });
+    });
+</script>

@@ -29,7 +29,7 @@
     <script type="text/javascript" src="/static/h-ui/js/H-ui.min.js"></script>
     <script type="text/javascript" src="/static/h-ui.admin/js/H-ui.admin.js"></script>
     <!--/_footer 作为公共模版分离出去-->
-    <title>山洞后台管理系统</title>
+    <title>小程序后台管理系统</title>
 </head>
 <body>
 {include file="public/header" /}
@@ -51,12 +51,12 @@
         <div class="show_iframe">
             <div style="display:none" class="loading"></div>
             <div class="page-container">
-                <p class="f-20 text-success">欢迎使用近帮山洞后台管理系统</p>
-                <!--<p>登录次数：{$Think.session.login_times} </p>-->
-                <!--<p>上次登录IP：{$Think.session.last_login_ip}  上次登录时间：{if (session('last_login_time'))}-->
-                    <!--{$Think.session.last_login_time|date="Y-m-d H:i:s"}-->
-                <!--{/if}-->
-                <!--</p>-->
+                <p class="f-20 text-success">欢迎使用近帮小程序后台管理系统</p>
+                <p>登录次数：{$Think.session.login_times} </p>
+                <p>上次登录IP：{$Think.session.last_login_ip}  上次登录时间：{if (session('last_login_time'))}
+                    {$Think.session.last_login_time|date="Y-m-d H:i:s"}
+                {/if}
+                </p>
                 <table class="table table-border table-bordered table-bg mt-20">
                     <thead>
                     <tr>
@@ -66,19 +66,19 @@
                     <tbody>
                     <tr>
                         <th width="30%">服务器计算机名</th>
-                        <td><span id="lbServerName">Hepburn</span></td>
+                        <td><span id="lbServerName">anne</span></td>
                     </tr>
                     <tr>
                         <td>服务器IP地址</td>
-                        <td>47.105.169.186</td>
+                        <td>47.104.130.39</td>
                     </tr>
                     <tr>
                         <td>服务器域名</td>
-                        <td>cave.jianghairui.com</td>
+                        <td>mp.jianghairui.com</td>
                     </tr>
                     <tr>
                         <td>服务器端口 </td>
-                        <td>80</td>
+                        <td>443</td>
                     </tr>
                     <tr>
                         <td>服务器Apache版本 </td>
@@ -86,7 +86,7 @@
                     </tr>
                     <tr>
                         <td>项目所在目录 </td>
-                        <td>/var/www/cave.jianghairui.com/</td>
+                        <td>/var/www/mp.jianghairui.com/</td>
                     </tr>
                     <tr>
                         <td>服务器操作系统 </td>
@@ -110,7 +110,7 @@
                     </tr>
                     <tr>
                         <td>服务器内存 </td>
-                        <td>8192M</td>
+                        <td>2048M</td>
                     </tr>
                     <tr>
                         <td>当前系统用户名 </td>

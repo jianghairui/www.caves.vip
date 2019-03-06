@@ -1,0 +1,129 @@
+<article class="page-container">
+    <form action="" method="post" class="form form-horizontal" id="form-admin-role-add">
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>角色名称：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder="" id="title" name="title">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3">备注：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder="" id="desc" name="desc">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3">配置权限：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                {foreach $list as $li}
+                {if $li['name'] === 'Admin'}
+                {if session('username')===config('superman')}
+                <dl class="permission-list">
+                    <dt>
+                        <label>
+                            <input type="checkbox" value="{$li.id}" name="check[]" id="user-Character-1">
+                            {$li.title}({$li.name})
+                        </label>
+                    </dt>
+                    <dd>
+                        <dl class="cl">
+                            <dd style="margin-left: 0px;">
+                                {foreach $li['child'] as $v}
+                                <label title="{$v.name}" style="display:inline-block;width: 180px;">
+                                    <input type="checkbox" value="{$v.id}" name="check[]" id="user-Character-1-0-0">
+                                    {$v.title}
+                                </label>
+                                {/foreach}
+                            </dd>
+                        </dl>
+                    </dd>
+                </dl>
+                {/if}
+
+                {else /}
+                <dl class="permission-list">
+                    <dt>
+                        <label>
+                            <input type="checkbox" value="{$li.id}" name="check[]" id="user-Character-1">
+                            {$li.title}({$li.name})
+                        </label>
+                    </dt>
+                    <dd>
+                        <dl class="cl">
+                            <dd style="margin-left: 0px;">
+                                {foreach $li['child'] as $v}
+                                <label title="{$v.name}" style="display:inline-block;width: 180px;">
+                                    <input type="checkbox" value="{$v.id}" name="check[]" id="user-Character-1-0-0">
+                                    {$v.title}
+                                </label>
+                                {/foreach}
+                            </dd>
+                        </dl>
+                    </dd>
+                </dl>
+                {/if}
+
+                {/foreach}
+
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+                <button type="submit" class="btn btn-success radius" id="admin-role-save"><i class="icon-ok"></i> 确定</button>
+            </div>
+        </div>
+    </form>
+</article>
+
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $(".permission-list dt input:checkbox").click(function(){
+            $(this).closest("dl").find("dd input:checkbox").prop("checked",$(this).prop("checked"));
+        });
+
+        var isclick = true
+
+        $("#form-admin-role-add").validate({
+            rules:{
+                title:{
+                    required:true,
+                    maxlength:100
+                },
+                desc:{
+                    maxlength:100
+                }
+            },
+            focusCleanup:true,
+            success:"valid",
+            submitHandler:function(form){
+                if(isclick) {
+                    isclick = false
+                    $(form).ajaxSubmit({
+                        type: 'post',
+                        url: "{:url('Admin/groupadd_post')}" ,
+                        success: function(data){
+                            console.log(data)
+                            if(data.code == 1) {
+                                layer.msg('添加成功!',{icon:1,time:1000},function(){
+                                    window.parent.location.reload();
+                                });
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000});
+                                isclick = true
+                            }
+                        },
+                        error: function(msg){
+                            layer.msg('接口请求失败!',{icon:2,time:1000});
+                            isclick = true
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>

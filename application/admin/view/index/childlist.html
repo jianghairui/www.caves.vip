@@ -1,0 +1,190 @@
+<style>
+    .thumbnail{ width:60px;height: 60px;background-size: cover;background-position: center;position: relative}
+</style>
+<nav class="breadcrumb">
+    <i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 需求管理 <span class="c-gray en">&gt;</span> 分类列表 <span class="c-gray en">&gt;</span>{$cate.cate_name}
+    <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+</nav>
+<div class="page-container">
+    <div class="cl pd-5 bg-1 bk-gray mt-20">
+        <a class="btn btn-primary radius" onclick="cate_add('添加子分类','{:url("Index/cateadd",array("cate_id"=>$cate['id']))}')" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加子分类</a></span>
+        <a class="btn btn-default radius" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace('{:url("Index/catelist")}');" title="返回" >
+            返回上一页<i class="Hui-iconfont">&#xe66b;</i>
+        </a>
+        <span class="r">共有数据：<strong>{$page.count}</strong> 条</span>
+    </div>
+    <div class="mt-20">
+        <table class="table table-border table-bordered table-bg table-hover">
+            <thead>
+            <tr class="text-c">
+                <th width="40">ID</th>
+                <th width="100">分类</th>
+                <th width="100">封面</th>
+                <th width="150">添加时间</th>
+                <th width="60">状态</th>
+                <th width="60">父级分类</th>
+                <th width="100">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {foreach catelist as $li}
+            <tr class="text-c">
+                    <td>{$li.id}</td>
+                    <td>{$li.cate_name}</td>
+                    <td>
+                        <div id="cover" class="thumbnail" style="background-image: url('/{$li.cover}')"></div>
+                    </td>
+                    <td>{$li.create_time}</td>
+                    <td class="td-status">{if condition="$li['status'] == 1"}<span class="label label-success radius">已启用</span>{else /}<span class="label label-defaunt radius">已禁用</span>{/if}</td>
+                    <td><span>无</span></td>
+                    <td class="td-manage">
+                        {if condition="$li['status'] == 1"}
+                        <a style="text-decoration:none" class="ml-5" style="text-decoration:none" onClick="cate_stop(this,{$li['id']})" href="javascript:;" title="禁用">
+                            <i class="Hui-iconfont">&#xe6de;</i>
+                        </a>
+                        {else /}
+                        <a style="text-decoration:none" class="ml-5" style="text-decoration:none" onClick="cate_start(this,{$li['id']})" href="javascript:;" title="启用">
+                            <i class="Hui-iconfont">&#xe603;</i>
+                        </a>
+                        {/if}
+                        <a style="text-decoration:none" class="ml-5" style="text-decoration:none" href="javascript:window.location.href = '{:url('Index/childlist',array('cate_id'=>$li['id']))}';" title="查看子分类">
+                            <i class="Hui-iconfont">&#xe667;</i>
+                        </a>
+                        <a style="text-decoration:none" class="ml-5" onClick="cate_edit('分类编辑','{:url("Index/catemod",array("cate_id"=>$li["id"]))}')" href="javascript:;" title="编辑">
+                        <i class="Hui-iconfont">&#xe6df;</i>
+                        </a>
+                        <a style="text-decoration:none" class="ml-5" onClick="cate_del(this,{$li['id']})" href="javascript:;" title="删除">
+                            <i class="Hui-iconfont">&#xe6e2;</i>
+                        </a>
+                    </td>
+                </tr>
+            {/foreach}
+            <tr class="text-r">
+                <td colspan="8" id="page">
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript">
+    var url = '{:url("Index/childlist")}'+'?{$page.query}';
+    var curr = '{$page.curr}'
+    laypage({
+        cont: 'page', //容器。值支持id名、原生dom对象，jquery对象。
+        pages: '{$page.totalPage}', //通过后台拿到的总页数
+        skip: false, //是否开启跳页
+        skin: '#5a98de',
+        curr: curr || 1, //当前页
+        jump: function(obj, first){ //触发分页后的回调
+            // console.log(obj)
+            if(!first) {
+                window.location.href = url+'&page='+obj.curr;
+            }
+        }
+    });
+
+    /*分类-添加*/
+    function cate_add(title,url){
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url
+        });
+        layer.full(index);
+    }
+
+    /*分类-编辑*/
+    function cate_edit(title,url){
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url
+        });
+        layer.full(index);
+    }
+
+    /*分类-下架*/
+    function cate_stop(obj,id){
+        layer.confirm('确认要禁用吗？',function(index){
+            $.ajax({
+                url:"{:url('Index/cate_stop')}",
+                type:'post',
+                dataType:'json',
+                data:{cate_id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" class="ml-5" onClick="cate_start(this,id)" href="javascript:;" title="启用"><i class="Hui-iconfont">&#xe603;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已禁用</span>');
+                        $(obj).remove();
+                        layer.msg('已禁用!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.message,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+
+        });
+    }
+
+    /*分类-发布*/
+    function cate_start(obj,id){
+        layer.confirm('确认要启用吗？',function(index){
+            $.ajax({
+                url:"{:url('Index/cate_start')}",
+                type:'post',
+                dataType:'json',
+                data:{cate_id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" class="ml-5" onClick="cate_stop(this,id)" href="javascript:;" title="禁用"><i class="Hui-iconfont">&#xe6de;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已启用</span>');
+                        $(obj).remove();
+                        layer.msg('已启用!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.message,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+        });
+    }
+
+    /*分类-删除*/
+    function cate_del(obj,id){
+        layer.confirm('确认要删除吗？',function(index){
+            $.ajax({
+                url: "{:url('Index/cate_del')}",
+                type: 'POST',
+                dataType: 'json',
+                data:{cate_id:id},
+                success: function(data){
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").remove();
+                        layer.msg('已删除!',{icon:1,time:1000});
+                    }else {
+                        layer.msg('删除失败!',{icon:2,time:1000});
+                    }
+                },
+                error:function(data) {
+                    console.log(data.msg);
+                },
+            });
+        });
+    }
+
+</script>

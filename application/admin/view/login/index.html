@@ -19,24 +19,24 @@
     <script type="text/javascript" src="/lib/DD_belatedPNG_0.0.8a-min.js" ></script>
     <script>DD_belatedPNG.fix('*');</script>
     <![endif]-->
-    <title>山洞后台登录</title>
+    <title>近帮小程序后台登录</title>
 </head>
 <body>
 <input type="hidden" id="TenantId" name="TenantId" value="" />
-<div class="header" style="display:flex;flex-direction:row;align-items:center;"><span style="font-size: 24px;color:#ffffff;margin-left: 30px">山洞后台登录</span></div>
+<div class="header" style="display:flex;flex-direction:row;align-items:center;"><span style="font-size: 24px;color:#ffffff;margin-left: 30px">小程序后台管理系统</span></div>
 <div class="loginWraper">
     <div id="loginform" class="loginBox">
         <form class="form form-horizontal hui-fadein" action="{:url('Login/login')}" method="post">
             <div class="row cl">
                 <label class="form-label col-xs-3"><i class="Hui-iconfont">&#xe60d;</i></label>
                 <div class="formControls col-xs-8">
-                    <input id="username" name="username" maxlength="32" type="text" placeholder="账户" value="{$data.username}" class="input-text size-L">
+                    <input id="username" name="username" maxlength="32" type="text" placeholder="账户" value="{$data.mp_username}" class="input-text size-L">
                 </div>
             </div>
             <div class="row cl">
                 <label class="form-label col-xs-3"><i class="Hui-iconfont">&#xe60e;</i></label>
                 <div class="formControls col-xs-8">
-                    <input id="password" name="password" maxlength="32" type="password" placeholder="密码" value="{$data.password}" class="input-text size-L">
+                    <input id="password" name="password" maxlength="32" type="password" placeholder="密码" value="{$data.mp_password}" class="input-text size-L">
                 </div>
             </div>
             <div class="row cl">

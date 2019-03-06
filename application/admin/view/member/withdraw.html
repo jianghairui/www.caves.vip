@@ -1,0 +1,204 @@
+<style>
+    .userinfo>td>img {
+        width:40px;height:40px;border-radius: 50%;
+    }
+</style>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 会员管理 <span class="c-gray en">&gt;</span> 提现管理 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+    <section id="formAjax">
+        <div class="text-c">
+            <button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+            <span class="select-box inline">
+                <select id="status" name="status" class="select">
+                    <option value="">全部</option>
+                    <option value="-1" {if $status === "-1"}selected{/if}>未通过</option>
+                    <option value="0" {if $status === "0"}selected{/if}>待审核</option>
+                    <option value="1" {if $status === "1"}selected{/if}>已通过</option>
+                </select>
+		    </span>
+            日期范围：
+            <input type="text" onfocus="WdatePicker({ maxDate:'#F{ $dp.$D(\'logmax\')||\'%y-%M-%d\' }' })" id="logmin" value="{$Think.get.logmin}" class="input-text Wdate" style="width:120px;">
+            -
+            <input type="text" onfocus="WdatePicker({ minDate:'#F{ $dp.$D(\'logmin\') }' })" id="logmax" value="{$Think.get.logmax}" class="input-text Wdate" style="width:120px;">
+            <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder=" 会员名称或手机号" style="width:250px" class="input-text">
+            <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找会员</button>
+        </div>
+    </section>
+    <div class="cl pd-5 bg-1 bk-gray mt-20">
+        <span class="r">共有数据：<strong>54</strong> 条</span> </div>
+    <table class="table table-border table-bordered table-bg">
+        <thead>
+        <tr class="text-c">
+            <th width="130">单号</th>
+            <th width="60">头像</th>
+            <th width="90">申请人</th>
+            <th width="120">手机号</th>
+            <th width="90">申请金额</th>
+            <th width="90">手续费</th>
+            <th width="90">实际扣除</th>
+            <th width="120">申请时间</th>
+            <th width="60">审核状态</th>
+            <th width="60">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <form id="multi-check">
+            {foreach $list as $li}
+            <tr class="text-c userinfo">
+                <td>{$li.order_sn}</td>
+                <td><img src="{if $li['avatar']}{$li.avatar}{else /}/static/src/image/default.jpg{/if}" alt=""></td>
+                <td>{$li.realname}</td>
+                <td>{$li.tel}</td>
+                <td>￥：{$li.money}</td>
+                <td>{$li.withdraw_rate*100}%</td>
+                <td>￥：{$li.real_money}</td>
+                <td>{$li.apply_time|date='Y-m-d H:i'}</td>
+                <td class="td-status">
+                    {switch $li['status']}
+                    {case -1}
+                    <span class="label label-default radius">未通过</span>{/case}
+                    {case 0}
+                    <span class="label label-warning radius">待审核</span>{/case}
+                    {case 1}
+                    <span class="label label-success radius">已通过</span>{/case}
+                    {default /}
+                    {/switch}
+
+                </td>
+                <td>
+                    {if $li['status'] == 0}
+                    <a class="btn btn-link radius" style="text-decoration:none;" onClick="user_shenhe(this,{$li.id})" href="javascript:;" title="审核">审核</a>
+                    {else /}
+                    <span class="btn btn-link radius"></span>
+                    {/if}
+                </td>
+            </tr>
+            {/foreach}
+        </form>
+
+        <tr>
+            <td colspan="11" id="page" class="text-r"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript">
+
+    var url = '{:url("Member/withdraw")}' + '?<?php echo $page["query"];?>'
+    var curr = '{$page.curr}'
+    laypage({
+        cont: 'page', //容器。值支持id名、原生dom对象，jquery对象。
+        pages: '{$page.totalPage}', //通过后台拿到的总页数
+        skip: false, //是否开启跳页
+        skin: '#5a98de',
+        curr: curr || 1, //当前页
+        jump: function(obj, first){ //触发分页后的回调
+            // console.log(obj)
+            if(!first) {
+                window.location.href = url+'&page=' + obj.curr;
+            }
+        }
+    });
+
+    $("#search-btn").click(function () {
+        var status = $("#formAjax").find("#status").val()
+        var logmin = $("#formAjax").find("#logmin").val()
+        var logmax = $("#formAjax").find("#logmax").val()
+        var search = $("#formAjax").find("#search").val()
+        var str = ''
+        if(status.length != '') {
+            str += '&status=' + status
+        }
+        if(logmin.length != '') {
+            str += '&logmin=' + logmin
+        }
+        if(logmax.length != '') {
+            str += '&logmax=' + logmax
+        }
+        if(search.length != '') {
+            str += '&search=' + search
+        }
+        window.location.href = '{:url("Member/withdraw")}' + '?' + str;
+    });
+
+    var click_lock = true,reason = '';
+
+    /*提现审核*/
+    function user_shenhe(obj,id){
+        layer.confirm('提现审核？', {
+                btn: ['通过','不通过','取消'],
+                shade: false,
+                closeBtn: 0
+            },
+            function(){
+                if(click_lock) {
+                    click_lock = false
+                    $.ajax({
+                        url:"{:url('Member/withdrawPass')}",
+                        type:'post',
+                        dataType:'json',
+                        data:{id:id},
+                        success:function(data) {
+                            console.log(data)
+                            if(data.code == 1) {
+                                $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已通过</span>');
+                                $(obj).parent().html('<span class="btn btn-link radius"></span>');
+                                layer.msg('已审核', {icon:1,time:1000});
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000})
+                            }
+                            click_lock = true
+                        },
+                        error:function(data) {
+                            layer.msg('请求失败!',{icon:5,time:1000})
+                            click_lock = true
+                        },
+                    })
+                }
+
+            },
+            function(){
+                layer.prompt({
+                    formType: 2,
+                    value: '系统余额不足',
+                    title: '请输入理由(最多10个字)',
+                    maxlength:10,
+                    area: ['400px', '300px'] //自定义文本域宽高
+                }, function(value, index, elem){
+                    reason = value;
+                    layer.close(index);
+                    if(click_lock) {
+                        click_lock = false
+                        $.ajax({
+                            url:"{:url('Member/withdrawReject')}",
+                            type:'post',
+                            dataType:'json',
+                            data:{id:id,reason:reason},
+                            success:function(data) {
+                                console.log(data)
+                                if(data.code == 1) {
+                                    $(obj).parents("tr").find(".td-status").html('<span class="label label-default radius">未通过</span>');
+                                    $(obj).parent().html('<span class="btn btn-link radius"></span>');
+                                    layer.msg('未通过', {icon:5,time:1000});
+                                }else {
+                                    layer.msg(data.data,{icon:2,time:1000})
+                                }
+                                click_lock = true
+                            },
+                            error:function(data) {
+                                layer.msg('请求失败!',{icon:5,time:1000})
+                                click_lock = true
+                            },
+                        })
+                    }
+                });
+
+            });
+    }
+
+
+</script>
