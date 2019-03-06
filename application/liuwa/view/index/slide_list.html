@@ -1,0 +1,330 @@
+<style>
+    .thumbnail{ width:120px;height: 120px;background-size: cover;background-position: center;position: relative}
+</style>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 轮播图 <span class="c-gray en">&gt;</span> 图片列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+    <div class="text-c">
+        <form class="Huiform" method="post" action="" target="_self" id="formAjax">
+            <input type="text" placeholder="图片描述" name="title" value="" class="input-text" style="width:200px">
+            <input type="text" placeholder="链接地址" name="url" value="" class="input-text" style="width:200px">
+            <span class="select-box inline">
+                <select id="type" name="type" class="select">
+                    <option value="1">公众号</option>
+                    <option value="2">小程序</option>
+                </select>
+		    </span>
+            <span class="btn-upload form-group">
+                <input class="input-text upload-url" type="text" id="uploadfile-2" readonly style="width:100px">
+                <a href="javascript:void(0);" class="btn btn-primary upload-btn">
+                    <i class="Hui-iconfont">&#xe642;</i> 上传图片(不超过512K)
+                </a>
+                <input type="file" id="file-2" multiple name="file-2" class="input-file">
+			</span>
+            <button type="submit" class="btn btn-success" id="" name="">
+                <i class="Hui-iconfont">&#xe600;</i> 添加
+            </button>
+        </form>
+    </div>
+    <div class="mt-20">
+        <table class="table table-border table-bordered table-bg table-sort">
+            <thead>
+            <tr class="text-c">
+                <th width="70">ID</th>
+                <th width="200">图片</th>
+                <th width="200">具体描述</th>
+                <th>链接地址</th>
+                <th width="60">状态</th>
+                <th width="60">类型</th>
+                <th width="80">排序</th>
+                <th width="100">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {foreach $list as $li}
+            <tr class="text-c">
+                <td>{$li.id}</td>
+                <td>
+                    <div id="cover" class="thumbnail" style="background-image: url('{$li.pic}')"></div>
+                </td>
+                <td class="text-c">{$li.title}</td>
+                <td class="text-l">{$li.url}</td>
+                <td class="td-status">
+                    {if condition="$li['status'] == 1"}<span class="label label-success radius">已启用</span>{else /}<span class="label label-defaunt radius">已禁用</span>{/if}
+                </td>
+                <td>
+                    {if condition="$li['type'] == 1"}公众号{else /}小程序{/if}
+                </td>
+                <td><input type="text" class="input-text text-c sort" value="{$li.sort}"></td>
+                <td class="f-14 product-brand-manage">
+                    {if condition="$li['status'] == 1"}
+                    <a style="text-decoration:none" class="ml-5" style="text-decoration:none" onClick="slide_stop(this,{$li['id']})" href="javascript:;" title="禁用">
+                        <i class="Hui-iconfont">&#xe6de;</i>
+                    </a>
+                    {else /}
+                    <a style="text-decoration:none" class="ml-5" style="text-decoration:none" onClick="slide_start(this,{$li['id']})" href="javascript:;" title="启用">
+                        <i class="Hui-iconfont">&#xe603;</i>
+                    </a>
+                    {/if}
+                    <a style="text-decoration:none" class="ml-5" onClick="slide_edit('轮播图编辑','{:url("Index/slidemod",array("id"=>$li["id"]))}')" href="javascript:;" title="编辑">
+                    <i class="Hui-iconfont">&#xe6df;</i>
+                    </a>
+                    <a style="text-decoration:none" class="ml-5" onClick="slide_del(this,'{$li.id}')" href="javascript:;" title="删除">
+                        <i class="Hui-iconfont">&#xe6e2;</i>
+                    </a>
+                </td>
+            </tr>
+            {/foreach}
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        var isclick = true
+
+        $("#formAjax").validate({
+            rules:{
+                title:{
+                    required:true,
+                    maxlength:100
+                },
+                url:{
+                    maxlength:255
+                }
+            },
+            onkeyup:false,
+            focusCleanup:true,
+            success:"valid",
+            submitHandler:function(form){
+                if($("#file-2").val() == '') {
+                    layer.msg('请上传图片',{icon:2,time:1000});
+                    return false
+                }
+                if(isclick === true) {
+                    isclick = false
+                    $(form).ajaxSubmit({
+                        type: 'post',
+                        url: "{:url('Index/slideadd')}" ,
+                        success: function(data){
+                            console.log(data)
+                            if(data.code == 1) {
+                                layer.msg('添加成功!',{icon:1,time:1000});
+                                setTimeout("window.location.reload()", 1000)
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000});
+                                isclick = true
+                            }
+
+                        },
+                        error: function(XmlHttpRequest, textStatus, errorThrown){
+                            layer.msg('error!',{icon:5,time:1000});
+                            isclick = true
+                        }
+                    });
+                }
+            }
+        });
+
+
+        $("#file-2").change(function(e){
+
+            var img = e.target.files[0];
+            console.log(img)
+            if (typeof(img) == "undefined") {
+                var src = ''
+            }else {
+                if(checkfile('file-2') !== true) {
+                    $("#file-2").val('')
+                    return false
+                }
+                var src = window.URL.createObjectURL(img);
+            }
+            $("#img").attr('src',src)
+            // console.log(src)
+        });
+
+        $(".sort").bind('input propertychange', function() {
+            var id = $(this).parent().prev().text();
+            var sort = $(this).val();
+            var rule = /^[0-9]{0,10}$/;
+            if(!rule.test(sort)) {
+                // $(this).val('')
+                alert('排序必须为数字,且不超过10位');
+                return;
+            }
+            $.ajax({
+                url:"{:url('Index/sortSlide')}",
+                type:"post",
+                data:{id:id,sort:sort},
+                success:function(data) {
+                    console.log(data)
+                },
+                error: function(data) {
+                    console.log('system error')
+                }
+            })
+        });
+
+        function checkfile(fileId){
+
+            var maxsize = 512*1024;//512K
+            var errMsg = "上传的附件文件不能超过512K！！！";
+            var tipMsg = "您的浏览器暂不支持计算上传文件的大小，确保上传文件不要超过512K，建议使用IE、FireFox、Chrome浏览器。";
+            var browserCfg = {};
+
+            var ua = window.navigator.userAgent;
+            if (ua.indexOf("MSIE")>=1){
+                browserCfg.ie = true;
+            }else if(ua.indexOf("Firefox")>=1){
+                browserCfg.firefox = true;
+            }else if(ua.indexOf("Chrome")>=1){
+                browserCfg.chrome = true;
+            }
+
+            if(typeof FileReader != 'undefined'){
+                var file = document.getElementById(fileId).files[0];
+                if((file.type).indexOf("image/")==-1){
+                    alert('请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!!!!');
+                    return false;
+                }
+            }else{
+                var fileName=document.getElementById(fileId).value;
+                var suffixIndex=fileName.lastIndexOf(".");
+                var suffix=fileName.substring(suffixIndex+1).toUpperCase();
+                if(suffix!="BMP"&&suffix!="JPG"&&suffix!="JPEG"&&suffix!="PNG"&&suffix!="GIF"){
+                    alert("请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!");
+                    return false;
+                }
+            }
+
+            try{
+                var obj_file = document.getElementById(fileId);
+                if(obj_file.value==""){
+                    alert("请先选择上传文件");
+                    return false;
+                }
+                var filesize = 0;
+
+                if(browserCfg.firefox || browserCfg.chrome ){
+                    filesize = obj_file.files[0].size;
+                }else{
+                    alert(tipMsg);
+                    return false;
+                }
+                if(filesize==-1){
+                    alert(tipMsg);
+                    return false;
+                }else if(filesize>maxsize){
+                    alert(errMsg);
+                    return false;
+                }else{
+                    return true;
+                }
+            }catch(e){
+                alert(e);
+                return false;
+            }
+            return false;
+        }
+
+
+
+    })
+    /*图片-编辑*/
+    function slide_edit(title,url){
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url
+        });
+        layer.full(index);
+    }
+
+    /*图片-删除*/
+    function slide_del(obj,id){
+        layer.confirm('确认要删除吗？',function(index){
+            $.ajax({
+                url: "{:url('Index/slide_del')}",
+                type: 'POST',
+                dataType: 'json',
+                data:{slideid:id},
+                success: function(data){
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").remove();
+                        layer.msg('已删除!',{icon:1,time:1000});
+                    }else {
+                        layer.msg('删除失败!',{icon:2,time:1000});
+                    }
+                },
+                error:function(data) {
+                    console.log(data.msg);
+                },
+            });
+        });
+    }
+
+    /*图片-禁用*/
+    function slide_stop(obj,id){
+        layer.confirm('确认要禁用吗？',function(index){
+            $.ajax({
+                url:"{:url('Index/slide_stop')}",
+                type:'post',
+                dataType:'json',
+                data:{slideid:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".product-brand-manage").prepend('<a style="text-decoration:none" class="ml-5" onClick="slide_start(this,'+id+')" href="javascript:;" title="启用"><i class="Hui-iconfont">&#xe603;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已禁用</span>');
+                        $(obj).remove();
+                        layer.msg('已禁用!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.message,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+
+        });
+    }
+
+    /*图片-启用*/
+    function slide_start(obj,id){
+        layer.confirm('确认要启用吗？',function(index){
+            $.ajax({
+                url:"{:url('Index/slide_start')}",
+                type:'post',
+                dataType:'json',
+                data:{slideid:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".product-brand-manage").prepend('<a style="text-decoration:none" class="ml-5" onClick="slide_stop(this,'+id+')" href="javascript:;" title="禁用"><i class="Hui-iconfont">&#xe6de;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已启用</span>');
+                        $(obj).remove();
+                        layer.msg('已启用!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.message,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+        });
+    }
+
+
+</script>
