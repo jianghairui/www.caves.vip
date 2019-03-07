@@ -1,0 +1,243 @@
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 管理员管理 <span class="c-gray en">&gt;</span> 管理员列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+    <form id="formAjax">
+        <div class="text-c"> 日期范围：
+            <input type="text" onfocus="WdatePicker({ maxDate:'#F{ $dp.$D(\'logmax\')||\'%y-%M-%d\' }' })" id="logmin" value="{$Think.get.logmin}" class="input-text Wdate" style="width:120px;">
+            -
+            <input type="text" onfocus="WdatePicker({ minDate:'#F{ $dp.$D(\'logmin\') }',maxDate:'%y-%M-%d' })" id="logmax" value="{$Think.get.logmax}" class="input-text Wdate" style="width:120px;">
+            <input type="text" class="input-text" style="width:250px" placeholder="输入管理员名称" value="{$Think.get.search}" id="search" name="search">
+            <button type="button" class="btn btn-success" id="search-btn" name=""><i class="Hui-iconfont">&#xe665;</i> 搜用户</button>
+        </div>
+    </form>
+    <div class="cl pd-5 bg-1 bk-gray mt-20">
+        <span class="l">
+            <a href="javascript:;" onclick="admin_multidel()" class="btn btn-danger radius">
+                <i class="Hui-iconfont">&#xe6e2;</i> 批量删除
+            </a>
+            <a href="javascript:;" onclick="admin_add('添加管理员','{:url("Admin/adminadd")}','1000','600')" class="btn btn-primary radius">
+                <i class="Hui-iconfont">&#xe600;</i> 添加管理员
+            </a>
+        </span>
+        <span class="r">共有数据：<strong>{$page.count}</strong> 条</span>
+    </div>
+    <table class="table table-border table-bordered table-bg">
+        <thead>
+        <tr>
+            <th scope="col" colspan="10">员工列表</th>
+        </tr>
+        <tr class="text-c">
+            <th width="25"><input type="checkbox" name="" value=""></th>
+            <th width="40">ID</th>
+            <th width="150">用户名</th>
+            <th width="150">姓名</th>
+            <th width="90">手机</th>
+            <th width="150">邮箱</th>
+            <th>角色</th>
+            <th width="130">加入时间</th>
+            <th width="100">是否已启用</th>
+            <th width="100">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <form id="multidel">
+            {foreach $list as $li}
+            <tr class="text-c">
+                <td><input type="checkbox" value="{$li.id}" name="check[]"></td>
+                <td>{$li.id}</td>
+                <td>{$li.username}</td>
+                <td>{$li.realname}</td>
+                <td>{$li.tel}</td>
+                <td>{$li.email}</td>
+                <td>{if $li['username'] === config('superman')}(<span class="Hui-iconfont" style="color:darkgoldenrod">&#xe72c;权力至高无上&#xe72c;</span>){else /}{$li.title}{/if}</td>
+                <td>{$li.create_time|date='Y-m-d H:i'}</td>
+                <td class="td-status">
+                    {switch $li['status']}
+                    {case 0}<span class="label label-default radius">已禁用</span>{/case}
+                    {case 1}<span class="label label-success radius">已启用</span>{/case}
+                    {default/}
+                    {/switch}
+                </td>
+                <td class="td-manage">
+                    {switch $li['status']}
+                    {case 0}
+                    <a style="text-decoration:none" onClick="admin_start(this,{$li.id})" href="javascript:;" title="启用">
+                        <i class="Hui-iconfont">&#xe615;</i>
+                    </a>{/case}
+                    {case 1}
+                    <a style="text-decoration:none" onClick="admin_stop(this,{$li.id})" href="javascript:;" title="停用">
+                        <i class="Hui-iconfont">&#xe631;</i>
+                    </a>{/case}
+                    {default/}
+                    {/switch}
+                    <a title="编辑" href="javascript:;" onclick="admin_edit('管理员编辑','{:url("Admin/adminmod",array("id"=>$li['id']))}','1','1000','600')" class="ml-5" style="text-decoration:none">
+                    <i class="Hui-iconfont">&#xe6df;</i>
+                    </a>
+                    <a title="删除" href="javascript:;" onclick="admin_del(this,{$li.id})" class="ml-5" style="text-decoration:none">
+                        <i class="Hui-iconfont">&#xe6e2;</i>
+                    </a>
+                </td>
+            </tr>
+            {/foreach}
+        </form>
+
+
+        <tr>
+            <td colspan="10" id="page" class="text-r"></td>
+        </tr>
+
+        </tbody>
+    </table>
+</div>
+
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript">
+    var url = '{:url("Admin/adminlist")}' + '?<?php echo $page["query"];?>';
+    var curr = '{$page.curr}';
+    var isclick = true;
+    laypage({
+        cont: 'page', //容器。值支持id名、原生dom对象，jquery对象。
+        pages: '{$page.totalPage}', //通过后台拿到的总页数
+        skip: false, //是否开启跳页
+        skin: '#5a98de',
+        curr: curr || 1, //当前页
+        jump: function(obj, first){ //触发分页后的回调
+            // console.log(obj)
+            if(!first) {
+                window.location.href = url+'&page=' + obj.curr;
+            }
+        }
+    });
+
+    $("#search-btn").click(function () {
+        var logmin = $("#formAjax").find("#logmin").val();
+        var logmax = $("#formAjax").find("#logmax").val();
+        var search = $("#formAjax").find("#search").val();
+        var str = '';
+        if(logmin.length !== '') {
+            str += '&logmin=' + logmin
+        }
+        if(logmax.length !== '') {
+            str += '&logmax=' + logmax
+        }
+        if(search.length !== '') {
+            str += '&search=' + search
+        }
+        window.location.href = '{:url("Admin/adminlist")}' + '?' + str;
+    });
+
+    function admin_add(title,url,w,h){
+        layer_show(title,url,w,h);
+    }
+    /*管理员-删除*/
+    function admin_del(obj,id){
+        layer.confirm('确认要删除吗？',function(index){
+            $.ajax({
+                type: 'POST',
+                url: "{:url('Admin/adminDel')}",
+                dataType: 'json',
+                data:{id:id},
+                success: function(data){
+                    if(data.code == 1) {
+                        $(obj).parents("tr").remove();
+                        layer.msg('已删除!',{icon:1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000});
+                    }
+
+                },
+                error:function(data) {
+                    console.log(data.msg);
+                },
+            });
+        });
+    }
+
+    /*管理员-编辑*/
+    function admin_edit(title,url,id,w,h){
+        layer_show(title,url,w,h);
+    }
+    /*管理员-停用*/
+    function admin_stop(obj,id){
+        layer.confirm('确认要停用吗？',function(index){
+            $.ajax({
+                url:"{:url('Admin/adminStop')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-manage").prepend('<a onClick="admin_start(this,'+id+')" href="javascript:;" title="启用" style="text-decoration:none"><i class="Hui-iconfont">&#xe615;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-default radius">已禁用</span>');
+                        $(obj).remove();
+                        layer.msg('已停用!',{icon: 5,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+        });
+    }
+
+    /*管理员-启用*/
+    function admin_start(obj,id){
+        layer.confirm('确认要启用吗？',function(index){
+            $.ajax({
+                url:"{:url('Admin/adminStart')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-manage").prepend('<a onClick="admin_stop(this,'+id+')" href="javascript:;" title="停用" style="text-decoration:none"><i class="Hui-iconfont">&#xe631;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已启用</span>');
+                        $(obj).remove();
+                        layer.msg('已启用!', {icon: 6,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+        });
+    }
+
+    function admin_multidel() {
+        layer.confirm('管理员删除须谨慎，确认要删除吗？',function(index){
+            if(isclick) {
+                isclick = false;
+                $('#multidel').ajaxSubmit({
+                    type: 'post',
+                    url: "{:url('Admin/admin_multidel')}" ,
+                    success: function(data){
+                        console.log(data)
+                        if(data.code == 1) {
+                            layer.msg('删除成功',{icon:1,time:1000},function () {
+                                window.location.reload()
+                            });
+                        }else {
+                            layer.msg(data.data,{icon:2,time:1000});
+                            isclick = true
+                        }
+                    },
+                    error: function(msg){
+                        //console.log(JSON.parse(msg.responseText))
+                        layer.msg('接口请求失败!',{icon:2,time:1000});
+                        isclick = true
+                    }
+                });
+            }
+
+        })
+    }
+</script>

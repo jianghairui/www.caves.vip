@@ -5,13 +5,13 @@
  * Date: 2018/9/27
  * Time: 11:24
  */
-namespace app\admin\controller;
+namespace app\sh\controller;
 use think\Db;
 use think\Loader;
 class Login extends Common {
 
     public function index() {
-        if(session('username') && session('mploginstatus') && session('mploginstatus') == md5(session('username') . config('login_key'))) {
+        if(session('username') && session('mploginstatus') && session('mploginstatus') == md5(session('username') . 'jiang')) {
             $this->redirect('Index/index');
             exit();
         }
@@ -69,8 +69,7 @@ class Login extends Common {
             }catch (\Exception $e) {
                 $this->error($e->getMessage(),url('Login/index'));
             }
-//            $this->redirect(url('Index/index'));
-            $this->success('登陆成功',url('Index/index'));
+            $this->success('登录成功','Index/index');
 
         }
     }

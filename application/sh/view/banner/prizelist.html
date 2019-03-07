@@ -1,0 +1,348 @@
+<style>
+    .thumbnail{ width:120px;height: 67px;background-size: cover;background-position: center;position: relative}
+</style>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 活动设置 <span class="c-gray en">&gt;</span> 活动列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+    <section id="formAjax">
+        <div class="text-c">
+            <button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+            <span class="select-box inline">
+                <select id="status" name="status" class="select">
+                    <option value="0">全部分类</option>
+                    <option value="1">进行中</option>
+                    <option value="2">未进行</option>
+                    <option value="3">已结束</option>
+                </select>
+		    </span>
+            日期范围：
+            <input type="text" onfocus="WdatePicker({ maxDate:'#F{ $dp.$D(\'logmax\')||\'%y-%M-%d\'  }' })" id="logmin" value="{$Think.get.logmin}" class="input-text Wdate" style="width:120px;">
+            -
+            <input type="text" onfocus="WdatePicker({ minDate:'#F{ $dp.$D(\'logmin\') }' })" id="logmax" value="{$Think.get.logmax}" class="input-text Wdate" style="width:120px;">
+            <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder=" 奖品名称" style="width:250px" class="input-text">
+            <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找</button>
+        </div>
+    </section>
+    <div class="cl pd-5 bg-1 bk-gray mt-20">
+        <span class="l">
+            <a class="btn btn-primary radius" data-title="添加活动" data-href="article-add.html" onclick="prize_edit('添加活动','{:url("Banner/prizeadd")}')" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加活动
+            </a>
+        </span>
+        <span class="r">共有数据：<strong>{$page.count}</strong> 条</span>
+    </div>
+    <div class="mt-20">
+        <table class="table table-border table-bordered table-bg table-sort">
+            <thead>
+            <tr class="text-c">
+                <th width="70">ID</th>
+                <th width="60">排序</th>
+                <th width="200">图片</th>
+                <th>活动标题</th>
+                <th width="240">活动时间</th>
+                <th width="60">奖品数量</th>
+                <th width="60">中奖概率</th>
+                <th width="60">状态</th>
+                <th width="100">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {foreach $list as $li}
+            <tr class="text-c">
+                <td>{$li.id}</td>
+                <td>
+                    <input type="text" class="input-text text-c sort" value="{$li.sort}">
+                </td>
+                <td>
+                    <div id="cover" class="thumbnail" style="background-image: url('/{$li.cover}')"></div>
+                </td>
+                <td class="text-c">{$li.title}</td>
+                <td class="text-c">{$li.start_time|date='Y-m-d H:i'} 到 {$li.end_time|date='Y-m-d H:i'}</td>
+                <td class="text-c">{$li.num}</td>
+                <td class="text-c">{$li.probability}%</td>
+                <td class="td-status">
+                    {switch $li['status']}
+                    {case 1}
+                    <span class="label label-success radius">已进行</span>
+                    {/case}
+                    {case 2}
+                    <span class="label label-defaunt radius">未进行</span>
+                    {/case}
+                    {case 3}
+                    <span class="label label-defaunt radius">已结束</span>
+                    {/case}
+                    {default /}
+                    {/switch}
+                </td>
+                <td class="f-14 product-brand-manage">
+                    {switch $li['status']}
+                    {case 1}
+                    <a style="text-decoration:none" class="ml-5" onClick="prize_stop(this,{$li['id']})" href="javascript:;" title="停止">
+                        <i class="Hui-iconfont">&#xe6de;</i>
+                    </a>
+                    {/case}
+                    {case 2}
+                    <a style="text-decoration:none" class="ml-5" onClick="prize_start(this,{$li['id']})" href="javascript:;" title="进行">
+                        <i class="Hui-iconfont">&#xe603;</i>
+                    </a>
+                    {/case}
+                    {case 3}{/case}
+                    {default /}
+                    {/switch}
+                    <a style="text-decoration:none" class="ml-5" onClick="prize_edit('奖品编辑','{:url("Banner/prizemod",array("id"=>$li["id"]))}')" href="javascript:;" title="编辑">
+                    <i class="Hui-iconfont">&#xe6df;</i>
+                    </a>
+                    <a style="text-decoration:none" class="ml-5" onClick="prize_del(this,'{$li.id}')" href="javascript:;" title="删除">
+                        <i class="Hui-iconfont">&#xe6e2;</i>
+                    </a>
+                </td>
+            </tr>
+            {/foreach}
+            <tr class="text-r">
+                <td colspan="9" id="page">
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript">
+
+    var url = '{:url("Banner/prizelist")}' + '?<?php echo $page["query"];?>'
+    var curr = '{$page.curr}'
+    laypage({
+        cont: 'page', //容器。值支持id名、原生dom对象，jquery对象。
+        pages: '{$page.totalPage}', //通过后台拿到的总页数
+        skip: false, //是否开启跳页
+        skin: '#5a98de',
+        curr: curr || 1, //当前页
+        jump: function(obj, first){ //触发分页后的回调
+            // console.log(obj)
+            if(!first) {
+                window.location.href = url+'&page=' + obj.curr;
+            }
+        }
+    });
+
+    $("#search-btn").click(function () {
+        var status = $("#formAjax").find("#status").val()
+        var logmin = $("#formAjax").find("#logmin").val()
+        var logmax = $("#formAjax").find("#logmax").val()
+        var search = $("#formAjax").find("#search").val()
+        var str = ''
+        if(status.length != '') {
+            str += '&status=' + status
+        }
+        if(logmin.length != '') {
+            str += '&logmin=' + logmin
+        }
+        if(logmax.length != '') {
+            str += '&logmax=' + logmax
+        }
+        if(search.length != '') {
+            str += '&search=' + search
+        }
+        window.location.href = '{:url("Banner/prizelist")}' + '?' + str;
+    });
+
+    $(function () {
+
+        $("#file-2").change(function(e){
+
+            var img = e.target.files[0];
+            console.log(img)
+            if (typeof(img) == "undefined") {
+                var src = ''
+            }else {
+                if(checkfile('file-2') !== true) {
+                    $("#file-2").val('')
+                    return false
+                }
+                var src = window.URL.createObjectURL(img);
+            }
+            $("#img").attr('src',src)
+            // console.log(src)
+        });
+
+        $(".sort").bind('input propertychange', function() {
+            var id = $(this).parent().prev().text();
+            var sort = $(this).val();
+            var rule = /^[0-9]{0,10}$/;
+            if(!rule.test(sort)) {
+                // $(this).val('')
+                alert('排序必须为数字,且不超过10位');
+                return;
+            }
+            $.ajax({
+                url:"{:url('Banner/sortPrize')}",
+                type:"post",
+                data:{id:id,sort:sort},
+                success:function(data) {
+                    console.log(data)
+                },
+                error: function(data) {
+                    console.log('system error')
+                }
+            })
+        });
+
+        function checkfile(fileId){
+
+            var maxsize = 512*1024;//512K
+            var errMsg = "上传的附件文件不能超过512K！！！";
+            var tipMsg = "您的浏览器暂不支持计算上传文件的大小，确保上传文件不要超过512K，建议使用IE、FireFox、Chrome浏览器。";
+            var browserCfg = {};
+
+            var ua = window.navigator.userAgent;
+            if (ua.indexOf("MSIE")>=1){
+                browserCfg.ie = true;
+            }else if(ua.indexOf("Firefox")>=1){
+                browserCfg.firefox = true;
+            }else if(ua.indexOf("Chrome")>=1){
+                browserCfg.chrome = true;
+            }
+
+            if(typeof FileReader != 'undefined'){
+                var file = document.getElementById(fileId).files[0];
+                if((file.type).indexOf("image/")==-1){
+                    alert('请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!!!!');
+                    return false;
+                }
+            }else{
+                var fileName=document.getElementById(fileId).value;
+                var suffixIndex=fileName.lastIndexOf(".");
+                var suffix=fileName.substring(suffixIndex+1).toUpperCase();
+                if(suffix!="BMP"&&suffix!="JPG"&&suffix!="JPEG"&&suffix!="PNG"&&suffix!="GIF"){
+                    alert("请上传图片（格式BMP、JPG、JPEG、PNG、GIF等）!");
+                    return false;
+                }
+            }
+
+            try{
+                var obj_file = document.getElementById(fileId);
+                if(obj_file.value==""){
+                    alert("请先选择上传文件");
+                    return false;
+                }
+                var filesize = 0;
+
+                if(browserCfg.firefox || browserCfg.chrome ){
+                    filesize = obj_file.files[0].size;
+                }else{
+                    alert(tipMsg);
+                    return false;
+                }
+                if(filesize==-1){
+                    alert(tipMsg);
+                    return false;
+                }else if(filesize>maxsize){
+                    alert(errMsg);
+                    return false;
+                }else{
+                    return true;
+                }
+            }catch(e){
+                alert(e);
+                return false;
+            }
+            return false;
+        }
+
+
+
+    })
+    /*图片-编辑*/
+    function prize_edit(title,url){
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url
+        });
+        layer.full(index);
+    }
+
+    /*图片-删除*/
+    function prize_del(obj,id){
+        layer.confirm('确认要删除吗？',function(index){
+            $.ajax({
+                url: "{:url('Banner/prize_del')}",
+                type: 'POST',
+                dataType: 'json',
+                data:{id:id},
+                success: function(data){
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").remove();
+                        layer.msg('已删除!',{icon:1,time:1000});
+                    }else {
+                        layer.msg('删除失败!',{icon:2,time:1000});
+                    }
+                },
+                error:function(data) {
+                    console.log(data.msg);
+                },
+            });
+        });
+    }
+
+    /*图片-结束*/
+    function prize_stop(obj,id){
+        layer.confirm('确认要结束吗？',function(index){
+            $.ajax({
+                url:"{:url('Banner/prize_stop')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".product-brand-manage").prepend('<a style="text-decoration:none" class="ml-5" onClick="prize_start(this,'+id+')" href="javascript:;" title="进行"><i class="Hui-iconfont">&#xe603;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已结束</span>');
+                        $(obj).remove();
+                        layer.msg('已结束!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+
+        });
+    }
+
+    /*图片-进行*/
+    function prize_start(obj,id){
+        layer.confirm('确认要进行吗？',function(index){
+            $.ajax({
+                url:"{:url('Banner/prize_start')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".product-brand-manage").prepend('<a style="text-decoration:none" class="ml-5" onClick="prize_stop(this,'+id+')" href="javascript:;" title="结束"><i class="Hui-iconfont">&#xe6de;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已进行</span>');
+                        $(obj).remove();
+                        layer.msg('已进行!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+        });
+    }
+
+
+</script>

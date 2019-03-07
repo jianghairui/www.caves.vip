@@ -5,7 +5,7 @@
  * Date: 2018/9/25
  * Time: 16:12
  */
-namespace app\admin\controller;
+namespace app\sh\controller;
 use my\Auth;
 use think\Db;
 use think\Controller;
@@ -23,8 +23,8 @@ class Common extends Controller {
         $this->cmd = request()->controller() . '/' . request()->action();
         $this->weburl = 'www.caves.vip';
         $this->mp_config = [
-            'app_id' => 'wxe7bbb3344157bd09',
-            'secret' => '7326d844c3399bc923a7aec7699fdd67',
+            'app_id' => 'wx50f030c7f4a897ff',
+            'secret' => 'bad0c74c8353df8584d10887ec65cb8c',
 
             'mch_id'             => '1490402642',
             'key'                => 'TIANJINTAOCIYUAN20190111SHWHCOPY',
@@ -58,7 +58,7 @@ class Common extends Controller {
         if (in_array(request()->controller() . '/' . request()->action(), $noNeedSession)) {
             return true;
         }else {
-            if(session('username') && session('mploginstatus') && session('mploginstatus') == md5(session('username') . config('login_key'))) {
+            if(session('username') && session('mploginstatus') && session('mploginstatus') == md5(session('username') . 'jiang')) {
                 if(session('username') !== config('superman')) {
                     $auth = new Auth();
                     $bool = $auth->check($this->cmd,session('admin_id'));
@@ -85,7 +85,7 @@ class Common extends Controller {
         $filename_array = explode('.',$_FILES[$k]['name']);
         $ext = array_pop($filename_array);
 
-        $path =  'static/upload/' . date('Y-m-d');
+        $path =  'static/sh/upload/' . date('Y-m-d');
         is_dir($path) or mkdir($path,0755,true);
         //转移临时文件
         $newname = create_unique_number() . '.' . $ext;
@@ -93,34 +93,6 @@ class Common extends Controller {
         $filepath = $path . "/" . $newname;
 
         return array('error'=>0,'data'=>$filepath);
-    }
-
-    protected function multi_upload() {
-        foreach ($_FILES as $k=>$v) {
-            if($v['name'] == '') {
-                unset($_FILES[$k]);
-            }else {
-                if($this->checkfile($k) !== true) {
-                    return array('error'=>1,'msg'=>$this->checkfile($k));
-                }
-            }
-        }
-        $arr = array();
-        if(count($arr) > 3) {
-            return array('error'=>1,'msg'=>'图片不可超过三张');
-        }
-        foreach ($_FILES as $k=>$v) {
-            $filename_array = explode('.',$_FILES[$k]['name']);
-            $ext = array_pop($filename_array);
-
-            $path =  'static/upload/' . date('Y-m-d');
-            is_dir($path) or mkdir($path,0755,true);
-            //转移临时文件
-            $newname = create_unique_number() . '.' . $ext;
-            move_uploaded_file($_FILES[$k]["tmp_name"], $path . "/" . $newname);
-            $arr[] = $path . "/" . $newname;
-        }
-        return array('error'=>0,'data'=>$arr);
     }
 
     //检验格式大小
@@ -161,15 +133,6 @@ class Common extends Controller {
         return true;
     }
 
-    protected function checkExist($table,$condition) {
-        $exist = Db::table($table)->where($condition)->find();
-        if($exist) {
-            return true;
-        }else {
-            return false;
-        }
-    }
-
     protected function getip() {
         $unknown = 'unknown';
         if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] && strcasecmp($_SERVER['HTTP_X_FORWARDED_FOR'], $unknown) ) {
@@ -193,11 +156,6 @@ class Common extends Controller {
         $insert['ip'] = $this->getip();
         $insert['type'] = $type;
         Db::table('mp_syslog')->insert($insert);
-    }
-
-    protected function billingLog($insert_data = []) {
-        $insert_data['create_time'] = time();
-        Db::table('mp_billing')->insert($insert_data);
     }
 
 
