@@ -69,7 +69,8 @@ class Login extends Common {
             }catch (\Exception $e) {
                 $this->error($e->getMessage(),url('Login/index'));
             }
-            $this->success('登录成功','Index/index');
+//            $this->success('登录成功','Index/index');
+            $this->redirect(url('Index/index'));
 
         }
     }

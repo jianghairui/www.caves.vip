@@ -5,13 +5,13 @@
  * Date: 2018/10/7
  * Time: 17:17
  */
-namespace app\admin\model;
+namespace app\sh\model;
 use think\Model;
 
-class Cate extends Model
+class Article extends Model
 {
     protected $pk = 'id';
-    protected $table = 'mp_cate';
+    protected $table = 'mp_article';
 
     protected static function init()
     {
@@ -35,7 +35,7 @@ class Cate extends Model
 
         self::afterDelete(function ($data) {
             //控制需要用destroy方法触发,不可用delete
-            @unlink($data['cover']);
+            @unlink($data['pic']);
         });
 
     }

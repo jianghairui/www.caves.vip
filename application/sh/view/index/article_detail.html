@@ -12,7 +12,7 @@
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">副标题：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.title}" placeholder="" id="desc" name="desc">
+                <input type="text" class="input-text" value="{$info.desc}" placeholder="" id="desc" name="desc">
             </div>
         </div>
         <div class="row cl">
@@ -45,7 +45,18 @@
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">文章内容：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <textarea id="editor" type="text/plain" name="content" style="width:100%;height:400px;">{$info.title|htmlspecialchars_decode}</textarea>
+                <textarea id="editor" type="text/plain" name="content" style="width:100%;height:400px;">{$info.content|htmlspecialchars_decode}</textarea>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">标签：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                {foreach $tag as $v}
+                <label title="{$v.tag_name}" style="display:inline-block;width: 120px;">
+                    <input type="checkbox" value="{$v.id}" name="tag[]" {if in_array($v['id'],$my_tag)}checked{/if}>
+                    {$v.tag_name}
+                </label>
+                {/foreach}
             </div>
         </div>
         <div class="row cl">
@@ -100,7 +111,7 @@
                         type: 'post',
                         url: "{:url('Index/articleModPost')}" ,
                         success: function(data){
-                            console.log(data);return;
+                            console.log(data);
                             if(data.code == 1) {
                                 layer.msg('保存成功!',{icon:1,time:1000});
                                 setTimeout("window.parent.location.reload()", 1000)

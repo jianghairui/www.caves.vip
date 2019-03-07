@@ -5,7 +5,7 @@
  * Date: 2018/10/7
  * Time: 17:17
  */
-namespace app\admin\model;
+namespace app\sh\model;
 use think\Model;
 
 class Slideshow extends Model
