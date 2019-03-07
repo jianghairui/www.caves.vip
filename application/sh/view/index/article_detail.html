@@ -4,62 +4,58 @@
 <article class="page-container">
     <form class="form form-horizontal" id="form-article-add">
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>商品名：</label>
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>资讯标题：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.goods_name}" placeholder="" id="goods_name" name="goods_name">
+                <input type="text" class="input-text" value="{$info.title}" placeholder="" id="title" name="title">
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">商品价格：</label>
+            <label class="form-label col-xs-4 col-sm-2">副标题：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.price}" placeholder="金额格式 0.00" id="price" name="price">
+                <input type="text" class="input-text" value="{$info.title}" placeholder="" id="desc" name="desc">
             </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">
-                <span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">商品图片</span>
+                <span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">资讯图片</span>
             </label>
             <div class="formControls col-xs-8 col-sm-9">
                 <div class="uploader-thum-container">
                     <div id="fileList1" class="uploader-list">
-                        <div id="cover" class="thumbnail" style="background-image: url('{$info.pic}');"><div class="file-panel"></div></div>
+                        <div id="cover" class="thumbnail" style="background-image: url('/{$info.pic}');"><div class="file-panel"></div></div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">有效时长：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.times}" placeholder="输入数字" id="times" name="times">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">所需人数：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.neednum}" placeholder="输入数字" id="neednum" name="neednum">
             </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>状态：</label>
             <div class="formControls col-xs-8 col-sm-9 skin-minimal">
                 <div class="radio-box">
-                    <input name="status" type="radio" id="sex-1" value="1" {if $info["status"]==1}checked{/if}>
-                    <label for="sex-1">正常</label>
+                    <label for="sex-1">
+                        <input name="status" type="radio" id="sex-1" value="1" {if $info["status"] == 1}checked{/if}>显示
+                    </label>
                 </div>
                 <div class="radio-box">
-                    <input name="status" type="radio" id="sex-2" value="0" {if $info["status"]==0}checked{/if}>
-                    <label for="sex-2">下架</label>
+                    <label for="sex-2">
+                        <input name="status" type="radio" id="sex-2" value="0" {if $info["status"] == 0}checked{/if}>隐藏
+                    </label>
                 </div>
             </div>
         </div>
-        <input type="hidden" name="id" value="{$info.id}">
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">文章内容：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea id="editor" type="text/plain" name="content" style="width:100%;height:400px;">{$info.title|htmlspecialchars_decode}</textarea>
+            </div>
+        </div>
         <div class="row cl">
             <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
                 <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
                 <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
             </div>
         </div>
-        <input type="file" name="file1" id="file1" style="display: none;">
+        <input type="file" name="file" id="file" style="display: none;">
+        <input type="hidden" name="id" value="{$info.id}">
     </form>
 </article>
 
@@ -68,8 +64,13 @@
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+<script type="text/javascript" src="/lib/ueditor/1.4.3/ueditor.config.js"></script>
+<script type="text/javascript" src="/lib/ueditor/1.4.3/ueditor.all.min.js"> </script>
+<script type="text/javascript" src="/lib/ueditor/1.4.3/lang/zh-cn/zh-cn.js"></script>
 <script type="text/javascript">
     $(function(){
+
+        var ue = UE.getEditor('editor');
 
         $('.skin-minimal input').iCheck({
             checkboxClass: 'icheckbox-blue',
@@ -81,20 +82,13 @@
         //表单验证
         $("#form-article-add").validate({
             rules:{
-                goods_name:{
+                title:{
                     required:true,
-                    maxlength:255
+                    maxlength:50
                 },
-                price:{
-                    required:true
-                },
-                neednum:{
+                desc:{
                     required:true,
-                    number:true
-                },
-                times:{
-                    required:true,
-                    number:true
+                    maxlength:100
                 }
             },
             focusCleanup:true,
@@ -104,9 +98,9 @@
                     isclick = false
                     $(form).ajaxSubmit({
                         type: 'post',
-                        url: "{:url('Free/goodsModPost')}" ,
+                        url: "{:url('Index/articleModPost')}" ,
                         success: function(data){
-                            console.log(data)
+                            console.log(data);return;
                             if(data.code == 1) {
                                 layer.msg('保存成功!',{icon:1,time:1000});
                                 setTimeout("window.parent.location.reload()", 1000)
@@ -128,9 +122,9 @@
 
 
         $("#btn-star1").click(function(){
-            $("#file1").click();
-            $("#file1").change(function(e){
-                if(checkfile('file1') !== true) {
+            $("#file").click();
+            $("#file").change(function(e){
+                if(checkfile('file') !== true) {
                     $("#file").val('')
                     return false
                 }
@@ -144,6 +138,7 @@
         $(document).ready(function(){
             bindKeyEvent($("#price"));
         });
+
         function bindKeyEvent(obj) {
             obj.keyup(function () {
                 var reg = $(this).val().match(/\d+\.?\d{0,2}/);
@@ -163,7 +158,7 @@
 
         function checkfile(fileId){
 
-            var maxsize = 300*1024;//512K
+            var maxsize = 512*1024;//512K
             var errMsg = "上传的附件文件不能超过512K！！！";
             var tipMsg = "您的浏览器暂不支持计算上传文件的大小，确保上传文件不要超过512K，建议使用IE、FireFox、Chrome浏览器。";
             var browserCfg = {};

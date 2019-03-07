@@ -32,7 +32,7 @@
             <tr class="text-c userinfo">
                 <td>{$li.id}</td>
                 <td>
-                    <div style="width: 100px;height: 80px;background-image: url('{if $li['pic']}{$li.pic}{else /}/static/src/image/default.jpg{/if}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                    <div style="width: 100px;height: 80px;background-image: url('{if $li['pic']}/{$li.pic}{else /}/static/src/image/default.jpg{/if}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
                 </td>
                 <td>{$li.title}</td>
                 <td>{$li.desc}</td>

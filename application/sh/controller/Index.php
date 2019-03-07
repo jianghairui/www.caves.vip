@@ -47,24 +47,12 @@ class Index extends Common
     }
     //添加分类提交
     public function articleAddPost() {
-        $val['cate_name'] = input('post.cate_name');
-        $val['pid'] = input('post.pid');
-
+        $val['title'] = input('post.title');
+        $val['desc'] = input('post.desc');
+        $val['status'] = input('post.status');
         $this->checkPost($val);
-        if($val['pid'] != 0) {
-            $where[] = ['pid','=',0];
-            $where[] = ['id','=',$val['pid']];
-            $exist = Db::table('mp_cate')->where($where)->find();
-            if(!$exist) {
-                return ajax('非法操作',-1);
-            }
-        }
-        $map[] = ['cate_name','=',$val['cate_name']];
-        $map[] = ['pid','=',$val['pid']];
-        if($this->checkExist('mp_cate',$map)) {
-            return ajax('分类已存在',-1);
-        }
-
+        $val['content'] = input('post.content');
+        $val['admin_id'] = session('admin_id');
         foreach ($_FILES as $k=>$v) {
             if($v['name'] == '') {
                 unset($_FILES[$k]);
@@ -73,75 +61,77 @@ class Index extends Common
         if(!empty($_FILES)) {
             $info = $this->upload(array_keys($_FILES)[0]);
             if($info['error'] === 0) {
-                $val['cover'] = $info['data'];
+                $val['pic'] = $info['data'];
             }else {
                 return ajax($info['msg'],-1);
             }
         }
-        $res = Db::table('mp_cate')->insert($val);
-        if($res) {
-            return ajax([]);
-        }else {
-            if(isset($val['cover'])) {
-                @unlink($val['cover']);
+        try {
+            Db::table('mp_article')->insert($val);
+        }catch (\Exception $e) {
+            if(isset($val['pic'])) {
+                @unlink($val['pic']);
             }
-            return ajax('添加失败',-1);
+            return ajax($e->getMessage(),-1);
         }
+        return ajax([]);
+
     }
     //修改分类页面
-    public function articleMod() {
-        $cate_id = input('param.cate_id') ? input('param.cate_id') : 0;
-        $exist = Db::table('mp_cate')->where('id',$cate_id)->find();
+    public function articleDetail() {
+        $article_id = input('param.id');
+        $exist = Db::table('mp_article')->where('id',$article_id)->find();
         if(!$exist) {
             $this->error('非法操作');
         }
-        $this->assign('cate',$exist);
+        $this->assign('info',$exist);
         return $this->fetch();
     }
     //修改分类提交
     public function articleModPost() {
-        $val['cate_name'] = input('post.cate_name');
-        $val['id'] = input('post.cate_id');
+        $val['title'] = input('post.title');
+        $val['desc'] = input('post.desc');
+        $val['status'] = input('post.status');
+        $val['id'] = input('post.id');
         $this->checkPost($val);
+        $val['content'] = input('post.content');
+        $val['admin_id'] = session('admin_id');
 
-        $exist = Db::table('mp_cate')->where('id',$val['id'])->find();
-        if(!$exist) {
-            return ajax('非法操作',-1);
-        }
-
-        if($this->checkExist('mp_cate',[
-            ['cate_name','=',$val['cate_name']],
-            ['id','<>',$val['id']]
-        ])) {
-            return ajax('分类已存在',-1);
-        }
+        return ajax($val,999);
         foreach ($_FILES as $k=>$v) {
             if($v['name'] == '') {
                 unset($_FILES[$k]);
             }
         }
-
         if(!empty($_FILES)) {
             $info = $this->upload(array_keys($_FILES)[0]);
             if($info['error'] === 0) {
-                $val['cover'] = $info['data'];
+                $val['pic'] = $info['data'];
             }else {
                 return ajax($info['msg'],-1);
             }
         }
-
-        $res = Db::table('mp_cate')->update($val);
+        try {
+            $exist = Db::table('mp_article')->where('id',$val['id'])->find();
+            $res = Db::table('mp_article')->update($val);
+        }catch (\Exception $e) {
+            if(isset($val['pic'])) {
+                @unlink($val['pic']);
+            }
+            return ajax($e->getMessage(),-1);
+        }
         if($res !== false) {
             if(!empty($_FILES)) {
-                @unlink($exist['cover']);
+                @unlink($exist['pic']);
             }
-            return ajax([]);
+            return ajax();
         }else {
             if(!empty($_FILES)) {
-                @unlink($val['cover']);
+                @unlink($val['pic']);
             }
             return ajax('修改失败',-1);
         }
+
     }
     //删除分类
     public function articleDel() {

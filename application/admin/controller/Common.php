@@ -113,7 +113,7 @@ class Common extends Controller {
             $filename_array = explode('.',$_FILES[$k]['name']);
             $ext = array_pop($filename_array);
 
-            $path =  'static/upload/' . date('Y-m-d');
+            $path =  'static/admin/upload/' . date('Y-m-d');
             is_dir($path) or mkdir($path,0755,true);
             //转移临时文件
             $newname = create_unique_number() . '.' . $ext;
