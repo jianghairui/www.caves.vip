@@ -45,7 +45,7 @@ class Member extends Common {
         }
 
         if($param['search']) {
-            $where[] = ['nickname|realname|tel','like',"%{$param['search']}%"];
+            $where[] = ['nickname|tel','like',"%{$param['search']}%"];
         }
 
         $count = Db::table('mp_user')->where($where)->count();
@@ -60,19 +60,11 @@ class Member extends Common {
     }
     //会员详情
     public function userdetail() {
-        $openid = input('param.openid');
         $id = input('param.id');
-        if($id) {
-            $where[] = ['u.id','=',$id];
-        }
-        if($openid) {
-            $where[] = ['u.openid','=',$openid];
-        }
+        $where[] = ['id','=',$id];
         try {
-            $info = Db::table('mp_user')->alias('u')
-                ->join('mp_userinfo i','u.openid=i.openid','left')
+            $info = Db::table('mp_user')
                 ->where($where)
-                ->field('u.*,i.job,i.resume,i.career,i.identity_num,i.identity_pic')
                 ->find();
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);

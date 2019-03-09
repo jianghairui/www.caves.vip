@@ -325,5 +325,55 @@ class Museum extends Common
         }
     }
 
+    //删除博物馆
+    public function collectionDel() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        $exist = Db::table('mp_collection')->where('id',$val['id'])->find();
+        if(!$exist) {
+            return ajax('非法操作',-1);
+        }
+        $model = model('collection');
+        try {
+            $model::destroy($val['id']);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+
+        return ajax([],1);
+    }
+    //停用博物馆
+    public function collectionHide() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        $exist = Db::table('mp_collection')->where('id',$val['id'])->find();
+        if(!$exist) {
+            return ajax('非法操作',-1);
+        }
+
+        $res = Db::table('mp_collection')->where('id',$val['id'])->update(['status'=>0]);
+        if($res !== false) {
+            return ajax([],1);
+        }else {
+            return ajax([],-1);
+        }
+    }
+    //启用博物馆
+    public function collectionShow() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        $exist = Db::table('mp_collection')->where('id',$val['id'])->find();
+        if(!$exist) {
+            return ajax('非法操作',-1);
+        }
+
+        $res = Db::table('mp_collection')->where('id',$val['id'])->update(['status'=>1]);
+        if($res !== false) {
+            return ajax([],1);
+        }else {
+            return ajax([],-1);
+        }
+    }
+
 
 }

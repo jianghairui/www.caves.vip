@@ -130,7 +130,7 @@ class Api extends Common {
     }
     //免费体验文案
     public function expNotice() {
-        $str = '我们会通过您留下的联系方式通知您XXXXXXXXXXXXXXXXXXXXXXXX';
+        $str = '具体体验方式，我们会通过您留下的联系信息通知您XXXXXXXXXXXXXXXXXXXXXXXX，感谢您的访问！';
         return ajax($str);
     }
     //免费体验
@@ -158,6 +158,11 @@ class Api extends Common {
     public function aboutUs() {
         $info = Db::table('mp_about')->where('id',1)->find();
         return ajax($info);
+    }
+
+    public function minipro() {
+        $list = Db::table('mp_minipro')->select();
+        return ajax($list);
     }
 
 
