@@ -65,6 +65,20 @@ class Api extends Common {
         }
         return ajax($list);
     }
+    //案例详情
+    public function caseDetail() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $exist = Db::table('mp_case')->where('id',$val['id'])->find();
+            if(!$exist) {
+                return ajax('',-4);
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($exist);
+    }
     //获取合作伙伴列表
     public function partnerList() {
         $where = [
@@ -103,14 +117,16 @@ class Api extends Common {
             if(!$exist) {
                 return ajax('',-4);
             }
+            $where = [
+                ['mid','=',$val['id']],
+                ['status','=',1]
+            ];
+            $data['detail'] = $exist;
+            $data['slidelist'] = Db::table('mp_collection')->where($where)->field('id,pic,title')->select();
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
-        return ajax($exist);
-    }
-    //
-    public function museumSlide() {
-
+        return ajax($data);
     }
     //免费体验文案
     public function expNotice() {
@@ -139,7 +155,10 @@ class Api extends Common {
 
     }
 
-
+    public function aboutUs() {
+        $info = Db::table('mp_about')->where('id',1)->find();
+        return ajax($info);
+    }
 
 
 

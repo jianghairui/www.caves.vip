@@ -4,6 +4,18 @@
 <article class="page-container">
     <form class="form form-horizontal" id="form-article-add">
         <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">博物馆：</label>
+            <div class="formControls col-xs-8 col-sm-9"> <span class="select-box">
+				<select class="select" name="mid" id="mid">
+					<option value="">请选择</option>
+                    {foreach $list as $li}
+					<option value="{$li.id}">{$li.title}</option>
+                    {/foreach}
+				</select>
+				</span>
+            </div>
+        </div>
+        <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">
                 <span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">馆藏文物图片</span>
             </label>
@@ -29,7 +41,7 @@
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>语音播报路径：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="" placeholder="填写语音文件的url地址" id="ticket_price" name="ticket_price">
+                <input type="text" class="input-text" value="" placeholder="填写语音文件的url地址" id="url" name="url">
             </div>
         </div>
         <div class="row cl">
@@ -62,13 +74,8 @@
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
 
-<script type="text/javascript" src="/lib/ueditor/1.4.3/ueditor.config.js"></script>
-<script type="text/javascript" src="/lib/ueditor/1.4.3/ueditor.all.min.js"> </script>
-<script type="text/javascript" src="/lib/ueditor/1.4.3/lang/zh-cn/zh-cn.js"></script>
 <script type="text/javascript">
     $(function(){
-
-        var ue = UE.getEditor('editor');
 
         $('.skin-minimal input').iCheck({
             checkboxClass: 'icheckbox-blue',
@@ -76,35 +83,22 @@
             increaseArea: '20%'
         });
 
-        jQuery.validator.addMethod("isLongitude", function(value, element) {
-            var lon = /^-?((0|1?[0-7]?[0-9]?)(([.][0-9]{1,6})?)|180(([.][0]{1,6})?))$/;
-            return this.optional(element) || lon.test(value);
-        }, "请正确填写经度");
-
-        jQuery.validator.addMethod("isLatitude", function(value, element) {
-            var lat = /^-?((0|[1-8]?[0-9]?)(([.][0-9]{1,6})?)|90(([.][0]{1,6})?))$/;
-            return this.optional(element) || lat.test(value);
-        }, "请正确填写纬度");
-
-        jQuery.validator.addMethod("isCurrency", function(value, element) {
-            var money = /^\d{1,8}(\.\d{1,2})?$/;
-            return this.optional(element) || money.test(value);
-        }, "请正确填写金额");
-
-
         var isclick = true
         //表单验证
         $("#form-article-add").validate({
             rules:{
                 title:{
                     required:true,
-                    maxlength:50
+                    maxlength:100
                 },
                 desc:{
-                    maxlength:100
+                    maxlength:255
+                },
+                mid: {
+                    required:true
                 }
             },
-            focusCleanup:true,
+            focusCleanup:false,
             success:"valid",
             submitHandler:function(form){
                 if(isclick === true) {
@@ -113,6 +107,7 @@
                         type: 'post',
                         url: "{:url('Museum/collectionAddPost')}" ,
                         success: function(data){
+                            // console.log(data);return;
                             if(data.code == 1) {
                                 layer.msg('添加成功!',{icon:1,time:1000});
                                 setTimeout("window.parent.location.reload()", 1000)

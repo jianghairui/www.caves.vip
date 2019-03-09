@@ -191,35 +191,47 @@ class Museum extends Common
 
     public function collectionList() {
         $param['search'] = input('param.search');
+        $param['mid'] = input('param.mid','');
         $page['query'] = http_build_query(input('param.'));
 
         $curr_page = input('param.page',1);
-        $perpage = input('param.perpage',10);
+        $perpage = input('param.perpage',5);
         $where = [];
         if($param['search']) {
-            $where[] = ['a.title|a.desc','like',"%{$param['search']}%"];
+            $where[] = ['c.title|c.desc','like',"%{$param['search']}%"];
         }
-        $count = Db::table('mp_collection')->alias('a')->where($where)->count();
+        if($param['mid']) {
+            $where[] = ['c.mid','=',$param['mid']];
+        }
+        $count = Db::table('mp_collection')->alias('c')
+            ->join('mp_museum m','c.mid=m.id','left')
+            ->where($where)->count();
 
         $page['count'] = $count;
         $page['curr'] = $curr_page;
         $page['totalPage'] = ceil($count/$perpage);
         try {
-            $list = Db::table('mp_collection')->alias('a')
-                ->join('mp_admin ad','a.admin_id=ad.id','left')
-                ->field('a.*,ad.realname')
+            $list = Db::table('mp_collection')->alias('c')
+                ->join('mp_admin a','c.admin_id=a.id','left')
+                ->join('mp_museum m','c.mid=m.id','left')
+                ->field('c.*,a.realname,m.title as museum')
                 ->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
             die('SQL错误: ' . $e->getMessage());
         }
 
+        $mlist = Db::table('mp_museum')->select();
+
         $this->assign('list',$list);
         $this->assign('page',$page);
+        $this->assign('mlist',$mlist);
+        $this->assign('mid',$param['mid']);
         return $this->fetch();
     }
 
     public function collectionAdd() {
-
+        $list = Db::table('mp_museum')->select();
+        $this->assign('list',$list);
         return $this->fetch();
     }
 
@@ -229,6 +241,7 @@ class Museum extends Common
         $this->checkPost($val);
         $val['url'] = input('post.url');
         $val['desc'] = input('post.desc');
+        $val['admin_id'] = session('admin_id');
 
         if(isset($_FILES['file'])) {
             $info = $this->upload('file');
@@ -260,10 +273,57 @@ class Museum extends Common
     }
 
     public function collectionDetail() {
-
+        $id = input('param.id');
+        $info = Db::table('mp_collection')->where('id',$id)->find();
+        $list = Db::table('mp_museum')->select();
+        $this->assign('info',$info);
+        $this->assign('list',$list);
+        return $this->fetch();
     }
 
     public function collectionModPost() {
+        $val['title'] = input('post.title');
+        $val['mid'] = input('post.mid');
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        $val['url'] = input('post.url');
+        $val['desc'] = input('post.desc');
+        $val['admin_id'] = session('admin_id');
 
+        foreach ($_FILES as $k=>$v) {
+            if($v['name'] == '') {
+                unset($_FILES[$k]);
+            }
+        }
+        if(!empty($_FILES)) {
+            $info = $this->upload(array_keys($_FILES)[0]);
+            if($info['error'] === 0) {
+                $val['pic'] = $info['data'];
+            }else {
+                return ajax($info['msg'],-1);
+            }
+        }
+        try {
+            $exist = Db::table('mp_collection')->where('id',$val['id'])->find();
+            $res = Db::table('mp_collection')->update($val);
+        }catch (\Exception $e) {
+            if(isset($val['pic'])) {
+                @unlink($val['pic']);
+            }
+            return ajax($e->getMessage(),-1);
+        }
+        if($res !== false) {
+            if(!empty($_FILES)) {
+                @unlink($exist['pic']);
+            }
+            return ajax();
+        }else {
+            if(!empty($_FILES)) {
+                @unlink($val['pic']);
+            }
+            return ajax('修改失败',-1);
+        }
     }
+
+
 }
