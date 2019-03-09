@@ -255,21 +255,15 @@ class Museum extends Common
         }
 
         try {
-            $res = Db::table('mp_collection')->insert($val);
+            Db::table('mp_collection')->insert($val);
         }catch (\Exception $e) {
             if(isset($val['pic'])) {
                 @unlink($val['pic']);
             }
             return ajax($e->getMessage(),-1);
         }
-        if($res) {
-            return ajax([],1);
-        }else {
-            if(isset($val['pic'])) {
-                @unlink($val['pic']);
-            }
-            return ajax('添加失败',-1);
-        }
+        return ajax([],1);
+
     }
 
     public function collectionDetail() {
@@ -305,24 +299,18 @@ class Museum extends Common
         }
         try {
             $exist = Db::table('mp_collection')->where('id',$val['id'])->find();
-            $res = Db::table('mp_collection')->update($val);
+            Db::table('mp_collection')->update($val);
         }catch (\Exception $e) {
             if(isset($val['pic'])) {
                 @unlink($val['pic']);
             }
             return ajax($e->getMessage(),-1);
         }
-        if($res !== false) {
-            if(!empty($_FILES)) {
-                @unlink($exist['pic']);
-            }
-            return ajax();
-        }else {
-            if(!empty($_FILES)) {
-                @unlink($val['pic']);
-            }
-            return ajax('修改失败',-1);
+        if(isset($val['pic'])) {
+            @unlink($exist['pic']);
         }
+        return ajax();
+
     }
 
     //删除博物馆
