@@ -2,10 +2,11 @@
     <div class="menu_dropdown bk_2">
     {if session('username')===config('superman')}
         <dl id="menu-banner">
-            <dt><i class="Hui-iconfont">&#xe613;</i> 首页设置<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dt><i class="Hui-iconfont">&#xe625;</i> 小程序设置<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
             <dd>
                 <ul>
-                    <li><a data-href="{:url('Banner/slideshow')}" data-title="轮播图" href="javascript:;">轮播图设置</a></li>
+                    <li><a data-href="{:url('Banner/slideshow')}" data-title="首页轮播图" href="javascript:;">首页轮播图</a></li>
+                    <li><a data-href="{:url('Banner/about')}" data-title="关于我们" href="javascript:;">关于我们</a></li>
                 </ul>
             </dd>
         </dl>
@@ -16,12 +17,12 @@
                     <li><a data-href="{:url('Index/articleList')}" data-title="资讯列表" href="javascript:void(0)">资讯列表</a></li>
                     <li><a data-href="{:url('Index/tagList')}" data-title="标签设置" href="javascript:void(0)">标签设置</a></li>
                     <li><a data-href="{:url('Index/caseList')}" data-title="案例列表" href="javascript:void(0)">案例列表</a></li>
-                    <li><a data-href="{:url('Index/partner')}" data-title="合作伙伴" href="javascript:void(0)">合作伙伴</a></li>
+                    <li><a data-href="{:url('Index/partnerList')}" data-title="合作伙伴" href="javascript:void(0)">合作伙伴</a></li>
                 </ul>
             </dd>
         </dl>
         <dl id="menu-wisdom">
-            <dt><i class="Hui-iconfont">&#xe616;</i> 智慧博物馆<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dt><i class="Hui-iconfont">&#xe643;</i> 智慧博物馆<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
             <dd>
                 <ul>
                     <li><a data-href="{:url('Museum/museumList')}" data-title="博物馆列表" href="javascript:void(0)">博物馆列表</a></li>
@@ -34,7 +35,7 @@
             <dd>
                 <ul>
                     <li><a data-href="{:url('Member/memberlist')}" data-title="会员列表" href="javascript:void(0);">会员列表</a></li>
-                    <li><a data-href="{:url('Member/recharge')}" data-title="充值记录" href="javascript:void(0);">充值记录</a></li>
+                    <li><a data-href="{:url('Member/expList')}" data-title="体验记录" href="javascript:void(0);">体验记录</a></li>
                 </ul>
             </dd>
         </dl>
@@ -52,7 +53,7 @@
             <dt><i class="Hui-iconfont">&#xe62e;</i> 系统管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
             <dd>
                 <ul>
-                    <li><a data-href="{:url('System/setting')}" data-title="系统设置" href="javascript:void(0)">系统设置</a></li>
+                    <!--<li><a data-href="{:url('System/setting')}" data-title="系统设置" href="javascript:void(0)">系统设置</a></li>-->
                     <li><a data-href="{:url('System/syslog')}" data-title="系统日志" href="javascript:void(0)">系统日志</a></li>
                 </ul>
             </dd>

@@ -4,69 +4,29 @@
 <article class="page-container">
     <form class="form form-horizontal" id="form-article-add">
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">博物馆：</label>
-            <div class="formControls col-xs-8 col-sm-9"> <span class="select-box">
-				<select class="select" name="mid" id="mid">
-					<option value="">请选择</option>
-                    {foreach $list as $li}
-					<option value="{$li.id}" {if $info['id'] == $li['id']}selected{/if}>{$li.title}</option>
-                    {/foreach}
-				</select>
-				</span>
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>单位名称：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder="" id="title" name="title">
             </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">
-                <span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">馆藏文物图片</span>
+                <span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">图片</span>
             </label>
             <div class="formControls col-xs-8 col-sm-9">
                 <div class="uploader-thum-container">
                     <div id="fileList1" class="uploader-list">
-                        <div id="cover" class="thumbnail" style="background-image: url('/{$info.pic}');"><div class="file-panel"></div></div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>馆藏文物名称：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.title}" placeholder="" id="title" name="title">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">备注：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.desc}" placeholder="" id="desc" name="desc">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>语音播报路径：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.url}" placeholder="填写语音文件的url地址" id="url" name="url">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>状态：</label>
-            <div class="formControls col-xs-8 col-sm-9 skin-minimal">
-                <div class="radio-box">
-                    <input name="status" type="radio" id="sex-1" value="1" {if $info['status'] == 1}checked{/if}>
-                    <label for="sex-1">显示</label>
-                </div>
-                <div class="radio-box">
-                    <input name="status" type="radio" id="sex-2" value="0" {if $info['status'] == 0}checked{/if}>
-                    <label for="sex-2">隐藏</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="row cl">
             <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
-                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 添加</button>
                 <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
             </div>
         </div>
         <input type="file" name="file" id="file" style="display: none;">
-        <input type="hidden" name="id" value="{$info.id}">
     </form>
 </article>
 
@@ -91,13 +51,7 @@
             rules:{
                 title:{
                     required:true,
-                    maxlength:100
-                },
-                desc:{
-                    maxlength:255
-                },
-                mid: {
-                    required:true
+                    maxlength:50
                 }
             },
             focusCleanup:false,
@@ -107,11 +61,10 @@
                     isclick = false
                     $(form).ajaxSubmit({
                         type: 'post',
-                        url: "{:url('Museum/collectionModPost')}" ,
+                        url: "{:url('Index/partnerAddPost')}" ,
                         success: function(data){
-                            // console.log(data);return;
                             if(data.code == 1) {
-                                layer.msg('保存成功!',{icon:1,time:1000});
+                                layer.msg('添加成功!',{icon:1,time:1000});
                                 setTimeout("window.parent.location.reload()", 1000)
                             }else {
                                 layer.msg(data.data,{icon:2,time:1000});
@@ -142,7 +95,6 @@
                 $("#fileList1").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
             });
         })
-
 
         function checkfile(fileId){
 

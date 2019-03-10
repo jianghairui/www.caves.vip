@@ -65,6 +65,20 @@ class Api extends Common {
         }
         return ajax($list);
     }
+    //案例详情
+    public function caseDetail() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $exist = Db::table('mp_case')->where('id',$val['id'])->find();
+            if(!$exist) {
+                return ajax('',-4);
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($exist);
+    }
     //获取合作伙伴列表
     public function partnerList() {
         $where = [
@@ -103,19 +117,20 @@ class Api extends Common {
             if(!$exist) {
                 return ajax('',-4);
             }
+            $where = [
+                ['mid','=',$val['id']],
+                ['status','=',1]
+            ];
+            $data['detail'] = $exist;
+            $data['slidelist'] = Db::table('mp_collection')->where($where)->field('id,pic,title')->select();
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
-        return ajax($exist);
-    }
-    //
-    public function museumSlide() {
-
+        return ajax($data);
     }
     //免费体验文案
     public function expNotice() {
-        $str = '我们会通过您留下的联系方式通知您XXXXXXXXXXXXXXXXXXXXXXXX
-        您在使用本服务过程中，可能可以为您使用的帐号设置昵称、头像、签名、留言等信息，也可能为您建立或者管理、参与的QQ群、微信群等设置名称、图片、简介等信息。您应当保证这些信息的内容和形式符合法律法规（本协议中的“法律法规”指用户所属/所处地区、国家现行有效的法律、行政法规、司法解释、地方法规、地方规章、部门规章及其他规范性文件以及对于该等法律法规的不时修改和补充，以及相关政策规定等，下同。）、公序良俗、社会公德以及腾讯平台规则，且不会侵害任何主体的合法权益。';
+        $str = '具体体验方式，我们会通过您留下的联系信息通知您XXXXXXXXXXXXXXXXXXXXXXXX，感谢您的访问！';
         return ajax($str);
     }
     //免费体验
@@ -140,7 +155,15 @@ class Api extends Common {
 
     }
 
+    public function aboutUs() {
+        $info = Db::table('mp_about')->where('id',1)->find();
+        return ajax($info);
+    }
 
+    public function minipro() {
+        $list = Db::table('mp_minipro')->select();
+        return ajax($list);
+    }
 
 
 

@@ -424,6 +424,120 @@ class Index extends Common
         }
     }
 
+    public function partnerList() {
+        $param['search'] = input('param.search');
+        $page['query'] = http_build_query(input('param.'));
+
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $where = [];
+        if($param['search']) {
+            $where[] = ['title','like',"%{$param['search']}%"];
+        }
+        $count = Db::table('mp_partner')->where($where)->count();
+
+        $page['count'] = $count;
+        $page['curr'] = $curr_page;
+        $page['totalPage'] = ceil($count/$perpage);
+        try {
+            $list = Db::table('mp_partner')->where($where)->select();
+        }catch (\Exception $e) {
+            die('SQL错误: ' . $e->getMessage());
+        }
+
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
+
+    }
+
+    //添加合作伙伴页面
+    public function partnerAdd() {
+        return $this->fetch();
+    }
+    //添加合作伙伴提交
+    public function partnerAddPost() {
+        $val['title'] = input('post.title');
+        $this->checkPost($val);
+        $val['admin_id'] = session('admin_id');
+        if(isset($_FILES['file'])) {
+            $info = $this->upload('file');
+            if($info['error'] === 0) {
+                $val['pic'] = $info['data'];
+            }else {
+                return ajax($info['msg'],-1);
+            }
+        }else {
+            return ajax('请上传图片',-1);
+        }
+        try {
+            Db::table('mp_partner')->insert($val);
+        }catch (\Exception $e) {
+            if(isset($val['pic'])) {
+                @unlink($val['pic']);
+            }
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax([]);
+
+    }
+    //修改合作伙伴页面
+    public function partnerDetail() {
+        $article_id = input('param.id');
+        $exist = Db::table('mp_partner')->where('id',$article_id)->find();
+        if(!$exist) {
+            $this->error('非法操作');
+        }
+        $this->assign('info',$exist);
+        return $this->fetch();
+    }
+    //修改合作伙伴提交
+    public function partnerModPost() {
+        $val['title'] = input('post.title');
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        $val['admin_id'] = session('admin_id');
+        if(isset($_FILES['file'])) {
+            $info = $this->upload('file');
+            if($info['error'] === 0) {
+                $val['pic'] = $info['data'];
+            }else {
+                return ajax($info['msg'],-1);
+            }
+        }
+        try {
+            $exist = Db::table('mp_partner')->where('id',$val['id'])->find();
+            Db::table('mp_partner')->update($val);
+        }catch (\Exception $e) {
+            if(isset($val['pic'])) {
+                @unlink($val['pic']);
+            }
+            return ajax($e->getMessage(),-1);
+        }
+        if(isset($val['pic'])) {
+            @unlink($exist['pic']);
+        }
+        return ajax();
+
+    }
+    //删除合作伙伴
+    public function partnerDel() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        $exist = Db::table('mp_partner')->where('id',$val['id'])->find();
+        if(!$exist) {
+            return ajax('非法操作',-1);
+        }
+        $model = model('partner');
+        try {
+            $model::destroy($val['id']);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+
+        return ajax([],1);
+    }
+
 
 
 

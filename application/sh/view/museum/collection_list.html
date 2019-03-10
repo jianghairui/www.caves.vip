@@ -3,6 +3,14 @@
     <section id="formAjax">
         <div class="text-c">
             <button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+            <span class="select-box inline">
+                <select name="mid" id="mid" class="select">
+                    <option value="">全部</option>
+                    {foreach $mlist as $m}
+                    <option value="{$m.id}" {if $mid == $m['id']}selected{/if}>{$m.title}</option>
+                    {/foreach}
+                </select>
+		    </span>
             <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder=" 馆藏文物名" style="width:250px" class="input-text">
             <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找馆藏文物</button>
         </div>
@@ -21,6 +29,7 @@
             <th width="120">馆藏文物标题</th>
             <th>馆藏文物简介</th>
             <th width="80">状态</th>
+            <th width="120">博物馆</th>
             <th width="100">发布人</th>
             <th width="120">发布时间</th>
             <th width="100">操作</th>
@@ -43,6 +52,7 @@
                     <span class="label label-defaunt radius">已隐藏</span>
                     {/if}
                 </td>
+                <td>{$li.museum}</td>
                 <td>{$li.realname}</td>
                 <td>{$li.create_time|date="Y-m-d H:i"}</td>
                 <td class="td-manage">
@@ -66,7 +76,7 @@
             {/foreach}
         </form>
         <tr>
-            <td colspan="8" id="page" class="text-r"></td>
+            <td colspan="9" id="page" class="text-r"></td>
         </tr>
         </tbody>
     </table>
@@ -98,8 +108,8 @@
 
     $("#search-btn").click(function () {
         var search = $("#formAjax").find("#search").val();
-        var id = $("#formAjax").find("#id").val();
-        var str = 'id=' + id;
+        var mid = $("#formAjax").find("#mid").val();
+        var str = 'mid=' + mid;
         if(search.length != '') {
             str += '&search=' + search;
         }

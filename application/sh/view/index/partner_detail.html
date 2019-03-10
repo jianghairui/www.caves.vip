@@ -1,87 +1,34 @@
 <style>
-    .thumbnail{ width:384px;height: 216px;background-size: cover;background-position: center;position: relative}
+    .thumbnail{ width:300px;height: 200px;background-size: cover;background-position: center;position: relative}
 </style>
 <article class="page-container">
     <form class="form form-horizontal" id="form-article-add">
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>活动标题：</label>
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>单位名称：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="" placeholder="" id="title" name="title">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>奖品名称：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="" placeholder="" id="prize" name="prize">
+                <input type="text" class="input-text" value="{$info.title}" placeholder="" id="title" name="title">
             </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">
-                <span id="btn-star" class="btn btn-primary btn-uploadstar radius ml-10">选择图片</span>
+                <span id="btn-star1" class="btn btn-primary btn-uploadstar radius ml-10">图片</span>
             </label>
             <div class="formControls col-xs-8 col-sm-9">
                 <div class="uploader-thum-container">
-                    <div id="fileList" class="uploader-list">
+                    <div id="fileList1" class="uploader-list">
+                        <div id="cover" class="thumbnail" style="background-image: url('/{$info.pic}');"><div class="file-panel"></div></div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">奖品数量：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="" placeholder="" id="num" name="num">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">中奖概率(val%)：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="" placeholder="输入格式(0.01~100)" id="keywords" name="probability">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">排序值：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="0" placeholder="" id="articlesort" name="sort">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>是否进行：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <div class="radio-box">
-                    <input name="status" type="radio" id="sex-1" checked value="1">
-                    <label for="sex-1">直接进行</label>
-                </div>
-                <div class="radio-box">
-                    <input name="status" type="radio" id="sex-2" value="2">
-                    <label for="sex-2">暂不进行</label>
-                </div>
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">抽奖开始时间：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" onfocus="WdatePicker({ dateFmt:'yyyy-MM-dd HH:00:00',maxDate:'#F{ $dp.$D(\'end_time\')||\'\'}' })" id="start_time" name="start_time" class="input-text Wdate">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">抽奖结束时间：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" onfocus="WdatePicker({ dateFmt:'yyyy-MM-dd HH:00:00',minDate:'#F{ $dp.$D(\'start_time\')}' })" id="end_time" name="end_time" class="input-text Wdate">
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">开奖时间：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" onfocus="WdatePicker({ dateFmt:'yyyy-MM-dd HH:00:00',minDate:'#F{ $dp.$D(\'end_time\')}' })" id="open_time" name="open_time" class="input-text Wdate">
-            </div>
-        </div>
-        <div class="row cl">
             <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
-                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 添加</button>
+                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
                 <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
             </div>
         </div>
         <input type="file" name="file" id="file" style="display: none;">
+        <input type="hidden" name="id" value="{$info.id}">
     </form>
 </article>
 
@@ -90,62 +37,36 @@
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+
 <script type="text/javascript">
     $(function(){
+
+        $('.skin-minimal input').iCheck({
+            checkboxClass: 'icheckbox-blue',
+            radioClass: 'iradio-blue',
+            increaseArea: '20%'
+        });
+
         var isclick = true
         //表单验证
         $("#form-article-add").validate({
             rules:{
                 title:{
                     required:true,
-                    maxlength:100
-                },
-                prize:{
-                    required:true,
-                    maxlength:30
-                },
-                num:{
-                    required:true,
-                    digits:true,
-                    maxlength:8
-                },
-                sort:{
-                    required:true,
-                    digits:true,
-                    maxlength:8
-                },
-                probability:{
-                    required:true,
-                    number:true,
-                    min:0.01,
-                    max:100
-                },
-                status:{
-                    required:true,
-                },
-                start_time:{
-                    required:true,
-                },
-                end_time:{
-                    required:true,
-                },
-                open_time:{
-                    required:true,
-                },
-
+                    maxlength:50
+                }
             },
-            focusCleanup:true,
+            focusCleanup:false,
             success:"valid",
             submitHandler:function(form){
                 if(isclick === true) {
                     isclick = false
                     $(form).ajaxSubmit({
                         type: 'post',
-                        url: "{:url('Banner/prizeadd_post')}" ,
+                        url: "{:url('Index/partnerModPost')}" ,
                         success: function(data){
-                            console.log(data)
                             if(data.code == 1) {
-                                layer.msg('添加成功!',{icon:1,time:1000});
+                                layer.msg('保存成功!',{icon:1,time:1000});
                                 setTimeout("window.parent.location.reload()", 1000)
                             }else {
                                 layer.msg(data.data,{icon:2,time:1000});
@@ -164,8 +85,7 @@
         });
 
 
-        $("#btn-star").click(function(){
-
+        $("#btn-star1").click(function(){
             $("#file").click();
             $("#file").change(function(e){
                 if(checkfile('file') !== true) {
@@ -174,14 +94,9 @@
                 }
                 var img = e.target.files[0];
                 var src = window.URL.createObjectURL(img);
-                $("#fileList").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+                $("#fileList1").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
             });
-
         })
-
-
-
-
 
         function checkfile(fileId){
 
@@ -245,7 +160,6 @@
             }
             return false;
         }
-
 
 
     });

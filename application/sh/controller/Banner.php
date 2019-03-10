@@ -160,5 +160,52 @@ class Banner extends Common {
         return ajax([],1);
     }
 
+    public function about() {
+        if(request()->isPost()) {
+            $val['name'] = input('post.name');
+            $val['linkman'] = input('post.linkman');
+            $val['tel'] = input('post.tel');
+            $val['address'] = input('post.address');
+            $val['intro'] = input('post.intro');
+//            $this->checkPost($val);
+            $val['lon'] = input('post.lon',0);
+            $val['lat'] = input('post.lat',0);
+
+//            return ajax($val,-99);
+
+            if(isset($_FILES['file'])) {
+                $info = $this->upload('file');
+                if($info['error'] === 0) {
+                    $val['logo'] = $info['data'];
+                }else {
+                    return ajax($info['msg'],-1);
+                }
+            }
+
+            try {
+                $exist = Db::table('mp_about')->where('id',1)->find();
+                if(!$exist) {
+                    Db::table('mp_about')->insert($val);
+                }else {
+                    Db::table('mp_about')->where('id',1)->update($val);
+                }
+            }catch (\Exception $e) {
+                if(isset($val['logo'])) {
+                    @unlink($val['logo']);
+                }
+                return ajax($e->getMessage(),-1);
+            }
+            if($exist) {
+                if(isset($val['logo'])) {
+                    @unlink($exist['logo']);
+                }
+            }
+            return ajax();
+        }
+        $exist = Db::table('mp_about')->where('id',1)->find();
+        $this->assign('info',$exist);
+        return $this->fetch();
+    }
+
 
 }
