@@ -130,7 +130,7 @@ class Api extends Common {
     }
     //免费体验文案
     public function expNotice() {
-        $str = '具体体验方式，我们会通过您留下的联系信息通知您XXXXXXXXXXXXXXXXXXXXXXXX，感谢您的访问！';
+        $str = '具体体验方式，我们会通过您留下的联系信息通知您，感谢您的访问！';
         return ajax($str);
     }
     //免费体验
