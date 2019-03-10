@@ -31,10 +31,10 @@
             </dd>
         </dl>
         <dl id="menu-member">
-            <dt><i class="Hui-iconfont">&#xe60d;</i> 会员管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dt><i class="Hui-iconfont">&#xe60d;</i> 用户管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
             <dd>
                 <ul>
-                    <li><a data-href="{:url('Member/memberlist')}" data-title="会员列表" href="javascript:void(0);">会员列表</a></li>
+                    <li><a data-href="{:url('Member/memberlist')}" data-title="用户列表" href="javascript:void(0);">用户列表</a></li>
                     <li><a data-href="{:url('Member/expList')}" data-title="体验记录" href="javascript:void(0);">体验记录</a></li>
                 </ul>
             </dd>
@@ -58,6 +58,110 @@
                 </ul>
             </dd>
         </dl>
+
+
+        {else /}
+
+
+        {if in_array(strtolower('Banner'),$authlist)}
+        <dl id="menu-banner">
+            <dt><i class="Hui-iconfont">&#xe625;</i> 小程序设置<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dd>
+                <ul>
+                    {if in_array(strtolower('Banner/slideshow'),$authlist)}
+                    <li><a data-href="{:url('Banner/slideshow')}" data-title="首页轮播图" href="javascript:;">首页轮播图</a></li>
+                    {/if}
+                    {if in_array(strtolower('Banner/about'),$authlist)}
+                    <li><a data-href="{:url('Banner/about')}" data-title="关于我们" href="javascript:;">关于我们</a></li>
+                    {/if}
+                </ul>
+            </dd>
+        </dl>
+        {/if}
+        {if in_array(strtolower('Index'),$authlist)}
+        <dl id="menu-article">
+            <dt><i class="Hui-iconfont">&#xe616;</i> 资讯管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dd>
+                <ul>
+                    {if in_array(strtolower('Index/articleList'),$authlist)}
+                    <li><a data-href="{:url('Index/articleList')}" data-title="资讯列表" href="javascript:void(0)">资讯列表</a></li>
+                    {/if}
+                    {if in_array(strtolower('Index/tagList'),$authlist)}
+                    <li><a data-href="{:url('Index/tagList')}" data-title="标签设置" href="javascript:void(0)">标签设置</a></li>
+                    {/if}
+                    {if in_array(strtolower('Index/caseList'),$authlist)}
+                    <li><a data-href="{:url('Index/caseList')}" data-title="案例列表" href="javascript:void(0)">案例列表</a></li>
+                    {/if}
+                    {if in_array(strtolower('Index/partnerList'),$authlist)}
+                    <li><a data-href="{:url('Index/partnerList')}" data-title="合作伙伴" href="javascript:void(0)">合作伙伴</a></li>
+                    {/if}
+                </ul>
+            </dd>
+        </dl>
+        {/if}
+        {if in_array(strtolower('Museum'),$authlist)}
+        <dl id="menu-wisdom">
+            <dt><i class="Hui-iconfont">&#xe643;</i> 智慧博物馆<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dd>
+                <ul>
+                    {if in_array(strtolower('Museum/museumList'),$authlist)}
+                    <li><a data-href="{:url('Museum/museumList')}" data-title="博物馆列表" href="javascript:void(0)">博物馆列表</a></li>
+                    {/if}
+                    {if in_array(strtolower('Museum/collectionList'),$authlist)}
+                    <li><a data-href="{:url('Museum/collectionList')}" data-title="馆藏精品" href="javascript:void(0)">馆藏精品</a></li>
+                    {/if}
+                </ul>
+            </dd>
+        </dl>
+        {/if}
+        {if in_array(strtolower('Member'),$authlist)}
+        <dl id="menu-member">
+            <dt><i class="Hui-iconfont">&#xe60d;</i> 用户管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dd>
+                <ul>
+                    {if in_array(strtolower('Member/memberlist'),$authlist)}
+                    <li><a data-href="{:url('Member/memberlist')}" data-title="用户列表" href="javascript:void(0);">用户列表</a></li>
+                    {/if}
+                    {if in_array(strtolower('Member/expList'),$authlist)}
+                    <li><a data-href="{:url('Member/expList')}" data-title="体验记录" href="javascript:void(0);">体验记录</a></li>
+                    {/if}
+                </ul>
+            </dd>
+        </dl>
+        {/if}
+        {if in_array(strtolower('Admin'),$authlist)}
+        <dl id="menu-admin">
+            <dt><i class="Hui-iconfont">&#xe62d;</i> 管理员管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dd>
+                <ul>
+                    {if in_array(strtolower('Admin/adminlist'),$authlist)}
+                    <li><a data-href="{:url('Admin/adminlist')}" data-title="管理员列表" href="javascript:void(0)">管理员列表</a></li>
+                    {/if}
+                    {if in_array(strtolower('Admin/grouplist'),$authlist)}
+                    <li><a data-href="{:url('Admin/grouplist')}" data-title="角色管理" href="javascript:void(0)">角色管理</a></li>
+                    {/if}
+                    {if in_array(strtolower('Admin/rulelist'),$authlist)}
+                    <li><a data-href="{:url('Admin/rulelist')}" data-title="权限管理" href="javascript:void(0)">权限管理</a></li>
+                    {/if}
+                </ul>
+            </dd>
+        </dl>
+        {/if}
+        {if in_array(strtolower('System'),$authlist)}
+        <dl id="menu-system">
+            <dt><i class="Hui-iconfont">&#xe62e;</i> 系统管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dd>
+                <ul>
+                    <!--<li><a data-href="{:url('System/setting')}" data-title="系统设置" href="javascript:void(0)">系统设置</a></li>-->
+                    {if in_array(strtolower('System/syslog'),$authlist)}
+                    <li><a data-href="{:url('System/syslog')}" data-title="系统日志" href="javascript:void(0)">系统日志</a></li>
+                    {/if}
+                </ul>
+            </dd>
+        </dl>
+        {/if}
+
+
     {/if}
 
     </div>
