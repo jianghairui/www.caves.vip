@@ -98,6 +98,8 @@
                         type: 'post',
                         url: "{:url('Index/caseAddPost')}" ,
                         success: function(data){
+                            // console.log(data);return;
+
                             if(data.code == 1) {
                                 layer.msg('添加成功!',{icon:1,time:1000});
                                 setTimeout("window.parent.location.reload()", 1000)
