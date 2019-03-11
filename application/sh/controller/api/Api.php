@@ -21,6 +21,42 @@ class Api extends Common {
         $list = Db::table('mp_slideshow')->where('status',1)->order(['sort'=>'ASC'])->select();
         return ajax($list);
     }
+
+    public function articleList() {
+        $page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        $where = [
+            ['status','=',1]
+        ];
+
+        $count = Db::table('mp_article')->where($where)->count();
+        $list = Db::table('mp_article')
+            ->where($where)
+            ->order(['create_time'=>'DESC'])
+            ->field('id,title,desc,pic,tags')
+            ->limit(($page-1)*$perpage,$perpage)->select();
+        $tag = Db::table('mp_tag')->select();
+
+        $tag_arr = $this->get_tag_arr($tag);
+
+        foreach ($list as &$v) {
+            $mytag = explode(',',$v['tags']);
+            $arr = [];
+            foreach ($mytag as $vv) {
+                if(isset($tag_arr[$vv])) {
+                    $arr[] = [
+                        'tag_id' => $vv,
+                        'tag_name' => $tag_arr[$vv]
+                    ];
+                }
+            }
+            $v['tag_list'] = $arr;
+        }
+        $data['count'] = $count;
+        $data['totalPage'] = ceil($count/10);
+        $data['list'] = $list;
+        return ajax($data);
+    }
     //首页资讯
     public function homeArticle() {
         $info = Db::table('mp_article')->order(['create_time'=>'DESC'])->find();
