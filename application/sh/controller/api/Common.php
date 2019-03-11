@@ -50,6 +50,9 @@ class Common extends Controller {
             return true;
         }else {
             $token = input('post.token');
+            if(!$token) {
+                throw new HttpResponseException(ajax('invalid token',-3));
+            }
             try {
                 $exist = Db::table('mp_token')->where([
                     ['token','=',$token],

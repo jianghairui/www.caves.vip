@@ -13,13 +13,6 @@ Route::get('think', function () {
     return 'hello,ThinkPHP5!';
 });
 
-Route::get('hello/:name', 'index/hello');
-
-
-Route::post('wxRefundNotify', 'admin/wx/refundNotify');
-
-Route::rule('api', 'admin/api/index');
-
 return [
 
 ];

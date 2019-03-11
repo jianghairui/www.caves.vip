@@ -40,34 +40,40 @@ class Login extends Common {
             $where['password'] = md5(input('post.password') . config('login_key'));
             try {
                 $result = Db::table('mp_admin')->where($where)->find();
-                if($result) {
-                    if($result['status'] == 0 && $result['username'] !== config('superman')) {
-                        exit($this->fetch('frozen'));
-                    }
-                    session('login_vcode',null);
-                    Db::table('mp_admin')->where($where)->setInc('login_times');
-                    Db::table('mp_admin')->where($where)->update(['last_login_time'=>time(),'last_login_ip'=>$this->getip()]);
-                    session('mploginstatus',md5(input('post.username') . config('login_key')));
-                    session('admin_id',$result['id']);
-                    session('username',$result['username']);
-                    session('realname',$result['realname']);
-                    session('login_times',$result['login_times'] + 1);
-                    session('last_login_time',$result['last_login_time']);
-                    session('last_login_ip',$result['last_login_ip']);
 
-                    if(input('post.remember_pwd') == 1) {
-                        cookie('mp_username',input('post.username'),3600*24*7);
-                        cookie('mp_password',input('post.password'),3600*24*7);
-                    }else {
-                        cookie('mp_username',null);
-                        cookie('mp_password',null);
-                    }
-                    $this->log('登录账号',0);
-                }else {
-                    $this->error('用户名密码不匹配',url('Login/index'));
-                }
             }catch (\Exception $e) {
                 $this->error($e->getMessage(),url('Login/index'));
+            }
+            if($result) {
+                session('login_vcode',null);
+
+                if($result['status'] == 0 && $result['username'] !== config('superman')) {
+                    exit($this->fetch('frozen'));
+                }
+                try {
+                    Db::table('mp_admin')->where($where)->setInc('login_times');
+                    Db::table('mp_admin')->where($where)->update(['last_login_time'=>time(),'last_login_ip'=>$this->getip()]);
+                }catch (\Exception $e) {
+                    $this->error($e->getMessage(),url('Login/index'));
+                }
+                session('mploginstatus',md5(input('post.username') . config('login_key')));
+                session('admin_id',$result['id']);
+                session('username',$result['username']);
+                session('realname',$result['realname']);
+                session('login_times',$result['login_times'] + 1);
+                session('last_login_time',$result['last_login_time']);
+                session('last_login_ip',$result['last_login_ip']);
+
+                if(input('post.remember_pwd') == 1) {
+                    cookie('mp_username',input('post.username'),3600*24*7);
+                    cookie('mp_password',input('post.password'),3600*24*7);
+                }else {
+                    cookie('mp_username',null);
+                    cookie('mp_password',null);
+                }
+                $this->log('登录账号',0);
+            }else {
+                $this->error('用户名密码不匹配',url('Login/index'));exit();
             }
 //            $this->redirect(url('Index/index'));
             $this->success('登陆成功',url('Index/index'));

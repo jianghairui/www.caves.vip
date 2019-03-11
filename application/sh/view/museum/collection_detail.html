@@ -9,7 +9,7 @@
 				<select class="select" name="mid" id="mid">
 					<option value="">请选择</option>
                     {foreach $list as $li}
-					<option value="{$li.id}" {if $info['id'] == $li['id']}selected{/if}>{$li.title}</option>
+					<option value="{$li.id}" {if $info['mid'] == $li['id']}selected{/if}>{$li.title}</option>
                     {/foreach}
 				</select>
 				</span>

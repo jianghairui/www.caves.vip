@@ -119,24 +119,12 @@ class Login extends Common {
     }
 
     public function test() {
+        return $this->fetch();
+    }
 
-        $config = [
-            'auth_on'           => 1, // 权限开关
-            'auth_type'         => 1, // 认证方式，1为实时认证；2为登录认证。
-            'auth_group'        => 'auth_group', // 用户组数据表名
-            'auth_group_access' => 'auth_group_access', // 用户-用户组关系表
-            'auth_rule'         => 'auth_rule', // 权限规则表
-            'auth_user'         => 'admin', // 用户信息表
-            'auth_out'          => []
-        ];
-// 转换表名
-        $auth_group_access = Loader::parseName($config['auth_group_access'], 1);
-        $auth_group        = Loader::parseName($config['auth_group'], 1);
-        // 执行查询
-        $user_groups  = Db::view($auth_group_access, 'uid,group_id')
-            ->view($auth_group, 'title,rules', "{$auth_group_access}.group_id={$auth_group}.id", 'LEFT')
-            ->where("{$auth_group_access}.uid='1' and {$auth_group}.status='1'")
-            ->select();
+    public function uploadA()
+    {
+        halt($_FILES);
     }
 
 

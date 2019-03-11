@@ -95,6 +95,37 @@ class Common extends Controller {
         return array('error'=>0,'data'=>$filepath);
     }
 
+    protected function uploadAudio($k) {
+        $allowType = array(
+            "audio/mp3"
+        );
+        if($_FILES[$k]["type"] == '') {
+            return array('error' => 1,'msg' => '文件存在中文名或大小超过2M');
+        }
+        if(!in_array($_FILES[$k]["type"],$allowType)) {
+            return array('error' => 1,'msg' => '文件格式无效:' . $_FILES[$k]["type"]);
+        }
+        if($_FILES[$k]["size"] > 1024*1024*2) {
+            return array('error' => 1,'msg' => '文件大小不超过2048Kb');
+
+        }
+        if ($_FILES[$k]["error"] > 0) {
+            return array('error'=>1,'msg'=>$_FILES[$k]["error"]);
+        }
+
+        $filename_array = explode('.',$_FILES[$k]['name']);
+        $ext = array_pop($filename_array);
+
+        $path =  'static/sh/audio/' . date('Y-m-d');
+        is_dir($path) or mkdir($path,0755,true);
+        //转移临时文件
+        $newname = create_unique_number() . '.' . $ext;
+        move_uploaded_file($_FILES[$k]["tmp_name"], $path . "/" . $newname);
+        $filepath = $path . "/" . $newname;
+
+        return array('error'=>0,'data'=>$filepath);
+    }
+
     //检验格式大小
     private function checkfile($file) {
         $allowType = array(

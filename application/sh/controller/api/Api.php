@@ -128,6 +128,20 @@ class Api extends Common {
         }
         return ajax($data);
     }
+
+    public function voiceDetail() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $exist = Db::table('mp_collection')->where('id',$val['id'])->find();
+            if(!$exist) {
+                return ajax('',-4);
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($exist);
+    }
     //免费体验文案
     public function expNotice() {
         $str = '具体体验方式，我们会通过您留下的联系信息通知您，感谢您的访问！';
