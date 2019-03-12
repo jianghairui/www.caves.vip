@@ -15,45 +15,33 @@ class Api extends Common {
         return $this->fetch();
     }
 
+    public function slideList() {
+
+    }
+
     public function uploadImage() {
         if(!empty($_FILES)) {
             if(count($_FILES) > 1) {
                 return ajax('最多上传一张图片',9);
             }
-            $info = $this->upload(array_keys($_FILES)[0]);
-            if($info['error'] === 0) {
-                return ajax(['path'=>$info['data']]);
-            }else {
-                return ajax($info['msg'],9);
-            }
+            $path = $this->upload(array_keys($_FILES)[0]);
+            return ajax(['path'=>$path]);
         }else {
             return ajax('请上传图片',3);
         }
     }
 
-    private function sortMerge($node,$pid=0)
-    {
-        $arr = array();
-        foreach($node as $key=>$v)
-        {
-            if($v['pid'] == $pid)
-            {
-                $v['child'] = $this->sortMerge($node,$v['id']);
-                $arr[] = $v;
+    public function uploadImage2m() {
+        if(!empty($_FILES)) {
+            if(count($_FILES) > 1) {
+                return ajax('最多上传一张图片',9);
             }
+            $path = $this->upload(array_keys($_FILES)[0],2048);
+            return ajax(['path'=>$path]);
+        }else {
+            return ajax('请上传图片',3);
         }
-        return $arr;
     }
 
-    private function recursion($array,$to_cid=0) {
-        $to_array = [];
-        foreach ($array as $v) {
-            if($v['root_cid'] == $to_cid) {
-                $v['child'] = $this->recursion($array,$v['id']);
-                $to_array[] = $v;
-            }
-        }
-        return $to_array;
-    }
 
 }

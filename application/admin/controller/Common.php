@@ -45,7 +45,6 @@ class Common extends Controller {
             }
         }
 
-
     }
 
     private function needSession() {
@@ -95,34 +94,6 @@ class Common extends Controller {
         return array('error'=>0,'data'=>$filepath);
     }
 
-    protected function multi_upload() {
-        foreach ($_FILES as $k=>$v) {
-            if($v['name'] == '') {
-                unset($_FILES[$k]);
-            }else {
-                if($this->checkfile($k) !== true) {
-                    return array('error'=>1,'msg'=>$this->checkfile($k));
-                }
-            }
-        }
-        $arr = array();
-        if(count($arr) > 3) {
-            return array('error'=>1,'msg'=>'图片不可超过三张');
-        }
-        foreach ($_FILES as $k=>$v) {
-            $filename_array = explode('.',$_FILES[$k]['name']);
-            $ext = array_pop($filename_array);
-
-            $path =  'static/admin/upload/' . date('Y-m-d');
-            is_dir($path) or mkdir($path,0755,true);
-            //转移临时文件
-            $newname = create_unique_number() . '.' . $ext;
-            move_uploaded_file($_FILES[$k]["tmp_name"], $path . "/" . $newname);
-            $arr[] = $path . "/" . $newname;
-        }
-        return array('error'=>0,'data'=>$arr);
-    }
-
     //检验格式大小
     private function checkfile($file) {
         $allowType = array(
@@ -161,15 +132,6 @@ class Common extends Controller {
         return true;
     }
 
-    protected function checkExist($table,$condition) {
-        $exist = Db::table($table)->where($condition)->find();
-        if($exist) {
-            return true;
-        }else {
-            return false;
-        }
-    }
-
     protected function getip() {
         $unknown = 'unknown';
         if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] && strcasecmp($_SERVER['HTTP_X_FORWARDED_FOR'], $unknown) ) {
@@ -195,10 +157,6 @@ class Common extends Controller {
         Db::table('mp_syslog')->insert($insert);
     }
 
-    protected function billingLog($insert_data = []) {
-        $insert_data['create_time'] = time();
-        Db::table('mp_billing')->insert($insert_data);
-    }
 
 
 

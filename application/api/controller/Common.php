@@ -14,7 +14,7 @@ class Common extends Controller {
     protected $cmd = '';
     protected $domain = '';
     protected $weburl = '';
-    protected $mp_config = '';
+    protected $mp_config = [];
     protected $myinfo = [];
 
     public function initialize()
@@ -113,9 +113,26 @@ class Common extends Controller {
         return $xml;
     }
 
-    protected function upload($k) {
-        if($this->checkfile($k) !== true) {
-            return array('error'=>1,'msg'=>$this->checkfile($k));
+    protected function upload($k,$maxsize=512) {
+        $allowType = array(
+            "image/gif",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/pjpeg",
+            "image/bmp"
+        );
+        if($_FILES[$k]["type"] == '') {
+            throw new HttpResponseException(ajax('图片存在中文名或超过2M',20));
+        }
+        if(!in_array($_FILES[$k]["type"],$allowType)) {
+            throw new HttpResponseException(ajax('文件类型不符' . $_FILES[$k]["type"],21));
+        }
+        if($_FILES[$k]["size"] > $maxsize*1024) {
+            throw new HttpResponseException(ajax('图片大小不超过'.$maxsize.'Kb',22));
+        }
+        if ($_FILES[$k]["error"] > 0) {
+            throw new HttpResponseException(ajax("error: " . $_FILES[$k]["error"],-1));
         }
 
         $filename_array = explode('.',$_FILES[$k]['name']);
@@ -127,8 +144,7 @@ class Common extends Controller {
         $newname = create_unique_number() . '.' . $ext;
         move_uploaded_file($_FILES[$k]["tmp_name"], $path . $newname);
         $filepath = $path . $newname;
-
-        return array('error'=>0,'data'=>$filepath);
+        return $filepath;
     }
 
     protected function rename_file($tmp,$path = '') {
@@ -140,39 +156,13 @@ class Common extends Controller {
         return '/' . $path . $filename;
     }
 
-    //检验格式大小
-    private function checkfile($file) {
-        $allowType = array(
-            "image/gif",
-            "image/jpeg",
-            "image/jpg",
-            "image/png",
-            "image/pjpeg",
-            "image/bmp"
-        );
-        if($_FILES[$file]["type"] == '') {
-            return '图片存在中文名或超过2M';
-        }
-        if(!in_array($_FILES[$file]["type"],$allowType)) {
-            return '图片格式无效' . $_FILES[$file]["type"];
-        }
-        if($_FILES[$file]["size"] > 512*1024) {
-            return '图片大小不超过512Kb';
-        }
-        if ($_FILES[$file]["error"] > 0) {
-            return "error: " . $_FILES[$file]["error"];
-        }else {
-            return true;
-        }
-    }
     //生成签名
     protected function getSign($arr)
     {
         //去除数组中的空值
         $arr = array_filter($arr);
         //如果数组中有签名删除签名
-        if(isset($arr['sing']))
-        {
+        if(isset($arr['sing'])) {
             unset($arr['sing']);
         }
         //按照键名字典排序

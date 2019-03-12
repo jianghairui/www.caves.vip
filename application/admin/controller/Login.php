@@ -75,8 +75,8 @@ class Login extends Common {
             }else {
                 $this->error('用户名密码不匹配',url('Login/index'));exit();
             }
-//            $this->redirect(url('Index/index'));
-            $this->success('登陆成功',url('Index/index'));
+            $this->redirect(url('Index/index'));
+//            $this->success('登陆成功',url('Index/index'));
 
         }
     }
@@ -120,59 +120,6 @@ class Login extends Common {
         return ajax($val,1);
     }
 
-    public function test() {
-
-        $config = [
-            'auth_on'           => 1, // 权限开关
-            'auth_type'         => 1, // 认证方式，1为实时认证；2为登录认证。
-            'auth_group'        => 'auth_group', // 用户组数据表名
-            'auth_group_access' => 'auth_group_access', // 用户-用户组关系表
-            'auth_rule'         => 'auth_rule', // 权限规则表
-            'auth_user'         => 'admin', // 用户信息表
-            'auth_out'          => []
-        ];
-// 转换表名
-        $auth_group_access = Loader::parseName($config['auth_group_access'], 1);
-        $auth_group        = Loader::parseName($config['auth_group'], 1);
-        // 执行查询
-        $user_groups  = Db::view($auth_group_access, 'uid,group_id')
-            ->view($auth_group, 'title,rules', "{$auth_group_access}.group_id={$auth_group}.id", 'LEFT')
-            ->where("{$auth_group_access}.uid='1' and {$auth_group}.status='1'")
-            ->select();
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//    public function sets() {
-//        session('myname','jianghairui');
-//        session('age','27');
-//        cookie('cookie_name','viki',30);
-//        cookie('cookie_sex','0',30);
-//
-//    }
-//
-//    public function gets() {
-//        dump(session('myname'));
-//        dump(session('age'));
-//        dump(cookie('cookie_name'));
-//        dump(cookie('cookie_sex'));
-//    }
 
 
 

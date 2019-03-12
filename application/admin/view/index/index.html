@@ -29,7 +29,7 @@
     <script type="text/javascript" src="/static/h-ui/js/H-ui.min.js"></script>
     <script type="text/javascript" src="/static/h-ui.admin/js/H-ui.admin.js"></script>
     <!--/_footer 作为公共模版分离出去-->
-    <title>山洞小程序后台管理系统</title>
+    <title>山海文化管理系统</title>
 </head>
 <body>
 {include file="public/header" /}
@@ -66,31 +66,31 @@
                     <tbody>
                     <tr>
                         <th width="30%">服务器计算机名</th>
-                        <td><span id="lbServerName">anne</span></td>
+                        <td><span id="lbServerName">山海文化</span></td>
                     </tr>
                     <tr>
                         <td>服务器IP地址</td>
-                        <td>47.104.130.39</td>
+                        <td>{$Think.server.server_addr}</td>
                     </tr>
                     <tr>
                         <td>服务器域名</td>
-                        <td>mp.jianghairui.com</td>
+                        <td>{$Think.server.http_host}</td>
                     </tr>
                     <tr>
                         <td>服务器端口 </td>
-                        <td>443</td>
+                        <td>{$Think.server.server_port}</td>
                     </tr>
                     <tr>
-                        <td>服务器Apache版本 </td>
-                        <td>Apache/2.4.18 (Ubuntu)</td>
+                        <td>服务器软件 </td>
+                        <td>{$Think.server.server_software}</td>
                     </tr>
                     <tr>
                         <td>项目所在目录 </td>
-                        <td>/var/www/mp.jianghairui.com/</td>
+                        <td>{$Think.server.document_root}</td>
                     </tr>
                     <tr>
                         <td>服务器操作系统 </td>
-                        <td>Ubuntu 16.04.3 LTS</td>
+                        <td>CentOS release 6.5 (Final)</td>
                     </tr>
                     <tr>
                         <td>服务器脚本超时时间 </td>
@@ -102,7 +102,7 @@
                     </tr>
                     <tr>
                         <td>CPU 核数 </td>
-                        <td>2</td>
+                        <td>4</td>
                     </tr>
                     <tr>
                         <td>CPU 型号 </td>
@@ -110,11 +110,11 @@
                     </tr>
                     <tr>
                         <td>服务器内存 </td>
-                        <td>2048M</td>
+                        <td>8192M</td>
                     </tr>
                     <tr>
                         <td>当前系统用户名 </td>
-                        <td>admin</td>
+                        <td>{$Think.server.user}</td>
                     </tr>
                     </tbody>
                 </table>

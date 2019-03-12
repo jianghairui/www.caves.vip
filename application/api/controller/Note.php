@@ -9,7 +9,6 @@ namespace app\api\controller;
 
 use think\Db;
 class Note extends Common {
-
     //获取笔记列表
     public function getNoteList()
     {
@@ -169,7 +168,6 @@ WHERE c.note_id=?",[$val['note_id']]);
         $val['note_id'] = input('post.note_id');
         $this->checkPost($val);
         $val['uid'] = $this->myinfo['uid'];
-
         try {
             $exist = Db::table('mp_note')->where('id',$val['note_id'])->find();
             if(!$exist) {
@@ -270,123 +268,30 @@ WHERE c.note_id=?",[$val['note_id']]);
         return ajax(true);
     }
 
-
-
-
-    //获取小程序入驻状态
-    public function getStatus() {
-        $val['uid'] = input('post.uid');
-        $this->checkPost($val);
-        try {
-            $exist = Db::table('mp_user')->where('id',$val['uid'])->find();
-            if(!$exist) {
-                return ajax('',-3);
+    private function sortMerge($node,$pid=0)
+    {
+        $arr = array();
+        foreach($node as $key=>$v)
+        {
+            if($v['pid'] == $pid)
+            {
+                $v['child'] = $this->sortMerge($node,$v['id']);
+                $arr[] = $v;
             }
-            $order_exist = Db::table('mp_order')->where('uid',$val['uid'])->find();
-            if(!$order_exist) {
-                $order_exist['flag'] = 0;//第一次进页面,去填写资料
-            }else {
-                if($order_exist['enter'] == 0 && $order_exist['status'] == 0) {
-                    $order_exist['flag'] = 1;//资料已填写,未支付,去支付
-                }
-                if($order_exist['enter'] == 0 && $order_exist['status'] == 1) {
-                    $order_exist['flag'] = 2;//资料已填写,已支付,审核中状态
-                }
-                if($order_exist['enter'] == -1 && $order_exist['status'] == 1) {
-                    $order_exist['flag'] = 3;//资料已填写,已支付,审核未通过,重新填写资料,提交后,刷新页面
-                }
-                if($order_exist['enter'] == 1) {
-                    $order_exist['flag'] = 4;//已入驻
-                }
-            }
-        }catch (\Exception $e) {
-            return ajax($e->getMessage(),-1);
         }
-        return ajax($order_exist);
-    }
-    //小程序入驻下单
-    public function order() {
-        $val['uid'] = input('post.uid');
-        $val['linkman'] = input('post.linkman');
-        $val['tel'] = input('post.tel');
-        $val['email'] = input('post.email');
-        $val['set'] = input('post.set');
-        $this->checkPost($val);
-        $val['cert'] = input('post.cert');
-
-
-        if(!in_array($val['set'],[1,2,3])) {
-            return ajax($val['set'],-3);
-        }
-        if(!is_tel($val['tel'])) {
-            return ajax('',6);
-        }
-        if(!is_email($val['email'])) {
-            return ajax('',7);
-        }
-        try {
-            $user_exist = Db::table('mp_user')->where('id',$val['uid'])->find();
-            if(!$user_exist) {
-                return ajax($val['uid'],-3);
-            }
-            $order_exist = Db::table('mp_order')->where('uid',$val['uid'])->find();
-            if($order_exist) {
-                if($order_exist['enter'] == 1) {
-                    return ajax('',8);
-                }
-                $val['order_sn'] = $order_exist['order_sn'];
-                $order_exist = true;
-            }else {
-                $order_exist = false;
-            }
-        }catch (\Exception $e) {
-            return ajax($e->getMessage(),-1);
-        }
-        $cert = $val['cert'];
-        if($cert) {
-            if(!file_exists($cert)) {
-                return ajax($cert,5);
-            }
-            $val['cert'] = $this->rename_file($cert);
-        }else {
-            unset($val['cert']);
-        }
-
-        $taocan = [
-            '1'=>[
-                'title' => '1元套餐',
-                'price' => 1
-            ],
-            '2'=>[
-                'title' => '2元套餐',
-                'price' => 2
-            ],
-            '3'=>[
-                'title' => '3元套餐',
-                'price' => 3
-            ]
-        ];
-
-        $val['title'] = $taocan[$val['set']]['title'];
-        $val['price'] = $taocan[$val['set']]['price'];
-        $val['openid'] = $user_exist['wechat_open_id'];
-        try {
-            if($order_exist) {
-                $val['enter'] = 0;
-                Db::table('mp_order')->where('uid',$val['uid'])->update($val);
-            }else {
-                $val['order_sn'] = create_unique_number('m');
-                $val['create_time'] = time();
-                Db::table('mp_order')->insert($val);
-            }
-        }catch (\Exception $e) {
-            return ajax($e->getMessage(),-1);
-        }
-        return ajax($val);
-
+        return $arr;
     }
 
-
+    private function recursion($array,$to_cid=0) {
+        $to_array = [];
+        foreach ($array as $v) {
+            if($v['root_cid'] == $to_cid) {
+                $v['child'] = $this->recursion($array,$v['id']);
+                $to_array[] = $v;
+            }
+        }
+        return $to_array;
+    }
 
 
 }
