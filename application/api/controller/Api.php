@@ -35,6 +35,9 @@ class Api extends Common {
 
 
 
+
+
+//上传图片限制512KB
     public function uploadImage() {
         if(!empty($_FILES)) {
             if(count($_FILES) > 1) {
@@ -46,7 +49,7 @@ class Api extends Common {
             return ajax('请上传图片',3);
         }
     }
-
+//上传图片限制2048KB
     public function uploadImage2m() {
         if(!empty($_FILES)) {
             if(count($_FILES) > 1) {
@@ -58,6 +61,5 @@ class Api extends Common {
             return ajax('请上传图片',3);
         }
     }
-
 
 }

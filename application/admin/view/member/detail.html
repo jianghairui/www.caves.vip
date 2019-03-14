@@ -34,51 +34,123 @@
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>手机号：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.tel}" placeholder="" name="tel" readonly>
+            <div class="formControls col-xs-8 col-sm-3">
+                <input type="text" class="input-text" value="{$info.tel}13102163019" placeholder="" name="tel" readonly style="border: 0">
             </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>是否认证：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.auth}" placeholder="" name="tel" readonly>
+                <input type="text" class="input-text" value="{$info.auth}" placeholder="" name="auth" readonly>
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>用户角色：</label>
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>组织机构：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.tel}" placeholder="" name="tel" readonly>
+                <input type="text" class="input-text" value="{$info.org}" placeholder="" name="org" readonly>
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>认证人手机号：</label>
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>法人代表：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.role_tel}" placeholder="" name="tel" readonly>
+                <input type="text" class="input-text" value="{$info.name}" placeholder="" name="name" readonly>
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>认证角色名：</label>
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>身份证号：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.tel}" placeholder="" name="tel" readonly>
+                <input type="text" class="input-text" value="{$info.identity}" placeholder="" name="identity" readonly>
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>手机号：</label>
+            <label class="form-label col-xs-4 col-sm-3">
+                身份证正反面：
+            </label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.tel}" placeholder="" name="tel" readonly>
+                <ul class="cl portfolio-area">
+                    <li class="item">
+                        <div class="portfoliobox">
+                            <input class="checkbox" name="" type="checkbox" value="">
+                            <div class="picbox"><a href="{$info.id_front}" data-lightbox="gallery" data-title=""><img src="{$info.id_front}"></a></div>
+                            <div class="textbox"></div>
+                        </div>
+                    </li>
+                    <li class="item">
+                        <div class="portfoliobox">
+                            <input class="checkbox" name="" type="checkbox" value="">
+                            <div class="picbox"><a href="{$info.id_back}" data-lightbox="gallery" data-title=""><img src="{$info.id_back}"></a></div>
+                            <div class="textbox"></div>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>手机号：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="{$info.tel}" placeholder="" name="tel" readonly>
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>认证手机号：</label>
+            <div class="formControls col-xs-8 col-sm-3">
+                <input type="text" class="input-text" value="{$info.role_tel}" placeholder="" name="role_tel" readonly style="border: 0">
             </div>
         </div>
-
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>运营者微信号：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.weixin}" placeholder="" name="weixin" readonly>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3">
+                作品6张：
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <ul class="cl portfolio-area">
+                    {if $info['works']}
+                    <?php $image = unserialize($info['works']);?>
+                    {foreach $image as $li}
+                    <li class="item">
+                        <div class="portfoliobox">
+                            <input class="checkbox" name="" type="checkbox" value="">
+                            <div class="picbox"><a href="{$li}" data-lightbox="gallery" data-title=""><img src="{$li}"></a></div>
+                            <div class="textbox"></div>
+                        </div>
+                    </li>
+                    {/foreach}
+                    {/if}
+                </ul>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3">
+                资质证明：
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <ul class="cl portfolio-area">
+                    <li class="item">
+                        <div class="portfoliobox">
+                            <input class="checkbox" name="" type="checkbox" value="">
+                            <div class="picbox"><a href="{$info.license}" data-lightbox="gallery" data-title=""><img src="{$info.license}"></a></div>
+                            <div class="textbox"></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3">备注：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea name="desc" cols="" rows="" class="textarea" placeholder="说点什么...最多输入100个字符" datatype="*10-100">{$info.desc}</textarea>
+            </div>
+        </div>
         <div class="row cl">
             <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+                {if $info['auth'] == 1}
+                <button onClick="check_pass('{$info.id}');" class="btn btn-success radius" type="button">&nbsp;&nbsp;通过&nbsp;&nbsp;</button>
+                <button onClick="check_reject('{$info.id}');" class="btn btn-danger radius" type="button">&nbsp;&nbsp;拒绝&nbsp;&nbsp;</button>
+                {/if}
                 <input class="btn btn-primary radius" onclick="layer_close()" type="submit" value="&nbsp;&nbsp;关闭选项卡&nbsp;&nbsp;">
             </div>
+        </div>
+        <div class="row cl">
+
         </div>
     </form>
 </article>

@@ -153,7 +153,7 @@ class Common extends Controller {
         $path.= date('Y-m-d') . '/';
         is_dir($path) or mkdir($path,0755,true);
         @rename($tmp, $path . $filename);
-        return '/' . $path . $filename;
+        return $path . $filename;
     }
 
     //生成签名
