@@ -16,6 +16,11 @@ class Api extends Common {
         halt($this->cmd);
         return $this->fetch();
     }
+
+    public function getVideo() {
+        $url = 'static/sh/video/001.mp4';
+        return ajax($url);
+    }
     //首页轮播图列表
     public function homeSlide() {
         $list = Db::table('mp_slideshow')->where('status',1)->order(['sort'=>'ASC'])->select();

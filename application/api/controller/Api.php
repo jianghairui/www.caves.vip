@@ -11,13 +11,29 @@ use think\Exception;
 
 class Api extends Common {
 
-    public function index() {
-        return $this->fetch();
-    }
-
     public function slideList() {
+        try {
+            $list = Db::table('mp_slideshow')->where([
+                ['status','=',1]
+            ])->order(['sort'=>'ASC'])->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($list);
+    }
+
+    public function getReqList() {
 
     }
+
+    public function getReqDetail() {
+
+    }
+
+//    public function
+
+
+
 
     public function uploadImage() {
         if(!empty($_FILES)) {
