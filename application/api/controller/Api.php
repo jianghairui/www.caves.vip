@@ -30,10 +30,41 @@ class Api extends Common {
 
     }
 
-//    public function
+    public function getVipList() {
+        try {
+            $list = Db::table('mp_vip')->where([
+                ['status','=',1]
+            ])->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($list);
+    }
 
+    public function recharge() {
+        $val['vip_id'] = input('post.vip_id');
+        $val['name'] = input('post.name');
+        $val['tel'] = input('post.tel');
+        $val['address'] = input('post.address');
+        $val['uid'] = $this->myinfo['uid'];
 
+        $this->checkPost($val);
+        try {
+            $exist = Db::table('mp_vip')->where('id',$val['vip_id'])->find();
+            if(!$exist) {
+                return ajax('invalid vip_id',-4);
+            }
+            $val['price'] = $exist['price'];
+            $val['days'] = $exist['days'];
+            $val['create_time'] = time();
+            $val['order_sn'] = create_unique_number('v');
+            Db::table('mp_vip_order')->insert($val);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($val);
 
+    }
 
 
 

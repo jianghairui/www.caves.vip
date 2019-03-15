@@ -257,11 +257,11 @@ WHERE c.note_id=?",[$val['note_id']]);
             $exist = Db::table('mp_collect')->where($map)->find();
             if($exist) {
                 Db::table('mp_collect')->where($map)->delete();
-                Db::table('mp_note')->where('id',$val['note_id'])->setDec('like',1);
+                Db::table('mp_note')->where('id',$val['note_id'])->setDec('collect',1);
                 return ajax(false);
             }
             Db::table('mp_collect')->insert($val);
-            Db::table('mp_note')->where('id',$val['note_id'])->setInc('like',1);
+            Db::table('mp_note')->where('id',$val['note_id'])->setInc('collect',1);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }

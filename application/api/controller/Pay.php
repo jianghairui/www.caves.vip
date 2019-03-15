@@ -5,35 +5,36 @@
  * Date: 2018/10/4
  * Time: 10:50
  */
-namespace app\index\controller;
+namespace app\api\controller;
 use EasyWeChat\Factory;
 use think\Db;
 use think\Exception;
 
 class Pay extends Common {
 
-    public function pay() {
+    public function vipPay() {
         $val['order_sn'] = input('post.order_sn');
-
+        $this->checkPost($val);
         $where = [
             ['order_sn','=',$val['order_sn']],
-            ['status','=',0]
+            ['status','=',0],
+            ['uid','=',$this->myinfo['uid']]
         ];
 
         $app = Factory::payment($this->mp_config);
         try {
-            $order_exist = Db::table('mp_order')->where($where)->find();
+            $order_exist = Db::table('mp_vip_order')->where($where)->find();
             if(!$order_exist) {
                 return ajax('',4);
             }
             $result = $app->order->unify([
-                'body' => '小程序支付',
+                'body' => 'VIP充值',
                 'out_trade_no' => $val['order_sn'],
                 'total_fee' => 1,
 //                'total_fee' => floatval($order_exist['price'])*100,
-                'notify_url' => $this->weburl . 'index/pay/notify',
+                'notify_url' => $this->weburl . 'api/pay/recharge_notify',
                 'trade_type' => 'JSAPI',
-                'openid' => $order_exist['openid'],
+                'openid' => $this->myinfo['openid'],
             ]);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
@@ -54,7 +55,7 @@ class Pay extends Common {
         return ajax($sign);
     }
     //支付回调接口
-    public function notify() {
+    public function recharge_notify() {
         //将返回的XML格式的参数转换成php数组格式
         $xml = file_get_contents('php://input');
         $data = $this->xml2array($xml);
@@ -65,20 +66,23 @@ class Pay extends Common {
                     ['order_sn','=',$data['out_trade_no']],
                     ['status','=',0],
                 ];
-                $exist = Db::table('mp_order')->where($map)->find();
-                if($exist) {
-                    $update_data = [
-                        'status' => 1,
-                        'trans_id' => $data['transaction_id'],
-                        'pay_time' => time(),
-                    ];
-                    try {
-                        Db::table('mp_order')->where('order_sn','=',$data['out_trade_no'])->update($update_data);
-                    } catch (\Exception $e) {
-                        $this->log($this->cmd,$e->getMessage());
+                try {
+                    $exist = Db::table('mp_vip_order')->where($map)->find();
+                    if($exist) {
+                        $update_data = [
+                            'status' => 1,
+                            'trans_id' => $data['transaction_id'],
+                            'pay_time' => time(),
+                        ];
+                        try {
+                            Db::table('mp_vip_order')->where('order_sn','=',$data['out_trade_no'])->update($update_data);
+                        } catch (\Exception $e) {
+                            $this->log($this->cmd,$e->getMessage());
+                        }
                     }
+                }catch (\Exception $e) {
+                    $this->log($this->cmd,$e->getMessage());
                 }
-
             }
 
         }
