@@ -67,18 +67,27 @@ class Pay extends Common {
                     ['status','=',0],
                 ];
                 try {
-                    $exist = Db::table('mp_vip_order')->where($map)->find();
-                    if($exist) {
+                    $order_exist = Db::table('mp_vip_order')->where($map)->find();
+                    if($order_exist) {
                         $update_data = [
                             'status' => 1,
                             'trans_id' => $data['transaction_id'],
                             'pay_time' => time(),
                         ];
-                        try {
-                            Db::table('mp_vip_order')->where('order_sn','=',$data['out_trade_no'])->update($update_data);
-                        } catch (\Exception $e) {
-                            $this->log($this->cmd,$e->getMessage());
+                        Db::table('mp_vip_order')->where('order_sn','=',$data['out_trade_no'])->update($update_data);
+                        $user = Db::table('mp_user')->where('id',$order_exist['uid'])->find();
+                        if($user['vip'] == 1) {
+                            $update_user = [
+                                'vip' => 1,
+                                'vip_time' => $user['vip_time'] + $order_exist['days']*3600*24
+                            ];
+                        }else {
+                            $update_user = [
+                                'vip' => 1,
+                                'vip_time' => time() + $order_exist['days']*3600*24
+                            ];
                         }
+                        Db::table('mp_user')->where('id',$order_exist['uid'])->update($update_user);
                     }
                 }catch (\Exception $e) {
                     $this->log($this->cmd,$e->getMessage());
