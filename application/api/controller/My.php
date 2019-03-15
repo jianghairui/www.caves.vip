@@ -83,13 +83,19 @@ class My extends Common {
         $val['part_way'] = input('post.part_way');
         $val['linkman'] = input('post.linkman');
         $val['tel'] = input('post.tel');
-        $val['weixin'] = input('post.weixin');
         $val['start_time'] = input('post.start_time');
         $val['deadline'] = input('post.deadline');
         $val['vote_time'] = input('post.vote_time');
         $val['end_time'] = input('post.end_time');
-
+        $val['uid'] = $this->myinfo['uid'];
         $this->checkPost($val);
+        $val['weixin'] = input('post.weixin');
+
+        $user = Db::table('mp_user')->where('id',$val['uid'])->find();
+        if(!in_array($user['role'],[1,2]) || $user['auth'] != 2) {
+            return ajax('当前角色状态无法发布需求',24);
+        }
+
         $image = input('post.cover','');
         if($image) {
             if(!file_exists($image)) {

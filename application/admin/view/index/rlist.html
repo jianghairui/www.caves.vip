@@ -17,13 +17,12 @@
         <thead>
         <tr class="text-c">
             <th width="25">#</th>
-            <th width="100">需求图片</th>
-            <th width="120">需求标题</th>
-            <th>需求简介</th>
-            <th width="80">状态</th>
-            <th width="100">发布人</th>
+            <th width="100">封面</th>
             <th width="120">举办方单位</th>
-            <th width="120">发布时间</th>
+            <th>赛事名称</th>
+            <th width="120">活开始时间</th>
+            <th width="80">审核状态</th>
+            <th width="80">审核</th>
             <th width="100">操作</th>
         </tr>
         </thead>
@@ -35,20 +34,32 @@
                 <td>
                     <div style="width: 100px;height: 80px;background-image: url('/{$li.cover}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
                 </td>
+                <td>{$li.org}</td>
                 <td>{$li.title}</td>
-                <td>{$li.desc}</td>
+                <td>{$li.start_time|date="Y-m-d H:i"}</td>
                 <td class="td-status">
-                    {if condition="$li['status'] == 1"}
-                    <span class="label label-success radius">已显示</span>
+                    {switch $li['status']}
+                    {case 0}
+                    <span class="label label-warning radius">审核中</span>
+                    {/case}
+                    {case 1}
+                    <span class="label label-success radius">已通过</span>
+                    {/case}
+                    {case 2}
+                    <span class="label label-defaunt radius">已拒绝</span>
+                    {/case}
+                    {default /}
+                    {/switch}
+                </td>
+                <td>
+                    {if $li['status'] == 0}
+                    <a class="btn btn-link radius" style="text-decoration:none;" onClick="req_shenhe(this,{$li.id})" href="javascript:;" title="审核">审核</a>
                     {else /}
-                    <span class="label label-defaunt radius">已隐藏</span>
+                    <span class="btn btn-link radius"></span>
                     {/if}
                 </td>
-                <td>{$li.realname}</td>
-                <td>{$li.org}</td>
-                <td>{$li.create_time|date="Y-m-d H:i"}</td>
                 <td class="td-manage">
-                    {if $li['status'] == '1'}
+                    {if $li['show'] == '1'}
                     <a style="text-decoration:none" onClick="req_hide(this,{$li.id})" href="javascript:;" title="隐藏">
                         <i class="Hui-iconfont">&#xe6de;</i>
                     </a>
@@ -130,7 +141,6 @@
                     console.log(data)
                     if(data.code == 1) {
                         $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="req_show(this,'+id+')" href="javascript:;" title="显示"><i class="Hui-iconfont">&#xe603;</i></a>');
-                        $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已隐藏</span>');
                         $(obj).remove();
                         layer.msg('已隐藏!',{icon: 1,time:1000});
                     }else {
@@ -156,7 +166,6 @@
                     console.log(data);
                     if(data.code == 1) {
                         $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="req_hide(this,'+id+')" href="javascript:;" title="隐藏"><i class="Hui-iconfont">&#xe6de;</i></a>');
-                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已显示</span>');
                         $(obj).remove();
                         layer.msg('已显示!',{icon: 1,time:1000});
                     }else {
@@ -170,7 +179,6 @@
 
         });
     }
-
     /*分类-删除*/
     function req_del(obj,id){
         layer.confirm('确认要删除吗？',function(index){
@@ -193,6 +201,70 @@
                 },
             });
         });
+    }
+
+    /*需求审核*/
+    function req_shenhe(obj,id){
+        layer.confirm('审核需求？', {
+                btn: ['通过','不通过','取消'],
+                shade: false,
+                closeBtn: 0
+            },
+            function(){
+                $.ajax({
+                    url:"{:url('Index/reqPass')}",
+                    type:'post',
+                    dataType:'json',
+                    data:{id:id},
+                    success:function(data) {
+                        console.log(data)
+                        if(data.code == 1) {
+                            $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已通过</span>');
+                            $(obj).parent().html('<span class="btn btn-link radius"></span>');
+                            layer.msg('已审核', {icon:1,time:1000});
+                        }else {
+                            layer.msg(data.data,{icon:2,time:1000})
+                        }
+                    },
+                    error:function(data) {
+                        layer.msg('请求失败!',{icon:5,time:1000})
+                    },
+                })
+
+            },
+            function(){
+                layer.prompt({
+                    formType: 2,
+                    value: '内容违规',
+                    title: '请输入理由(最多50个字)',
+                    maxlength:50,
+                    area: ['400px', '300px'] //自定义文本域宽高
+                }, function(value, index, elem){
+                    reason = value;
+                    layer.close(index);
+                    $.ajax({
+                        url:"{:url('Index/reqReject')}",
+                        type:'post',
+                        dataType:'json',
+                        data:{id:id,reason:reason},
+                        success:function(data) {
+                            console.log(data)
+                            if(data.code == 1) {
+                                $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">未通过</span>');
+                                $(obj).parent().html('<span class="btn btn-link radius"></span>');
+                                layer.msg('已拒绝', {icon:1,time:1000});
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000})
+                            }
+                        },
+                        error:function(data) {
+                            layer.msg('请求失败!',{icon:5,time:1000})
+                        }
+                    })
+                })
+
+
+            });
     }
 
 </script>

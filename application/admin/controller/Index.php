@@ -62,26 +62,27 @@ class Index extends Common
     //查看需求详情
     public function detail() {
         $rid = input('param.rid');
-        $info = Db::table('mp_req')->alias('r')
-            ->join('mp_cate c','r.cate_id=c.id','left')
-            ->where('r.id','=',$rid)
-            ->field('r.*,c.cate_name')
-            ->find();
+        try {
+            $info = Db::table('mp_req')
+                ->where('id','=',$rid)
+                ->find();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
         $this->assign('info',$info);
         return $this->fetch();
     }
     //需求审核-通过
     public function reqPass() {
-        $map[] = ['status','=',0];
-        $map[] = ['pay_status','=',1];
-        $map[] = ['id','=',input('post.id',0)];
-
-        $exist = Db::table('mp_req')->where($map)->find();
-        if(!$exist) {
-            return ajax('非法操作',-1);
-        }
-
+        $map = [
+            ['status','=',0],
+            ['id','=',input('post.id',0)]
+        ];
         try {
+            $exist = Db::table('mp_req')->where($map)->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
             Db::table('mp_req')->where($map)->update(['status'=>1]);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
@@ -90,26 +91,20 @@ class Index extends Common
     }
     //需求审核-拒绝
     public function reqReject() {
-        $map[] = ['status','=',0];
-        $map[] = ['pay_status','=',1];
-        $map[] = ['id','=',input('post.id',0)];
-
-        $exist = Db::table('mp_req')->where($map)->find();
-        if(!$exist) {
-            return ajax('非法操作',-1);
-        }
-
+        $map = [
+            ['status','=',0],
+            ['id','=',input('post.id',0)]
+        ];
+        $reason = input('post.reason','');
         try {
-            Db::table('mp_req')->where($map)->update(['status'=>-1]);
+            $exist = Db::table('mp_req')->where($map)->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
+            Db::table('mp_req')->where($map)->update(['status'=>2]);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
-        //todo 退款
-        $arg = [
-            'order_sn' => $exist['order_sn'],
-            'reason' => '需求未通过审核'
-        ];
-        $this->asyn_refund($arg);
         return ajax([],1);
     }
 
