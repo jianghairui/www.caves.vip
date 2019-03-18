@@ -57,6 +57,51 @@ class Member extends Common {
         return $this->fetch();
     }
 
+    public function rolePass() {
+        $map = [
+            ['auth','=',1],
+            ['id','=',input('post.id',0)]
+        ];
+        try {
+            $exist = Db::table('mp_user')->where($map)->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
+            Db::table('mp_user')->where($map)->update(['auth'=>2]);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax([],1);
+    }
+
+    public function roleReject() {
+        $map = [
+            ['auth','=',1],
+            ['id','=',input('post.id',0)]
+        ];
+        $reason = input('post.reason','');
+        try {
+            $exist = Db::table('mp_user')->where($map)->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
+            Db::table('mp_user')->where($map)->update(['auth'=>3,'reason'=>$reason]);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax([],1);
+    }
+
+
+
+
+
+
+
+
+
+
+
     public function detail() {
         $id = input('param.id');
         $where = [
@@ -166,8 +211,7 @@ class Member extends Common {
         return ajax();
 
     }
-
-    //删除博物馆
+    //删除会员
     public function vipDel() {
         $val['id'] = input('post.id');
         $this->checkPost($val);
@@ -184,7 +228,7 @@ class Member extends Common {
 
         return ajax([],1);
     }
-    //停用博物馆
+    //停用会员
     public function vipHide() {
         $val['id'] = input('post.id');
         $this->checkPost($val);
@@ -200,7 +244,7 @@ class Member extends Common {
             return ajax([],-1);
         }
     }
-    //启用博物馆
+    //启用会员
     public function vipShow() {
         $val['id'] = input('post.id');
         $this->checkPost($val);

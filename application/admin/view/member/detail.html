@@ -71,14 +71,14 @@
                     <li class="item">
                         <div class="portfoliobox">
                             <input class="checkbox" name="" type="checkbox" value="">
-                            <div class="picbox"><a href="{$info.id_front}" data-lightbox="gallery" data-title=""><img src="{$info.id_front}"></a></div>
+                            <div class="picbox"><a href="/{$info.id_front}" data-lightbox="gallery" data-title=""><img src="/{$info.id_front}"></a></div>
                             <div class="textbox"></div>
                         </div>
                     </li>
                     <li class="item">
                         <div class="portfoliobox">
                             <input class="checkbox" name="" type="checkbox" value="">
-                            <div class="picbox"><a href="{$info.id_back}" data-lightbox="gallery" data-title=""><img src="{$info.id_back}"></a></div>
+                            <div class="picbox"><a href="/{$info.id_back}" data-lightbox="gallery" data-title=""><img src="/{$info.id_back}"></a></div>
                             <div class="textbox"></div>
                         </div>
                     </li>
@@ -109,7 +109,7 @@
                     <li class="item">
                         <div class="portfoliobox">
                             <input class="checkbox" name="" type="checkbox" value="">
-                            <div class="picbox"><a href="{$li}" data-lightbox="gallery" data-title=""><img src="{$li}"></a></div>
+                            <div class="picbox"><a href="/{$li}" data-lightbox="gallery" data-title=""><img src="/{$li}"></a></div>
                             <div class="textbox"></div>
                         </div>
                     </li>
@@ -127,7 +127,7 @@
                     <li class="item">
                         <div class="portfoliobox">
                             <input class="checkbox" name="" type="checkbox" value="">
-                            <div class="picbox"><a href="{$info.license}" data-lightbox="gallery" data-title=""><img src="{$info.license}"></a></div>
+                            <div class="picbox"><a href="/{$info.license}" data-lightbox="gallery" data-title=""><img src="/{$info.license}"></a></div>
                             <div class="textbox"></div>
                         </div>
                     </li>
@@ -161,4 +161,77 @@
     $(function(){
         $(".portfolio-area li").Huihover();
     });
+
+    /*需求审核*/
+    function check_pass(id){
+        layer.confirm('通过审核？', {
+                btn: ['确定','取消'],
+                shade: false,
+                closeBtn: 0
+            },
+            function(){
+                $.ajax({
+                    url:"{:url('Member/rolePass')}",
+                    type:'post',
+                    dataType:'json',
+                    data:{id:id},
+                    success:function(data) {
+                        console.log(data)
+                        if(data.code == 1) {
+                            layer.msg('已审核', {icon:1,time:1000},function () {
+                                window.parent.location.reload();
+                            });
+                        }else {
+                            layer.msg(data.data,{icon:2,time:1000})
+                        }
+                    },
+                    error:function(data) {
+                        layer.msg('请求失败!',{icon:5,time:1000})
+                    }
+                })
+
+            }
+            );
+    }
+
+
+    function check_reject(id) {
+        layer.confirm('拒绝通过审核？', {
+                btn: ['确定','取消'],
+                shade: false,
+                closeBtn: 0
+            },
+        function() {
+            layer.prompt({
+                formType: 2,
+                value: '内容违规',
+                title: '请输入理由(最多50个字)',
+                maxlength: 50,
+                area: ['400px', '300px'] //自定义文本域宽高
+            }, function (value, index, elem) {
+                reason = value;
+                layer.close(index);
+                $.ajax({
+                    url: "{:url('Member/roleReject')}",
+                    type: 'post',
+                    dataType: 'json',
+                    data: {id: id, reason: reason},
+                    success: function (data) {
+                        console.log(data);
+                        if (data.code == 1) {
+                            layer.msg('已拒绝', {icon: 1, time: 1000},function () {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.data, {icon: 2, time: 1000})
+                        }
+                    },
+                    error: function (data) {
+                        layer.msg('请求失败!', {icon: 5, time: 1000})
+                    }
+                })
+            })
+
+        })
+    }
 </script>

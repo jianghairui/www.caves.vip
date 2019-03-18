@@ -101,7 +101,7 @@ class Index extends Common
             if(!$exist) {
                 return ajax('非法操作',-1);
             }
-            Db::table('mp_req')->where($map)->update(['status'=>2]);
+            Db::table('mp_req')->where($map)->update(['status'=>2,'reason'=>$reason]);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
