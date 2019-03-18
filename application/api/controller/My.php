@@ -185,10 +185,9 @@ class My extends Common {
                 return ajax('',16);
             }
 
-            $val['id_front'] = $this->rename_file($id_front,'static/uploads/role/');
-            $val['id_back'] = $this->rename_file($id_back,'static/uploads/role/');
+
             $val['weixin'] = input('post.weixin');
-            $works = input('post.pics', []);
+            $works = input('post.works', []);
 
             $image_array = [];
             if($val['role'] == 3) {
@@ -218,8 +217,10 @@ class My extends Common {
                 }
                 $val['license'] = $this->rename_file($license,'static/uploads/role/');
             }
-
             $val['works'] = serialize($image_array);
+            $val['id_front'] = $this->rename_file($id_front,'static/uploads/role/');
+            $val['id_back'] = $this->rename_file($id_back,'static/uploads/role/');
+
             $role_exist = Db::table('mp_role')->where('uid',$val['uid'])->find();
             unset($val['code']);
             if($role_exist) {
