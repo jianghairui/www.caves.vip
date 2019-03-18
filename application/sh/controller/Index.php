@@ -275,7 +275,9 @@ class Index extends Common
             $list = Db::table('mp_case')->alias('a')
                 ->join('mp_admin ad','a.admin_id=ad.id','left')
                 ->field('a.*,ad.realname')
-                ->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
+                ->order(['create_time'=>'DESC'])
+                ->where($where)->limit(($curr_page - 1)*$perpage,$perpage)
+                ->select();
         }catch (\Exception $e) {
             die('SQL错误: ' . $e->getMessage());
         }
@@ -440,7 +442,7 @@ class Index extends Common
         $page['curr'] = $curr_page;
         $page['totalPage'] = ceil($count/$perpage);
         try {
-            $list = Db::table('mp_partner')->where($where)->select();
+            $list = Db::table('mp_partner')->where($where)->limit(($curr_page-1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
             die('SQL错误: ' . $e->getMessage());
         }

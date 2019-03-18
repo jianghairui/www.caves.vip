@@ -124,17 +124,18 @@
 
         $("#btn-star1").click(function(){
             $("#file").click();
-            $("#file").change(function(e){
-                if(checkfile('file') !== true) {
-                    $("#file").val('');
-                    $("#fileList1").html('');
-                    return false
-                }
-                var img = e.target.files[0];
-                var src = window.URL.createObjectURL(img);
-                $("#fileList1").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
-            });
-        })
+        });
+
+        $("#file").change(function(e){
+            if(checkfile('file') !== true) {
+                $("#file").val('');
+                $("#fileList1").html('');
+                return false
+            }
+            var img = e.target.files[0];
+            var src = window.URL.createObjectURL(img);
+            $("#fileList1").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+        });
 
     });
 </script>
