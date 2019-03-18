@@ -10,6 +10,7 @@
             <div class="formControls col-xs-8 col-sm-9">
                 <div class="uploader-thum-container">
                     <div id="fileList" class="uploader-list">
+                        <div id="cover" class="thumbnail" style="background-image: url('/{$info.pic}');"><div class="file-panel"></div></div>
                     </div>
                 </div>
             </div>
@@ -17,25 +18,25 @@
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>充值类目名称：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="" placeholder="" id="title" name="title">
+                <input type="text" class="input-text" value="{$info.title}" placeholder="" id="title" name="title">
             </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>价格：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="" placeholder="" id="price" name="price">
+                <input type="text" class="input-text" value="{$info.price}" placeholder="" id="price" name="price">
             </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>天数：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <input type="text" class="input-text" value="" placeholder="" id="days" name="days">
+                <input type="text" class="input-text" value="{$info.days}" placeholder="" id="days" name="days">
             </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">描述：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <textarea name="detail" id="zhai" cols="" rows="" minlength="10" maxlength="255" class="textarea"  placeholder="说点什么...最少输入10个字符" dragonfly="true" nullmsg="备注不能为空！" ></textarea>
+                <textarea name="detail" id="zhai" cols="" rows="" minlength="10" maxlength="255" class="textarea"  placeholder="说点什么...最少输入10个字符" dragonfly="true" nullmsg="备注不能为空！" >{$info.detail}</textarea>
             </div>
         </div>
         <div class="row cl">
@@ -53,6 +54,7 @@
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+<script type="text/javascript" src="/lib/checkfile.js"></script>
 
 <script type="text/javascript">
     $(function(){
@@ -119,6 +121,7 @@
             }else {
                 if(checkfile('file') !== true) {
                     $("#file").val('');
+                    $("#fileList").html('');
                     return false;
                 }
                 var src = window.URL.createObjectURL(img);
@@ -129,13 +132,7 @@
         $("#btn-star1").click(function(){
             $("#file").click();
 
-        })
-
-
-        $(document).ready(function(){
-            bindKeyEvent($("#price"));
         });
-
 
 
     });
