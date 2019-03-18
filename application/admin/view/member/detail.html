@@ -200,38 +200,36 @@
                 btn: ['确定','取消'],
                 shade: false,
                 closeBtn: 0
-            },
-        function() {
-            layer.prompt({
-                formType: 2,
-                value: '内容违规',
-                title: '请输入理由(最多50个字)',
-                maxlength: 50,
-                area: ['400px', '300px'] //自定义文本域宽高
-            }, function (value, index, elem) {
-                reason = value;
-                layer.close(index);
-                $.ajax({
-                    url: "{:url('Member/roleReject')}",
-                    type: 'post',
-                    dataType: 'json',
-                    data: {id: id, reason: reason},
-                    success: function (data) {
-                        console.log(data);
-                        if (data.code == 1) {
-                            layer.msg('已拒绝', {icon: 1, time: 1000},function () {
-                                window.parent.location.reload();
-                            });
-                        } else {
-                            layer.msg(data.data, {icon: 2, time: 1000})
+            }, function() {
+                layer.prompt({
+                    formType: 2,
+                    value: '内容违规',
+                    title: '请输入理由(最多50个字)',
+                    maxlength: 50,
+                    area: ['400px', '300px'] //自定义文本域宽高
+                }, function (value, index, elem) {
+                    reason = value;
+                    layer.close(index);
+                    $.ajax({
+                        url: "{:url('Member/roleReject')}",
+                        type: 'post',
+                        dataType: 'json',
+                        data: {id: id, reason: reason},
+                        success: function (data) {
+                            console.log(data);
+                            if (data.code == 1) {
+                                layer.msg('已拒绝', {icon: 1, time: 1000},function () {
+                                    window.parent.location.reload();
+                                });
+                            } else {
+                                layer.msg(data.data, {icon: 2, time: 1000})
+                            }
+                        },
+                        error: function (data) {
+                            layer.msg('请求失败!', {icon: 5, time: 1000})
                         }
-                    },
-                    error: function (data) {
-                        layer.msg('请求失败!', {icon: 5, time: 1000})
-                    }
+                    })
                 })
             })
-
-        })
     }
 </script>

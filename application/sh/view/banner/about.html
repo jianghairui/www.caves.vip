@@ -9,7 +9,7 @@
             </label>
             <div class="formControls col-xs-8 col-sm-9">
                 <div class="uploader-thum-container">
-                    <div id="fileList1" class="uploader-list">
+                    <div id="fileList" class="uploader-list">
                         <div id="cover" class="thumbnail" style="background-image: url('/{$info.logo}');"><div class="file-panel"></div></div>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
             return this.optional(element) || lat.test(value);
         }, "请正确填写纬度");
 
-        var isclick = true
+        var isclick = true;
         //表单验证
         $("#form-article-add").validate({
             rules:{
@@ -139,19 +139,23 @@
             }
         });
 
+        $("#file").change(function (e) {
+            var img = e.target.files[0];
+            if (typeof(img) == "undefined") {
+                var src = '';
+            }else {
+                if(checkfile('file') !== true) {
+                    $("#file").val('');
+                    return false;
+                }
+                var src = window.URL.createObjectURL(img);
+            }
+            $("#fileList").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
+        });
 
         $("#btn-star1").click(function(){
             $("#file").click();
-            $("#file").change(function(e){
-                if(checkfile('file') !== true) {
-                    $("#file").val('')
-                    return false
-                }
-                var img = e.target.files[0];
-                var src = window.URL.createObjectURL(img);
-                $("#fileList1").html('<div id="cover" class="thumbnail" style="background-image: url('+src+');"><div class="file-panel"></div></div>');
-            });
-        })
+        });
 
         function checkfile(fileId){
 

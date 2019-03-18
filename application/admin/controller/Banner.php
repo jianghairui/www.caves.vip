@@ -24,8 +24,8 @@ class Banner extends Common {
             $this->checkPost($val);
             $val['url'] = input('post.url');
 
-            if(isset($_FILES['file-2'])) {
-                $info = $this->upload('file-2');
+            if(isset($_FILES['file'])) {
+                $info = $this->upload('file');
                 if($info['error'] === 0) {
                     $val['pic'] = $info['data'];
                 }else {
@@ -76,8 +76,8 @@ class Banner extends Common {
                 return ajax('非法操作',-1);
             }
 
-            if(isset($_FILES['file-2'])) {
-                $info = $this->upload('file-2');
+            if(isset($_FILES['file'])) {
+                $info = $this->upload('file');
                 if($info['error'] === 0) {
                     $val['pic'] = $info['data'];
                 }else {
@@ -87,12 +87,12 @@ class Banner extends Common {
             try {
                 Db::table('mp_slideshow')->update($val);
             }catch (Exception $e) {
-                if(isset($_FILES['file-2'])) {
+                if(isset($_FILES['file'])) {
                     @unlink($val['pic']);
                 }
                 return ajax($e->getMessage(),-1);
             }
-            if(isset($_FILES['file-2'])) {
+            if(isset($_FILES['file'])) {
                 @unlink($exist['pic']);
             }
             return ajax([],1);

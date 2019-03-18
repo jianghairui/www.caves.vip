@@ -8,11 +8,11 @@
             <input type="text" placeholder="图片描述" name="title" value="" class="input-text" style="width:200px">
             <input type="text" placeholder="链接地址" name="url" value="" class="input-text" style="width:200px">
             <span class="btn-upload form-group">
-                <input class="input-text upload-url" type="text" id="uploadfile-2" readonly style="width:100px">
+                <input class="input-text upload-url" type="text" id="uploadfile" readonly style="width:100px">
                 <a href="javascript:void();" class="btn btn-primary upload-btn">
                     <i class="Hui-iconfont">&#xe642;</i> 上传图片(不超过512K)
                 </a>
-                <input type="file" id="file-2" multiple name="file-2" class="input-file">
+                <input type="file" id="file" multiple name="file" class="input-file">
 			</span>
             <button type="submit" class="btn btn-success" id="" name="">
                 <i class="Hui-iconfont">&#xe600;</i> 添加
@@ -87,13 +87,13 @@
                 },
                 url:{
                     maxlength:255
-                },
+                }
             },
             onkeyup:false,
             focusCleanup:true,
             success:"valid",
             submitHandler:function(form){
-                if($("#file-2").val() == '') {
+                if($("#file").val() == '') {
                     layer.msg('请上传图片',{icon:2,time:1000});
                     return false
                 }
@@ -123,15 +123,15 @@
         });
 
 
-        $("#file-2").change(function(e){
+        $("#file").change(function(e){
 
             var img = e.target.files[0];
             console.log(img)
             if (typeof(img) == "undefined") {
                 var src = ''
             }else {
-                if(checkfile('file-2') !== true) {
-                    $("#file-2").val('')
+                if(checkfile('file') !== true) {
+                    $("#file").val('')
                     return false
                 }
                 var src = window.URL.createObjectURL(img);

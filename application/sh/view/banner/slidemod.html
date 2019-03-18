@@ -86,12 +86,16 @@
         });
 
         $(document).on("change","#file-2",function(e){
-            if(checkfile('file-2') !== true) {
-                $("#file-2").val('')
-                return false
-            }
             var img = e.target.files[0];
-            var src = window.URL.createObjectURL(img);
+            if (typeof(img) == "undefined") {
+                var src = ''
+            }else {
+                if(checkfile('file-2') !== true) {
+                    $("#file-2").val('');
+                    return false;
+                }
+                var src = window.URL.createObjectURL(img);
+            }
             $("#fileList").html('<div id="cover" class="thumbnail" style="background-image: url('+src+')"></div>');
         });
 

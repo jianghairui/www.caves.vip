@@ -26,18 +26,20 @@ class Index extends Common
         $curr_page = input('param.page',config('app.page'));
         $perpage = input('param.perpage',10);
 
-        $where = [];
+        $where = [
+            ['r.del','=',0]
+        ];
 
         if(!is_null($param['status']) && $param['status'] !== '') {
             $where[] = ['r.status','=',$param['status']];
         }
 
         if($param['logmin']) {
-            $where[] = ['r.create_time','>=',strtotime(date('Y-m-d 00:00:00',strtotime($param['logmin'])))];
+            $where[] = ['r.create_time','>=',$param['logmin']];
         }
 
         if($param['logmax']) {
-            $where[] = ['r.create_time','<=',strtotime(date('Y-m-d 23:59:59',strtotime($param['logmax'])))];
+            $where[] = ['r.create_time','<=',$param['logmax']];
         }
 
         if($param['search']) {
@@ -60,7 +62,7 @@ class Index extends Common
         return $this->fetch();
     }
     //查看需求详情
-    public function detail() {
+    public function reqDetail() {
         $rid = input('param.rid');
         try {
             $info = Db::table('mp_req')
@@ -102,6 +104,22 @@ class Index extends Common
                 return ajax('非法操作',-1);
             }
             Db::table('mp_req')->where($map)->update(['status'=>2,'reason'=>$reason]);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax([],1);
+    }
+    //删除需求
+    public function reqDel() {
+        $map = [
+            ['id','=',input('post.id',0)]
+        ];
+        try {
+            $exist = Db::table('mp_req')->where($map)->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
+            Db::table('mp_req')->where($map)->update(['del'=>1]);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }

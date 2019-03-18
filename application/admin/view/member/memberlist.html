@@ -70,6 +70,8 @@
                     <span class="label label-warning radius">审核中</span>{/case}
                     {case 2}
                     <span class="label label-success radius">已认证</span>{/case}
+                    {case 3}
+                    <span class="label label-danger radius">未通过</span>{/case}
                     {default /}
                     {/switch}
                 </td>
@@ -133,9 +135,9 @@
 
 
     $("#search-btn").click(function () {
-        var logmin = $("#formAjax").find("#logmin").val()
-        var logmax = $("#formAjax").find("#logmax").val()
-        var search = $("#formAjax").find("#search").val()
+        var logmin = $("#formAjax").find("#logmin").val();
+        var logmax = $("#formAjax").find("#logmax").val();
+        var search = $("#formAjax").find("#search").val();
         var str = ''
         if(logmin.length != '') {
             str += '&logmin=' + logmin
@@ -210,134 +212,5 @@
         });
     }
 
-    /*需求审核*/
-    function user_shenhe(obj,id){
-        layer.confirm('审核用户？', {
-                btn: ['通过','不通过','取消'],
-                shade: false,
-                closeBtn: 0
-            },
-            function(){
-                $.ajax({
-                    url:"{:url('Member/userPass')}",
-                    type:'post',
-                    dataType:'json',
-                    data:{id:id},
-                    success:function(data) {
-                        console.log(data)
-                        if(data.code == 1) {
-                            $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已认证</span>');
-                            $(obj).parent().html('<span class="btn btn-link radius"></span>');
-                            layer.msg('已审核', {icon:6,time:1000});
-                        }else {
-                            layer.msg(data.data,{icon:2,time:1000})
-                        }
-                    },
-                    error:function(data) {
-                        layer.msg('请求失败!',{icon:5,time:1000})
-                    },
-                })
 
-            },
-            function(){
-                $.ajax({
-                    url:"{:url('Member/userReject')}",
-                    type:'post',
-                    dataType:'json',
-                    data:{id:id},
-                    success:function(data) {
-                        console.log(data)
-                        if(data.code == 1) {
-                            $(obj).parents("tr").find(".td-status").html('<span class="label label-default radius">未通过</span>');
-                            $(obj).parent().html('<span class="btn btn-link radius"></span>');
-                            layer.msg('未通过', {icon:5,time:1000});
-                        }else {
-                            layer.msg(data.data,{icon:2,time:1000})
-                        }
-                    },
-                    error:function(data) {
-                        layer.msg('请求失败!',{icon:5,time:1000})
-                    },
-                })
-
-            });
-    }
-
-    function multi_del() {
-        layer.confirm('全部拉黑吗？', {
-                btn: ['确认','取消'],
-                shade: false,
-                closeBtn: 0
-            },
-            function() {
-                $('#multi-check').ajaxSubmit({
-                    type: 'post',
-                    url: "{:url('Member/multiDel')}" ,
-                    success: function(data){
-                        console.log(data)
-                        if(data.code == 1) {
-                            layer.msg(data.data,{icon:1,time:1000});
-                            setTimeout("window.location.reload()", 1000)
-                        }else {
-                            layer.msg(data.data,{icon:2,time:1000});
-                        }
-
-                    },
-                    error: function(msg){
-                        //console.log(JSON.parse(msg.responseText))
-                        layer.msg('接口请求失败!',{icon:5,time:1000});
-                    }
-                });
-            })
-    }
-
-    function multi_check() {
-        layer.confirm('确定批量认证？', {
-                btn: ['批量通过','批量拒绝','取消'],
-                shade: false,
-                closeBtn: 0
-            },
-            function() {
-                $('#multi-check').ajaxSubmit({
-                    type: 'post',
-                    url: "{:url('Member/multiPass')}" ,
-                    success: function(data){
-                        console.log(data)
-                        if(data.code == 1) {
-                            layer.msg(data.data,{icon:1,time:1000});
-                            setTimeout("window.location.reload()", 1000)
-                        }else {
-                            layer.msg(data.data,{icon:2,time:1000});
-                        }
-
-                    },
-                    error: function(msg){
-                        //console.log(JSON.parse(msg.responseText))
-                        layer.msg('接口请求失败!',{icon:5,time:1000});
-                    }
-                });
-            },
-            function() {
-                $('#multi-check').ajaxSubmit({
-                    type: 'post',
-                    url: "{:url('Member/multiReject')}" ,
-                    success: function(data){
-                        console.log(data)
-                        if(data.code == 1) {
-                            layer.msg(data.data,{icon:5,time:1000});
-                            setTimeout("window.location.reload()", 1000)
-                        }else {
-                            layer.msg(data.data,{icon:2,time:1000});
-                        }
-
-                    },
-                    error: function(msg){
-                        //console.log(JSON.parse(msg.responseText))
-                        layer.msg('接口请求失败!',{icon:5,time:1000});
-                    }
-                });
-            })
-
-    }
-    
 </script>

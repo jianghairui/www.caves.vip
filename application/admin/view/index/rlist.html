@@ -68,7 +68,7 @@
                         <i class="Hui-iconfont">&#xe603;</i>
                     </a>
                     {/if}
-                    <a style="text-decoration:none" onclick="add_info('需求信息','{:url("Index/reqDetail",array("id"=>$li["id"]))}')" class="ml-5" href="javascript:;" title="查看需求">
+                    <a style="text-decoration:none" onclick="add_info('需求信息','{:url("Index/reqDetail",array("rid"=>$li["id"]))}')" class="ml-5" href="javascript:;" title="查看需求">
                     <i class="Hui-iconfont">&#xe6df;</i>
                     </a>
                     <a style="text-decoration:none" class="ml-5" onClick="req_del(this,{$li['id']})" href="javascript:;" title="删除">
@@ -188,7 +188,7 @@
                 dataType: 'json',
                 data:{id:id},
                 success: function(data){
-                    console.log(data)
+                    console.log(data);
                     if(data.code == 1) {
                         $(obj).parents("tr").remove();
                         layer.msg('已删除!',{icon:1,time:1000});

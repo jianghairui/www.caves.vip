@@ -85,7 +85,8 @@ class Member extends Common {
             if(!$exist) {
                 return ajax('非法操作',-1);
             }
-            Db::table('mp_user')->where($map)->update(['auth'=>3,'reason'=>$reason]);
+            Db::table('mp_user')->where($map)->update(['auth'=>3]);
+            Db::table('mp_role')->where(['uid'=>1])->update(['reason'=>$reason]);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
@@ -168,9 +169,7 @@ class Member extends Common {
     public function vipDetail() {
         $id = input('param.id');
         $info = Db::table('mp_vip')->where('id',$id)->find();
-        $list = Db::table('mp_vip')->select();
         $this->assign('info',$info);
-        $this->assign('list',$list);
         return $this->fetch();
     }
 
