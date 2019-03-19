@@ -11,9 +11,9 @@ return array(
     'layout_name'   =>  'layout',
     'page'   =>  1,
     'perpage'   =>  5,
-
     'login_key' => 'jiang',
     'app_trace' => true,
+
     'trace'     =>  [
         //支持Html,Console
         'type'  =>  'html',
