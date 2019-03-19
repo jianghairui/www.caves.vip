@@ -8,7 +8,6 @@
 namespace app\api\controller;
 use EasyWeChat\Factory;
 use think\Db;
-use think\Exception;
 
 class Login extends Common {
 

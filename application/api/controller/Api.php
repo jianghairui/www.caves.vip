@@ -23,11 +23,74 @@ class Api extends Common {
     }
 
     public function getReqList() {
+        $type = input('post.type','');
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        if(!in_array($type,[1,2])) {
+            return ajax($type,-4);
+        }
+        $where = [];
+        if($type == 1) {
+            $where = [
+                ['r.vote_time','>',date('Y-m-d H:i:s')],
+                ['r.status','=',1],
+                ['r.show','=',1],
+                ['r.del','=',0]
+            ];
+        }
+        if($type == 2) {
+            $where = [
+                ['r.vote_time','<=',date('Y-m-d H:i:s')],
+                ['r.end_time','>',date('Y-m-d H:i:s')],
+                ['r.status','=',1],
+                ['r.show','=',1],
+                ['r.del','=',0]
+            ];
+        }
 
+        try {
+            $list = Db::table('mp_req')
+                ->alias('r')
+                ->join("mp_user u","r.uid=u.id","left")
+                ->where($where)->order(['r.start_time'=>'ASC'])
+                ->field("r.id,r.title,r.cover,r.start_time,r.end_time,u.org as user_org")
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        foreach ($list as &$v) {
+            $v['start_time'] = date('Y-m-d',strtotime($v['start_time']));
+            $v['end_time'] = date('Y-m-d',strtotime($v['end_time']));
+        }
+        return ajax($list);
     }
 
     public function getReqDetail() {
-
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['r.status','=',1],
+                ['r.show','=',1],
+                ['r.del','=',0],
+                ['r.id','=',$val['id']],
+            ];
+            $info = Db::table('mp_req')->alias('r')
+                ->join("mp_user u","r.uid=u.id","left")
+                ->where($where)
+                ->field("r.*,u.org as user_org")
+                ->find();
+            if(!$info) {
+                return ajax($val['id'],-4);
+            }
+            if(date('Y-m-d 23:59:59',strtotime($info['end_time'])) <= date('Y-m-d H:i:s')) {
+                return ajax('活动已结束,无法查看',25);
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($info);
     }
 
     public function getVipList() {

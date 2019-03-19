@@ -56,7 +56,7 @@ class Member extends Common {
         $this->assign('status',$param['status']);
         return $this->fetch();
     }
-
+    //申请角色-通过审核
     public function rolePass() {
         $map = [
             ['auth','=',1],
@@ -73,7 +73,7 @@ class Member extends Common {
         }
         return ajax([],1);
     }
-
+    //申请角色-拒绝审核
     public function roleReject() {
         $map = [
             ['auth','=',1],
@@ -92,17 +92,7 @@ class Member extends Common {
         }
         return ajax([],1);
     }
-
-
-
-
-
-
-
-
-
-
-
+    //用户详情
     public function detail() {
         $id = input('param.id');
         $where = [
@@ -120,7 +110,7 @@ class Member extends Common {
         $this->assign('info',$info);
         return $this->fetch();
     }
-
+    //充值类目列表
     public function vipList() {
         $where = [];
         $where[] = ['status','=',1];
@@ -132,11 +122,11 @@ class Member extends Common {
         $this->assign('list',$list);
         return $this->fetch();
     }
-
+    //添加充值类目
     public function vipAdd() {
         return $this->fetch();
     }
-
+    //添加充值类目POST
     public function vipAddPost() {
         $val['title'] = input('post.title');
         $val['price'] = input('post.price');
@@ -165,14 +155,14 @@ class Member extends Common {
         return ajax([],1);
 
     }
-
+    //充值类目详情
     public function vipDetail() {
         $id = input('param.id');
         $info = Db::table('mp_vip')->where('id',$id)->find();
         $this->assign('info',$info);
         return $this->fetch();
     }
-
+    //充值类目编辑
     public function vipModPost() {
         $val['title'] = input('post.title');
         $val['mid'] = input('post.mid');
@@ -225,6 +215,11 @@ class Member extends Common {
             return ajax($e->getMessage(),-1);
         }
         return ajax([],1);
+    }
+
+
+    public function rechargeList() {
+
     }
 
 

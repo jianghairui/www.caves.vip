@@ -106,6 +106,10 @@ class My extends Common {
             return ajax('请传入图片',3);
         }
         try {
+            $val['start_time'] = date('Y-m-d 23:59:59',strtotime($val['start_time']));
+            $val['deadline'] = date('Y-m-d 23:59:59',strtotime($val['deadline']));
+            $val['vote_time'] = date('Y-m-d 23:59:59',strtotime($val['vote_time']));
+            $val['end_time'] = date('Y-m-d 23:59:59',strtotime($val['end_time']));
             Db::table('mp_req')->insert($val);
         }catch (\Exception $e) {
             if(isset($val['cover'])) {
@@ -185,10 +189,9 @@ class My extends Common {
                 return ajax('',16);
             }
 
-
+            $val['org'] = input('post.org','');
             $val['weixin'] = input('post.weixin');
             $works = input('post.works', []);
-
             $image_array = [];
             if($val['role'] == 3) {
                 if (is_array($works) && !empty($works)) {
@@ -208,7 +211,6 @@ class My extends Common {
                 }
             }else {
                 $license = input('post.license');
-                $val['org'] = input('post.org');
                 if(!$val['org']) {
                     return ajax('机构名称不能为空',23);
                 }
@@ -247,7 +249,8 @@ class My extends Common {
             }
             Db::table('mp_user')->where('id',$val['uid'])->update([
                 'role' => $val['role'],
-                'auth' => 1
+                'auth' => 1,
+                'org' => $val['org']
             ]);
         }catch (\Exception $e) {
             foreach ($image_array as $v) {
