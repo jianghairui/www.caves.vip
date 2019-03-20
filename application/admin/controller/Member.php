@@ -217,9 +217,35 @@ class Member extends Common {
         return ajax([],1);
     }
 
-
     public function rechargeList() {
+        $param['status'] = input('param.status','');
+        $param['logmin'] = input('param.logmin');
+        $param['logmax'] = input('param.logmax');
+        $param['search'] = input('param.search');
 
+        $page['query'] = http_build_query(input('param.'));
+
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+
+        $where = [];
+        try {
+            $count = Db::table('mp_vip_order')->alias('o')->where($where)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_vip_order')->alias('o')
+                ->join("mp_user u","o.uid=u.id","left")
+                ->join("mp_vip v","o.vip_id=v.id","left")
+                ->field("o.*,u.nickname,u.avatar,v.title")
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->select();
+        }catch (\Exception $e) {
+            die($e->getMessage());
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
     }
 
 

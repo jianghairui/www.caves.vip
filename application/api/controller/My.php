@@ -106,7 +106,6 @@ class My extends Common {
             return ajax('请传入图片',3);
         }
         try {
-            $val['start_time'] = date('Y-m-d 23:59:59',strtotime($val['start_time']));
             $val['deadline'] = date('Y-m-d 23:59:59',strtotime($val['deadline']));
             $val['vote_time'] = date('Y-m-d 23:59:59',strtotime($val['vote_time']));
             $val['end_time'] = date('Y-m-d 23:59:59',strtotime($val['end_time']));

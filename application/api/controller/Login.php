@@ -18,13 +18,12 @@ class Login extends Common {
         $this->checkPost(['code'=>$code]);
         $app = Factory::miniProgram($this->mp_config);
         $info = $app->auth->session($code);
-
         if(isset($info['errcode']) && $info['errcode'] !== 0) {
             return ajax($info,-1);
         }
         $ret['openid'] = $info['openid'];
         $ret['session_key'] = $info['session_key'];
-        $ret['unionid'] = $info['unionid'];
+//        $ret['unionid'] = $info['unionid'];
 
         try {
             $exist = Db::table('mp_user')->where('openid',$ret['openid'])->find();
@@ -36,7 +35,7 @@ class Login extends Common {
                     'create_time'=>time(),
                     'last_login_time'=>time(),
                     'openid'=>$ret['openid'],
-                    'unionid'=>$ret['unionid']
+//                    'unionid'=>$ret['unionid']
                 ];
                 $uid = Db::table('mp_user')->insert($insert);
             }
@@ -66,7 +65,6 @@ class Login extends Common {
     }
     //保存用户信息
     public function userAuth() {
-
         $iv = input('post.iv');
         $encryptData = input('post.encryptedData');
         $this->checkPost([
@@ -82,16 +80,11 @@ class Login extends Common {
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
-
-        $exist = Db::table('mp_user')->where('openid','=',$decryptedData['openId'])->find();
-        if($exist['avatar']) {
-            return ajax('已有头像',1);
-        }
-
         try {
             $data['nickname'] = $decryptedData['nickName'];
             $data['avatar'] = $decryptedData['avatarUrl'];
             $data['sex'] = $decryptedData['gender'];
+            $data['unionid'] = $decryptedData['unionId'];
             Db::table('mp_user')->where('openid','=',$decryptedData['openId'])->update($data);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);

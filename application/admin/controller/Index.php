@@ -23,8 +23,8 @@ class Index extends Common
 
         $page['query'] = http_build_query(input('param.'));
 
-        $curr_page = input('param.page',config('app.page'));
-        $perpage = input('param.perpage',2);
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
 
         $where = [
             ['r.del','=',0]

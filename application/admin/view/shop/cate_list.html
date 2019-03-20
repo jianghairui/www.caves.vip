@@ -1,0 +1,160 @@
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 分类管理 <span class="c-gray en">&gt;</span> 分类列表 ({if $pcate_name}{$pcate_name}{else /}顶级分类{/if})<a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+    <div class="cl pd-5 bg-1 bk-gray mt-20">
+        <span class="l">
+            <a class="btn btn-primary radius" data-title="添加分类" data-href="article-add.html" onclick="add_info('添加分类','{:url("Shop/cateAdd",array('pid'=>$pid))}')" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加分类
+            </a>
+        </span>
+    </div>
+    <table class="table table-border table-bordered table-bg">
+        <thead>
+        <tr class="text-c">
+            <th width="25">#</th>
+            <th width="50">图标</th>
+            <th>分类名</th>
+            <th width="80">状态</th>
+            <th width="100">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <form id="multi-check">
+            {foreach $list as $li}
+            <tr class="text-c userinfo">
+                <td>{$li.id}</td>
+                <td>
+                    <div style="width: 50px;height: 50px;background-image: url('/{$li.icon}');background-position: center;background-repeat: no-repeat;background-size: cover;"></div>
+                </td>
+                <td>{$li.cate_name}</td>
+                <td class="td-status">
+                    {switch $li['status']}
+                    {case 0}
+                    <span class="label label-defaunt radius">已隐藏</span>
+                    {/case}
+                    {case 1}
+                    <span class="label label-success radius">已显示</span>
+                    {/case}
+                    {default /}
+                    {/switch}
+                </td>
+                <td class="td-manage">
+                    {if $li['status'] == '1'}
+                    <a style="text-decoration:none" onClick="cate_hide(this,{$li.id})" href="javascript:;" title="隐藏">
+                        <i class="Hui-iconfont">&#xe6de;</i>
+                    </a>
+                    {else /}
+                    <a style="text-decoration:none" onClick="cate_show(this,{$li.id})" href="javascript:;" title="显示">
+                        <i class="Hui-iconfont">&#xe603;</i>
+                    </a>
+                    {/if}
+                    {if $pid == 0}
+                    <a style="text-decoration:none" class="ml-5" href="{:url('Shop/cateList',array('pid'=>$li['id']))}" title="查看子分类">
+                    <i class="Hui-iconfont">&#xe681;</i>
+                    </a>
+                    {/if}
+                    <a style="text-decoration:none" onclick="add_info('修改分类','{:url("Shop/cateDetail",array("id"=>$li["id"]))}')"  class="ml-5" href="javascript:;" title="修改分类">
+                    <i class="Hui-iconfont">&#xe6df;</i>
+                    </a>
+                    <a style="text-decoration:none" class="ml-5" onClick="cate_del(this,{$li['id']})" href="javascript:;" title="删除">
+                        <i class="Hui-iconfont">&#xe6e2;</i>
+                    </a>
+                </td>
+            </tr>
+            {/foreach}
+        </form>
+        </tbody>
+    </table>
+</div>
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript">
+
+    /*添加分类*/
+    function add_info(title,url){
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url
+        });
+        layer.full(index);
+    }
+
+    /*下架*/
+    function cate_hide(obj,id){
+        layer.confirm('确认要隐藏吗？',function(index){
+            $.ajax({
+                url:"{:url('Shop/cateHide')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="cate_show(this,'+id+')" href="javascript:;" title="显示"><i class="Hui-iconfont">&#xe603;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已隐藏</span>');
+                        $(obj).remove();
+                        layer.msg('已隐藏!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+
+        });
+    }
+    /*上架*/
+    function cate_show(obj,id){
+        layer.confirm('确认要显示吗？',function(index){
+            $.ajax({
+                url:"{:url('Shop/cateShow')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data);
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="cate_hide(this,'+id+')" href="javascript:;" title="隐藏"><i class="Hui-iconfont">&#xe6de;</i></a>');
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已显示</span>');
+                        $(obj).remove();
+                        layer.msg('已显示!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+
+        });
+    }
+    /*分类-删除*/
+    function cate_del(obj,id){
+        layer.confirm('确认要删除吗？',function(index){
+            $.ajax({
+                url: "{:url('Shop/cateDel')}",
+                type: 'POST',
+                dataType: 'json',
+                data:{id:id},
+                success: function(data){
+                    console.log(data);
+                    if(data.code == 1) {
+                        $(obj).parents("tr").remove();
+                        layer.msg('已删除!',{icon:1,time:1000});
+                    }else {
+                        layer.msg('删除失败!',{icon:2,time:1000});
+                    }
+                },
+                error:function(data) {
+                    console.log(data.msg);
+                },
+            });
+        });
+    }
+
+
+</script>

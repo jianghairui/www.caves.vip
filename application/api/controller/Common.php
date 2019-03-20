@@ -8,6 +8,7 @@
 namespace app\api\controller;
 use think\Controller;
 use think\Db;
+use think\exception\HttpException;
 use think\exception\HttpResponseException;
 class Common extends Controller {
 
@@ -176,6 +177,18 @@ class Common extends Controller {
     protected function arrToUrl($str)
     {
         return urldecode($str);
+    }
+
+    protected function getMyInfo() {
+        $where = [
+            ['id','=',$this->myinfo['uid']]
+        ];
+        try {
+            $info = Db::table('mp_user')->where($where)->find();
+        }catch (\Exception $e) {
+            throw new HttpResponseException(ajax($e->getMessage(),-1));
+        }
+        return $info;
     }
 
     protected function log($cmd,$str) {

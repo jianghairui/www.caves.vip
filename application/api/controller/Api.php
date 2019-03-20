@@ -93,6 +93,27 @@ class Api extends Common {
         return ajax($info);
     }
 
+    public function takePartIn() {
+        $val['req_id'] = input('post.req_id');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['id','=',$val['req_id']]
+            ];
+            $exist = Db::table('mp_req')->where($where)->find();
+            if(!$exist) {
+                return ajax('非法参数',-4);
+            }
+            if($exist['start_time'] < date('Y-m-d H:i:s')) {
+                return ajax();
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        $user = $this->getMyInfo();
+        return ajax($user);
+    }
+
     public function getVipList() {
         try {
             $list = Db::table('mp_vip')->where([
@@ -128,8 +149,6 @@ class Api extends Common {
         return ajax($val);
 
     }
-
-
 
 //上传图片限制512KB
     public function uploadImage() {

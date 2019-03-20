@@ -1,0 +1,136 @@
+<style>
+    .userinfo>td>img {
+        width:40px;height:40px;border-radius: 50%;
+    }
+</style>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 订单管理 <span class="c-gray en">&gt;</span> 订单列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+    <section id="formAjax">
+        <div class="text-c">
+            <button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+            日期范围：
+            <input type="text" onfocus="WdatePicker({ maxDate:'#F{ $dp.$D(\'logmax\')||\'%y-%M-%d\' }' })" id="logmin" value="{$Think.get.logmin}" class="input-text Wdate" style="width:120px;">
+            -
+            <input type="text" onfocus="WdatePicker({ minDate:'#F{ $dp.$D(\'logmin\') }' })" id="logmax" value="{$Think.get.logmax}" class="input-text Wdate" style="width:120px;">
+            <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder=" 订单名称或手机号" style="width:250px" class="input-text">
+            <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找订单</button>
+        </div>
+    </section>
+    <div class="cl pd-5 bg-1 bk-gray mt-20">
+        <span class="r">共有数据：<strong>{$page.count}</strong> 条</span> </div>
+    <table class="table table-border table-bordered table-bg">
+        <thead>
+        <tr class="text-c">
+            <th width="30">#</th>
+            <th width="160">订单号</th>
+            <th width="200">微信端单号</th>
+            <th width="60">价格</th>
+            <th>充值类目</th>
+            <th width="120">下单时间</th>
+            <th width="50">订单状态</th>
+            <th width="120">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <form id="multi-check">
+            {foreach $list as $li}
+            <tr class="text-c userinfo">
+                <td rowspan="2">{$li.id}</td>
+                <td>{$li.order_sn}</td>
+                <td>{$li.trans_id}</td>
+                <td>{$li.price}</td>
+                <td>{$li.title}</td>
+                <td>{$li.create_time|date="Y-m-d H:i:s"}</td>
+                <td>
+                    {switch $li['status']}
+                    {case -1}
+                    支付失败{/case}
+                    {case 0}
+                    待支付{/case}
+                    {case 1}
+                    已支付{/case}
+                    {case 2}
+                    已发货{/case}
+                    {case 3}
+                    已收货{/case}
+                    {default /}
+                    {/switch}
+                </td>
+                <td class="td-manage">
+                    <a title="查看详情" href="javascript:;" onclick="">
+                    <i class="Hui-iconfont">&#xe6df;</i>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <b style="margin-left: 15px;">收货地址</b>: {$li.address}
+                </td>
+                <td colspan="2">
+                    <b style="margin-left: 15px;">收货手机号</b>: {$li.tel}
+                </td>
+            </tr>
+            {/foreach}
+        </form>
+
+        <tr>
+            <td colspan="7" id="page" class="text-r"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript">
+
+    var url = '{:url("Member/rechargeList")}' + '?<?php echo $page["query"];?>';
+    var curr = '{$page.curr}',totalPage='{$page.totalPage}';
+    if(totalPage > 1) {
+        laypage({
+            cont: 'page', //容器。值支持id名、原生dom对象，jquery对象。
+            pages: '{$page.totalPage}', //通过后台拿到的总页数
+            skip: false, //是否开启跳页
+            skin: '#5a98de',
+            curr: curr || 1, //当前页
+            jump: function(obj, first){ //触发分页后的回调
+                // console.log(obj)
+                if(!first) {
+                    window.location.href = url+'&page=' + obj.curr;
+                }
+            }
+        });
+    }
+
+
+    $("#search-btn").click(function () {
+        var logmin = $("#formAjax").find("#logmin").val();
+        var logmax = $("#formAjax").find("#logmax").val();
+        var search = $("#formAjax").find("#search").val();
+        var str = '';
+        if(logmin.length != '') {
+            str += '&logmin=' + logmin
+        }
+        if(logmax.length != '') {
+            str += '&logmax=' + logmax
+        }
+        if(search.length != '') {
+            str += '&search=' + search
+        }
+        window.location.href = '{:url("Member/rechargeList")}' + '?' + str;
+    });
+
+    /*查看订单信息*/
+    function detail(title,url){
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url
+        });
+        layer.full(index);
+    }
+
+
+
+</script>

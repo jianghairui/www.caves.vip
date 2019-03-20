@@ -1,0 +1,166 @@
+<style>
+    .userinfo>td>img {
+        width:80px;height:80px
+    }
+</style>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 商城管理 <span class="c-gray en">&gt;</span> 商品列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+    <section id="formAjax">
+        <div class="text-c">
+            <button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+            <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder=" 商品名" style="width:250px" class="input-text">
+            <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找商品</button>
+        </div>
+    </section>
+    <div class="cl pd-5 bg-1 bk-gray mt-20">
+        <span class="l">
+            <a class="btn btn-primary radius" data-title="添加商品" data-href="article-add.html" onclick="add_info('添加商品','{:url("Shop/goodsAdd")}')" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加商品
+            </a>
+        </span>
+        <span class="r">共有数据：<strong>{$page.count}</strong> 条</span> </div>
+    <table class="table table-border table-bordered table-bg">
+        <thead>
+        <tr class="text-c">
+            <th width="25">#</th>
+            <th width="100">商品图片</th>
+            <th>商品名</th>
+            <th width="60">商品价值</th>
+            <th width="90">有效时长</th>
+            <th width="80">所需人数</th>
+            <th width="80">已完成数量</th>
+            <th width="120">添加时间</th>
+            <th width="100">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <form id="multi-check">
+            {foreach $list as $li}
+            <tr class="text-c userinfo">
+                <td>{$li.id}</td>
+                <td>
+                    <div style="width: 80px;height: 80px;background-image: url('{if $li['pic']}{$li.pic}{else /}/static/src/image/default.jpg{/if}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                </td>
+                <td>{$li.goods_name}</td>
+                <td>{$li.price}</td>
+                <td>{$li.times}</td>
+                <td>{$li.neednum}</td>
+                <td>{$li.count}</td>
+                <td>{$li.create_time|date="Y-m-d H:i:s"}</td>
+                <td class="td-manage">
+                    {if $li['status'] == '1'}
+                    <a style="text-decoration:none" onClick="goods_hide(this,{$li.id})" href="javascript:;" title="下架">
+                        <i class="Hui-iconfont">&#xe6de;</i>
+                    </a>
+                    {else /}
+                    <a style="text-decoration:none" onClick="goods_show(this,{$li.id})" href="javascript:;" title="上架">
+                        <i class="Hui-iconfont">&#xe603;</i>
+                    </a>
+                    {/if}
+                    <a style="text-decoration:none" onclick="add_info('商品信息','{:url("Shop/goodsDetail",array("id"=>$li["id"]))}')" class="ml-5" href="javascript:;" title="查看商品">
+                    <i class="Hui-iconfont">&#xe6df;</i>
+                    </a>
+                </td>
+            </tr>
+            {/foreach}
+        </form>
+
+        <tr>
+            <td colspan="9" id="page" class="text-r"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript">
+
+    var url = '{:url("Shop/goodsList")}' + '?<?php echo $page["query"];?>'
+    var curr = '{$page.curr}'
+    laypage({
+        cont: 'page', //容器。值支持id名、原生dom对象，jquery对象。
+        pages: '{$page.totalPage}', //通过后台拿到的总页数
+        skip: false, //是否开启跳页
+        skin: '#5a98de',
+        curr: curr || 1, //当前页
+        jump: function(obj, first){ //触发分页后的回调
+            // console.log(obj)
+            if(!first) {
+                window.location.href = url+'&page=' + obj.curr;
+            }
+        }
+    });
+
+    $("#search-btn").click(function () {
+        var search = $("#formAjax").find("#search").val();
+        var id = $("#formAjax").find("#id").val();
+        var str = 'id=' + id;
+        if(search.length != '') {
+            str += '&search=' + search;
+        }
+        window.location.href = '{:url("Shop/goodsList")}' + '?' + str;
+    });
+
+    /*添加商品*/
+    function add_info(title,url){
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url
+        });
+        layer.full(index);
+    }
+
+    /*下架*/
+    function goods_hide(obj,id){
+        layer.confirm('确认要下架吗？',function(index){
+            $.ajax({
+                url:"{:url('Shop/goodsHide')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data)
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="goods_show(this,'+id+')" href="javascript:;" title="上架"><i class="Hui-iconfont">&#xe603;</i></a>');
+                        $(obj).remove();
+                        layer.msg('已下架!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+
+        });
+    }
+    /*上架*/
+    function goods_show(obj,id){
+        layer.confirm('确认要上架吗？',function(index){
+            $.ajax({
+                url:"{:url('Shop/goodsShow')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    console.log(data);
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="goods_hide(this,'+id+')" href="javascript:;" title="下架"><i class="Hui-iconfont">&#xe6de;</i></a>');
+                        $(obj).remove();
+                        layer.msg('已上架!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                },
+            })
+
+        });
+    }
+
+</script>
