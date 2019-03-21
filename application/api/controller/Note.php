@@ -61,7 +61,7 @@ class Note extends Common {
             Db::table('mp_note')->insert($val);
         }catch (\Exception $e) {
             foreach ($image_array as $v) {
-                @unlink('.' . $v);
+                @unlink($v);
             }
             return ajax($e->getMessage(),-1);
         }
