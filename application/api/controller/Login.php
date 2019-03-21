@@ -85,11 +85,26 @@ class Login extends Common {
             $data['avatar'] = $decryptedData['avatarUrl'];
             $data['sex'] = $decryptedData['gender'];
             $data['unionid'] = $decryptedData['unionId'];
+            $data['user_auth'] = 1;
             Db::table('mp_user')->where('openid','=',$decryptedData['openId'])->update($data);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
         return ajax('保存成功',1);
+    }
+    //检测用户是否授权
+    public function checkUserAuth() {
+        $uid = $this->myinfo['uid'];
+        try {
+            $userauth = Db::table('mp_user')->where('id',$uid)->value('user_auth');
+            if($userauth == 1) {
+                return ajax(true);
+            }else {
+                return ajax(false);
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
     }
     //保存手机号
     public function getPhoneNumber() {

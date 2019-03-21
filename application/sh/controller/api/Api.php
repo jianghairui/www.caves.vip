@@ -285,7 +285,6 @@ class Api extends Common {
         $json['token'] = $third_session;
         return ajax($json);
     }
-
     //小程序用户授权
     public function userAuth() {
         $iv = input('post.iv');
@@ -314,11 +313,38 @@ class Api extends Common {
             $data['avatar'] = $decryptedData['avatarUrl'];
             $data['sex'] = $decryptedData['gender'];
             $data['unionid'] = $decryptedData['unionId'];
+            $data['user_auth'] = 1;
             Db::table('mp_user')->where('openid','=',$decryptedData['openId'])->update($data);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),4);
         }
         return ajax('授权成功',1);
+    }
+    //检测用户是否授权
+    public function checkUserAuth() {
+        $token = input('post.token');
+        try {
+            $exist = Db::table('mp_token')->where([
+                ['token','=',$token],
+                ['end_time','>',time()]
+            ])->find();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        if(!$exist) {
+            return ajax('invalid token',-3);
+        }
+        $uid = $exist['uid'];
+        try {
+            $userauth = Db::table('mp_user')->where('id',$uid)->value('user_auth');
+            if($userauth == 1) {
+                return ajax(true);
+            }else {
+                return ajax(false);
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
     }
 
     //小程序入驻下单

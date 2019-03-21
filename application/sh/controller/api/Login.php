@@ -88,38 +88,38 @@ class Login extends Common {
             $data['avatar'] = $decryptedData['avatarUrl'];
             $data['sex'] = $decryptedData['gender'];
             $data['unionid'] = $decryptedData['unionId'];
+            $data['user_auth'] = 1;
             Db::table('mp_user')->where('openid','=',$decryptedData['openId'])->update($data);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),4);
         }
         return ajax('授权成功',1);
     }
-
-    public function getPhoneNumber() {
-
-        $iv = input('post.iv');
-        $encryptData = input('post.encryptedData');
-        $this->checkPost([
-            'iv' => $iv,
-            'encryptedData' => $encryptData
-        ]);
-        if(!$iv || !$encryptData) {
-            return ajax([],-2);
-        }
-        $app = Factory::miniProgram($this->mp_config);
+    //检测用户是否授权
+    public function checkUserAuth() {
+        $token = input('post.token');
         try {
-            $decryptedData = $app->encryptor->decryptData($this->myinfo['session_key'], $iv, $encryptData);
+            $exist = Db::table('mp_token')->where([
+                ['token','=',$token],
+                ['end_time','>',time()]
+            ])->find();
         }catch (\Exception $e) {
-            return ajax($e->getMessage(),24);
+            return ajax($e->getMessage(),-1);
         }
-
+        if(!$exist) {
+            return ajax('invalid token',-3);
+        }
+        $uid = $exist['uid'];
         try {
-            $data['tel'] = $decryptedData['phoneNumber'];
-            Db::table('mp_user')->where('openid','=',$this->myinfo['openid'])->update($data);
+            $userauth = Db::table('mp_user')->where('id',$uid)->value('user_auth');
+            if($userauth == 1) {
+                return ajax(true);
+            }else {
+                return ajax(false);
+            }
         }catch (\Exception $e) {
-            return ajax($e->getMessage(),24);
+            return ajax($e->getMessage(),-1);
         }
-        return ajax($decryptedData,1);
     }
 
 
