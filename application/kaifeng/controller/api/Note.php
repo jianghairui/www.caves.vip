@@ -5,7 +5,7 @@
  * Date: 2019/3/11
  * Time: 14:27
  */
-namespace app\kaifeng\api\controller;
+namespace app\kaifeng\controller\api;
 
 use think\Db;
 class Note extends Common {

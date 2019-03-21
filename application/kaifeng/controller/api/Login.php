@@ -5,7 +5,7 @@
  * Date: 2018/9/20
  * Time: 16:36
  */
-namespace app\kaifeng\api\controller;
+namespace app\kaifeng\controller\api;
 use EasyWeChat\Factory;
 use think\Db;
 
@@ -129,6 +129,11 @@ class Login extends Common {
             return ajax($e->getMessage(),-1);
         }
         return ajax($decryptedData,1);
+    }
+
+    public function test() {
+        echo 'test lalala';
+
     }
 
 

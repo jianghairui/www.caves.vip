@@ -5,7 +5,7 @@
  * Date: 2018/9/18
  * Time: 21:36
  */
-namespace app\kaifeng\api\controller;
+namespace app\kaifeng\controller\api;
 use think\Controller;
 use think\Db;
 use think\exception\HttpException;
@@ -44,9 +44,8 @@ class Common extends Controller {
 
     private function checkSession() {
         $noneed = [
-            'Login/login',
-            'Pay/recharge_notify',
-            'Index/test',
+            'Api.login/login',
+            'Api.login/test'
         ];
         if (in_array(request()->controller() . '/' . request()->action(), $noneed)) {
             return true;
