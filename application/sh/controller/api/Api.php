@@ -302,21 +302,15 @@ class Api extends Common {
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
-
-        $exist = Db::table('mp_user')->where('openid','=',$decryptedData['openId'])->find();
-        if($exist['avatar']) {
-            return ajax('已授权',1);
-        }
-
         try {
             $data['nickname'] = $decryptedData['nickName'];
             $data['avatar'] = $decryptedData['avatarUrl'];
             $data['sex'] = $decryptedData['gender'];
-            $data['unionid'] = $decryptedData['unionId'];
+//            $data['unionid'] = $decryptedData['unionId'];
             $data['user_auth'] = 1;
             Db::table('mp_user')->where('openid','=',$decryptedData['openId'])->update($data);
         }catch (\Exception $e) {
-            return ajax($e->getMessage(),4);
+            return ajax($e->getMessage(),-1);
         }
         return ajax('授权成功',1);
     }
