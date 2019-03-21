@@ -133,7 +133,8 @@ class Login extends Common {
 
     public function test() {
         echo 'test lalala';
-
+//        $list = Db::table('mp_user')->select();
+//        halt($list);
     }
 
 
