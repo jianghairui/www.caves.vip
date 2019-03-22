@@ -45,17 +45,22 @@ class Index extends Common
         if($param['search']) {
             $where[] = ['r.title|r.org','like',"%{$param['search']}%"];
         }
+        try {
+            $count = Db::table('mp_req')->alias('r')
+                ->join('mp_role ro','r.uid=ro.uid','left')
+                ->where($where)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_req')->alias('r')
+                ->join('mp_role ro','r.uid=ro.uid','left')
+                ->field('r.*,ro.org')
+                ->order(['r.id'=>'DESC'])
+                ->where($where)->order(['r.id'=>'DESC'])->limit(($curr_page - 1)*$perpage,$perpage)->select();
+        }catch (\Exception $e) {
+            die($e->getMessage());
+        }
 
-        $count = Db::table('mp_req')->alias('r')
-            ->join('mp_role ro','r.uid=ro.uid','left')
-            ->where($where)->count();
-        $page['count'] = $count;
-        $page['curr'] = $curr_page;
-        $page['totalPage'] = ceil($count/$perpage);
-        $list = Db::table('mp_req')->alias('r')
-            ->join('mp_role ro','r.uid=ro.uid','left')
-            ->field('r.*,ro.org')
-            ->where($where)->order(['r.id'=>'DESC'])->limit(($curr_page - 1)*$perpage,$perpage)->select();
         $this->assign('list',$list);
         $this->assign('page',$page);
         $this->assign('status',$param['status']);

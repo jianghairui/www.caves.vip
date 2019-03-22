@@ -155,6 +155,50 @@ class My extends Common {
         }
         return ajax();
     }
+    //获取我的展示作品
+    public function getMyShowWorks() {
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        try {
+            $where = [
+                ['type','=',1],
+                ['uid','=',$this->myinfo['uid']]
+            ];
+            $list = Db::table('mp_design_works')
+                ->where($where)
+                ->field("id,title,pics")
+                ->limit(($curr_page-1)*$perpage,$perpage)->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        foreach ($list as &$v) {
+            $v['cover'] = unserialize($v['pics'])[0];
+            unset($v['pics']);
+        }
+        return ajax($list);
+    }
+    //获取我的参赛作品
+    public function getMyReqWorks() {
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        try {
+            $where = [
+                ['type','=',2],
+                ['uid','=',$this->myinfo['uid']]
+            ];
+            $list = Db::table('mp_design_works')
+                ->where($where)
+                ->field("id,title,req_id,vote,pics")
+                ->limit(($curr_page-1)*$perpage,$perpage)->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        foreach ($list as &$v) {
+            $v['cover'] = unserialize($v['pics'])[0];
+            unset($v['pics']);
+        }
+        return ajax($list);
+    }
     //获取申请审核状态
     public function applyStatus() {
         $uid = $this->myinfo['uid'];

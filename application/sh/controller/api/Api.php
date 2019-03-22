@@ -340,6 +340,19 @@ class Api extends Common {
             return ajax($e->getMessage(),-1);
         }
     }
+    //小程序页面多张图
+    public function getLongImg() {
+        $array = [
+            'static/sh/img/long1.gif',
+            'static/sh/img/long2.gif',
+            'static/sh/img/long3.gif',
+            'static/sh/img/long4.gif',
+            'static/sh/img/long5.gif',
+            'static/sh/img/long6.gif',
+            'static/sh/img/long7.jpg',
+        ];
+        return ajax($array);
+    }
 
     //小程序入驻下单
     public function order() {

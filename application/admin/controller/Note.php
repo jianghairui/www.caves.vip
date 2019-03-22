@@ -43,6 +43,7 @@ class Note extends Common {
             $list = Db::table('mp_note')->alias('n')
                 ->join("mp_user u","n.uid=u.id","left")
                 ->field("n.*,u.nickname")
+                ->order(['n.id'=>'DESC'])
                 ->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
             die('SQL错误: ' . $e->getMessage());
