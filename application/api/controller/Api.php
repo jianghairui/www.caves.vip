@@ -159,6 +159,15 @@ class Api extends Common {
         }
         try {
             $where = [
+                ['req_id','=',$val['req_id']],
+                ['type','=',2],
+                ['uid','=',$this->myinfo['uid']]
+            ];
+            $workExist = Db::table('mp_design_works')->where($where)->find();
+            if($workExist) {
+                return ajax('已参加',31);
+            }
+            $where = [
                 ['id','=',$val['req_id']]
             ];
             $exist = Db::table('mp_req')->where($where)->find();
@@ -258,6 +267,14 @@ class Api extends Common {
         $this->checkPost($val);
         $user = $this->getMyInfo();
         try {
+            $whereVote = [
+                ['work_id','=',$val['work_id']],
+                ['uid','=',$this->myinfo['uid']]
+            ];
+            $vote_exist = Db::table('mp_vote')->where($whereVote)->find();
+            if($vote_exist) {
+                return ajax('已投票',32);
+            }
             $where = [
                 ['id','=',$val['work_id']],
                 ['type','=',2]
@@ -355,9 +372,21 @@ class Api extends Common {
         }
         return ajax($list);
     }
+//
+    public function designerDetail() {
+        $val['uid'] = input('post.uid');
+        $this->checkPost($val);
+        try {
+            $info = Db::table('mp_user')
+                ->where('id',$val['uid'])
+                ->field("id,nickname,avatar,focus,age,desc")
+                ->find();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($info);
 
-
-
+    }
 
     public function getVipList() {
         try {

@@ -14,7 +14,11 @@ class Note extends Common {
     {
         $page = input('page',1);
         $perpage = input('perpage',10);
-        $where = [];
+        $where = [
+            ['n.status','=',1],
+            ['n.del','=',0]
+//            ['n.recommend','=',1]
+        ];
         try {
             $ret['count'] = Db::table('mp_note')->alias('n')->where($where)->count();
             $list = Db::table('mp_note')->alias('n')

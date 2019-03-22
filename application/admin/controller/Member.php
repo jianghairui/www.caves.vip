@@ -237,6 +237,7 @@ class Member extends Common {
             $list = Db::table('mp_vip_order')->alias('o')
                 ->join("mp_user u","o.uid=u.id","left")
                 ->join("mp_vip v","o.vip_id=v.id","left")
+                ->order(['o.create_time'=>'DESC'])
                 ->field("o.*,u.nickname,u.avatar,v.title")
                 ->limit(($curr_page-1)*$perpage,$perpage)
                 ->select();

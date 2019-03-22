@@ -119,6 +119,42 @@ class My extends Common {
         return ajax();
 
     }
+    //上传展示作品
+    public function uploadShowWorks() {
+        $val['title'] = input('post.title');
+        $val['desc'] = input('post.desc');
+        $this->checkPost($val);
+        $val['uid'] = $this->myinfo['uid'];
+        $val['type'] = 1;
+        $val['create_time'] = time();
+        $image = input('post.pics',[]);
+        if(is_array($image) && !empty($image)) {
+            if(count($image) > 9) {
+                return ajax('最多上传9张图片',8);
+            }
+            foreach ($image as $v) {
+                if(!file_exists($v)) {
+                    return ajax($v,5);
+                }
+            }
+        }else {
+            return ajax('请传入图片',3);
+        }
+        try {
+            $image_array = [];
+            foreach ($image as $v) {
+                $image_array[] = $this->rename_file($v,'static/uploads/work/');
+            }
+            $val['pics'] = serialize($image_array);
+            Db::table('mp_design_works')->insert($val);
+        }catch (\Exception $e) {
+            foreach ($image_array as $v) {
+                @unlink($v);
+            }
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax();
+    }
     //获取申请审核状态
     public function applyStatus() {
         $uid = $this->myinfo['uid'];

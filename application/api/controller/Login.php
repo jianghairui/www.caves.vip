@@ -10,7 +10,6 @@ use EasyWeChat\Factory;
 use think\Db;
 
 class Login extends Common {
-
     //小程序登录
     public function login()
     {
