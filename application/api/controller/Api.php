@@ -53,7 +53,7 @@ class Api extends Common {
                 ->alias('r')
                 ->join("mp_user u","r.uid=u.id","left")
                 ->where($where)->order(['r.start_time'=>'ASC'])
-                ->field("r.id,r.title,r.cover,r.start_time,r.end_time,u.org as user_org")
+                ->field("r.id,r.title,r.cover,r.part_num,r.start_time,r.end_time,u.org as user_org")
                 ->limit(($curr_page-1)*$perpage,$perpage)
                 ->select();
         }catch (\Exception $e) {
@@ -198,6 +198,7 @@ class Api extends Common {
                 return ajax('已参加',31);
             }
             Db::table('mp_design_works')->insert($val);
+            Db::table('mp_req')->where('id',$val['req_id'])->setInc('part_num');
         }catch (\Exception $e) {
             foreach ($image_array as $v) {
                 @unlink($v);
