@@ -41,11 +41,12 @@
         </div>
         <div class="row cl">
             <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
-                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 添加</button>
+                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
                 <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
             </div>
         </div>
         <input type="file" name="file" id="file" style="display: none;">
+        <input type="hidden" name="id" value="{$info.id}">
     </form>
 </article>
 
@@ -92,11 +93,11 @@
                     isclick = false
                     $(form).ajaxSubmit({
                         type: 'post',
-                        url: "{:url('Member/vipAddPost')}" ,
+                        url: "{:url('Member/vipModPost')}" ,
                         success: function(data){
                             // console.log(data);return;
                             if(data.code == 1) {
-                                layer.msg('添加成功!',{icon:1,time:1000});
+                                layer.msg('保存成功!',{icon:1,time:1000});
                                 setTimeout("window.parent.location.reload()", 1000)
                             }else {
                                 layer.msg(data.data,{icon:2,time:1000});

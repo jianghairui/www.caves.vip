@@ -158,27 +158,24 @@ class Member extends Common {
     //充值类目详情
     public function vipDetail() {
         $id = input('param.id');
-        $info = Db::table('mp_vip')->where('id',$id)->find();
+        try {
+            $info = Db::table('mp_vip')->where('id',$id)->find();
+        }catch (\Exception $e) {
+            die($e->getMessage());
+        }
         $this->assign('info',$info);
         return $this->fetch();
     }
     //充值类目编辑
     public function vipModPost() {
         $val['title'] = input('post.title');
-        $val['mid'] = input('post.mid');
+        $val['price'] = input('post.price');
+        $val['detail'] = input('post.detail');
+        $val['days'] = input('post.days');
         $val['id'] = input('post.id');
         $this->checkPost($val);
-        $val['url'] = input('post.url');
-        $val['desc'] = input('post.desc');
-        $val['admin_id'] = session('admin_id');
-
-        foreach ($_FILES as $k=>$v) {
-            if($v['name'] == '') {
-                unset($_FILES[$k]);
-            }
-        }
-        if(!empty($_FILES)) {
-            $info = $this->upload(array_keys($_FILES)[0]);
+        if(isset($_FILES['file'])) {
+            $info = $this->upload('file');
             if($info['error'] === 0) {
                 $val['pic'] = $info['data'];
             }else {
@@ -186,8 +183,14 @@ class Member extends Common {
             }
         }
         try {
-            $exist = Db::table('mp_vip')->where('id',$val['id'])->find();
-            Db::table('mp_vip')->update($val);
+            $where = [
+                ['id','=',$val['id']]
+            ];
+            $exist = Db::table('mp_vip')->where($where)->find();
+            if(!$exist) {
+                return ajax('非法参数',-1);
+            }
+            Db::table('mp_vip')->where($where)->update($val);
         }catch (\Exception $e) {
             if(isset($val['pic'])) {
                 @unlink($val['pic']);
@@ -197,24 +200,61 @@ class Member extends Common {
         if(isset($val['pic'])) {
             @unlink($exist['pic']);
         }
-        return ajax();
+        return ajax([],1);
 
     }
     //删除会员
     public function vipDel() {
         $val['id'] = input('post.id');
         $this->checkPost($val);
-        $exist = Db::table('mp_vip')->where('id',$val['id'])->find();
-        if(!$exist) {
-            return ajax('非法操作',-1);
-        }
-        $model = model('vip');
         try {
+            $exist = Db::table('mp_vip')->where('id',$val['id'])->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
+            $model = model('vip');
             $model::destroy($val['id']);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
         return ajax([],1);
+    }
+
+    //拉黑用户
+    public function userStop() {
+        $id = input('post.id');
+        $map = [
+            ['status','=',1],
+            ['id','=',$id]
+        ];
+        try {
+            $res = Db::table('mp_user')->where($map)->update(['status'=>2]);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        if($res) {
+            return ajax([],1);
+        }else {
+            return ajax('拉黑失败',-1);
+        }
+    }
+    //恢复用户
+    public function userGetback() {
+        $id = input('post.id');
+        $map = [
+            ['status','=',2],
+            ['id','=',$id]
+        ];
+        try {
+            $res = Db::table('mp_user')->where($map)->update(['status'=>1]);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        if($res) {
+            return ajax([],1);
+        }else {
+            return ajax('恢复失败',-1);
+        }
     }
 
     public function rechargeList() {

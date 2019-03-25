@@ -79,7 +79,7 @@
                     {switch $li['status']}
                     {case 1}
                     <span class="label label-success radius">正常</span>{/case}
-                    {case 0}
+                    {case 2}
                     <span class="label label-danger radius">已拉黑</span>{/case}
                     {default /}
                     {/switch}
@@ -133,12 +133,11 @@
         });
     }
 
-
     $("#search-btn").click(function () {
         var logmin = $("#formAjax").find("#logmin").val();
         var logmax = $("#formAjax").find("#logmax").val();
         var search = $("#formAjax").find("#search").val();
-        var str = ''
+        var str = '';
         if(logmin.length != '') {
             str += '&logmin=' + logmin
         }
@@ -160,8 +159,7 @@
         });
         layer.full(index);
     }
-    
-    
+
     function user_stop(obj,id) {
         layer.confirm('确认要拉黑吗？',function(index){
             $.ajax({
@@ -188,7 +186,7 @@
     }
 
     function user_start(obj,id) {
-        layer.confirm('确认恢复吗？恢复后用户需重新认证',function(index){
+        layer.confirm('确认恢复吗？',function(index){
             $.ajax({
                 url:"{:url('Member/userGetback')}",
                 type:'post',
@@ -197,7 +195,7 @@
                 success:function(data) {
                     console.log(data)
                     if(data.code == 1) {
-                        $(obj).parents("tr").find(".td-status").html('<span class="label label-warning radius">未认证</span>')
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">正常</span>')
                         $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="user_stop(this,'+id+')" href="javascript:;" title="恢复"><i class="Hui-iconfont">&#xe631;</i></a>');
                         $(obj).remove();
                         layer.msg('已恢复!',{icon: 1,time:1000});

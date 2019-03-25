@@ -29,14 +29,15 @@ class My extends Common {
         $page = input('page',1);
         $perpage = input('perpage',10);
         $where = [
-            ['n.uid','=',$this->myinfo['uid']]
+            ['n.uid','=',$this->myinfo['uid']],
+            ['n.del','=',0]
         ];
         try {
             $ret['count'] = Db::table('mp_note')->alias('n')->where($where)->count();
             $list = Db::table('mp_note')->alias('n')
                 ->join('mp_user u','n.uid=u.id','left')
                 ->where($where)
-                ->field('n.id,n.title,n.pics,u.nickname,n.like')
+                ->field('n.id,n.title,n.pics,u.nickname,n.like,n.status')
                 ->order(['n.create_time'=>'DESC'])
                 ->limit(($page-1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
@@ -48,20 +49,103 @@ class My extends Common {
         $ret['list'] = $list;
         return ajax($ret);
     }
+    //获取我自己的笔记详情
+    public function getMyNoteDetail() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        $val['uid'] = $this->myinfo['uid'];
+        try {
+            $where = [
+                ['id','=',$val['id']],
+                ['uid','=',$val['uid']],
+                ['del','=',0]
+            ];
+            $exist = Db::table('mp_note')->where($where)
+                ->field("id,title,content,pics,status,reason")
+                ->find();
+            if(!$exist) {
+                return ajax($val['id'],-4);
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        $exist['pics'] = unserialize($exist['pics']);
+        return ajax($exist);
+    }
+    //编辑笔记
+    public function noteMod ()
+    {
+        $val['id'] = input('post.id');
+        $val['title'] = input('post.title');
+        $val['content'] = input('post.content');
+        $this->checkPost($val);
+        $val['uid'] = $this->myinfo['uid'];
+        $image = input('post.pics',[]);
+
+        $where = [
+            ['id','=',$val['id']],
+            ['uid','=',$this->myinfo['uid']]
+        ];
+        try {
+            $exist = Db::table('mp_note')->where($where)->find();
+            if(!$exist) {
+                return ajax($val['id'],-4);
+            }
+            if($exist['status'] == 0) {
+                return ajax('当前状态无法修改',34);
+            }
+            $old_pics = unserialize($exist['pics']);
+            if(is_array($image) && !empty($image)) {
+                if(count($image) > 9) {
+                    return ajax('最多上传9张图片',8);
+                }
+                foreach ($image as $v) {
+                    if(!file_exists($v)) {
+                        return ajax($v,5);
+                    }
+                }
+            }else {
+                return ajax('请传入图片',3);
+            }
+            $image_array = [];
+            foreach ($image as $v) {
+                $image_array[] = $this->rename_file($v);
+            }
+            $val['pics'] = serialize($image_array);
+            $val['status'] = 0;
+            Db::table('mp_note')->where($where)->update($val);
+        }catch (\Exception $e) {
+            foreach ($image_array as $v) {
+                if(!in_array($v,$old_pics)) {
+                    @unlink($v);
+                }
+            }
+            return ajax($e->getMessage(),-1);
+        }
+        foreach ($old_pics as $v) {
+            if(!in_array($v,$image_array)) {
+                @unlink($v);
+            }
+        }
+        return ajax();
+    }
     //获取我的收藏笔记列表
     public function getMyCollectedNoteList() {
         $page = input('page',1);
         $perpage = input('perpage',10);
         $where = [
-            ['n.uid','=',$this->myinfo['uid']]
+            ['c.uid','=',$this->myinfo['uid']]
         ];
         try {
-            $ret['count'] = Db::table('mp_collect')->alias('c')->where($where)->count();
+            $ret['count'] = Db::table('mp_collect')->alias('c')
+                ->join('mp_note n','c.note_id=n.id','left')
+                ->join('mp_user u','c.uid=u.id','left')
+                ->where($where)->count();
             $list = Db::table('mp_collect')->alias('c')
                 ->join('mp_note n','c.note_id=n.id','left')
-                ->join('mp_user u','n.uid=u.id','left')
+                ->join('mp_user u','c.uid=u.id','left')
                 ->where($where)
-                ->field('n.id,n.title,n.pics,u.nickname,n.like')
+                ->field('n.id,n.title,n.pics,u.nickname,u.avatar,n.like')
                 ->order(['n.create_time'=>'DESC'])
                 ->limit(($page-1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
@@ -118,6 +202,69 @@ class My extends Common {
         }
         return ajax();
 
+    }
+    //获取需求详情
+    public function reqDetail() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['r.status','=',1],
+                ['r.show','=',1],
+                ['r.del','=',0],
+                ['r.id','=',$val['id']],
+            ];
+            $info = Db::table('mp_req')->alias('r')
+                ->join("mp_user u","r.uid=u.id","left")
+                ->where($where)
+                ->field("r.*,u.org as user_org")
+                ->find();
+            if(!$info) {
+                return ajax($val['id'],-4);
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($info);
+    }
+    //编辑需求
+    public function reqMod() {
+
+    }
+    //我发布的需求或我参与的需求列表
+    public function myReqList() {
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        $val['uid'] = $this->myinfo['uid'];
+        $where = [];
+        try {
+            $user = $this->getMyInfo();
+            if($user['auth'] != 2) {
+                return ajax([]);
+            }
+            if($user['role'] == 1) {
+                $where = [
+                    ['r.status','=',1],
+                    ['r.show','=',1],
+                    ['r.del','=',0],
+                    ['r.uid','=',$val['uid']]
+                ];
+            }
+            $list = Db::table('mp_req')
+                ->alias('r')
+                ->join("mp_user u","r.uid=u.id","left")
+                ->where($where)->order(['r.start_time'=>'ASC'])
+                ->field("r.id,r.title,r.cover,r.part_num,r.start_time,r.end_time,u.org as user_org")
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        foreach ($list as &$v) {
+            $v['start_time'] = date('Y-m-d',strtotime($v['start_time']));
+            $v['end_time'] = date('Y-m-d',strtotime($v['end_time']));
+        }
+        return ajax($list);
     }
     //上传展示作品
     public function uploadShowWorks() {
@@ -225,8 +372,7 @@ class My extends Common {
         }
     }
     //申请角色
-    public function apply()
-    {
+    public function apply() {
         $val['role'] = input('post.role');
         $val['name'] = input('post.name');
         $val['identity'] = input('post.identity');
@@ -235,6 +381,12 @@ class My extends Common {
         $val['uid'] = $this->myinfo['uid'];
         $this->checkPost($val);
         $val['desc'] = input('post.desc');
+        $val['org'] = input('post.org','');
+        $val['weixin'] = input('post.weixin');
+        $id_front = input('post.id_front');
+        $id_back = input('post.id_back');
+        $cover = input('post.cover');
+        $works = input('post.works', []);
 
         if(!in_array($val['role'],[1,2,3,4])) {
             return ajax($val['role'],-4);
@@ -245,33 +397,31 @@ class My extends Common {
         if (!is_tel($val['tel'])) {
             return ajax('', 6);
         }
-
-        $id_front = input('post.id_front');
-        $id_back = input('post.id_back');
+        if(!$cover) {
+            return ajax('请上传封面',33);
+        }
+        if (!file_exists($cover)) {
+            return ajax('封面图片不存在', 5);
+        }
         if(!$id_front || !$id_back) {
-            return ajax('',18);
+            return ajax('上传身份证正反面',18);
         }
         if (!file_exists($id_front) || !file_exists($id_back)) {
-            return ajax('invalid id_image', 5);
+            return ajax('身份证图片不存在', 5);
         }
-        try {
-            //验证短信验证码
+        try {//验证短信验证码
             $code_exist = Db::table('mp_verify')->where([
                 ['tel','=',$val['tel']],
                 ['code','=',$val['code']]
             ])->find();
             if($code_exist) {
                 if((time() - $code_exist['create_time']) > 60*5) {
-                    return ajax('',17);
+                    return ajax('验证码已过期',17);
                 }
             }else {
-                return ajax('',16);
+                return ajax('验证码无效',16);
             }
-
-            $val['org'] = input('post.org','');
-            $val['weixin'] = input('post.weixin');
-            $works = input('post.works', []);
-            $image_array = [];
+            $image_array = [];//验证设计师作品
             if($val['role'] == 3) {
                 if (is_array($works) && !empty($works)) {
                     if (count($works) > 6) {
@@ -299,30 +449,15 @@ class My extends Common {
                 $val['license'] = $this->rename_file($license,'static/uploads/role/');
             }
             $val['works'] = serialize($image_array);
+            $val['cover'] = $this->rename_file($cover,'static/uploads/role/');
             $val['id_front'] = $this->rename_file($id_front,'static/uploads/role/');
             $val['id_back'] = $this->rename_file($id_back,'static/uploads/role/');
 
             $role_exist = Db::table('mp_role')->where('uid',$val['uid'])->find();
             unset($val['code']);
             if($role_exist) {
-                Db::table('mp_role')->where('uid',$val['uid'])->update($val);
                 $old_works = unserialize($role_exist['works']);
-                if($val['role'] == 3) {
-                    foreach ($old_works as $v) {
-                        if(!in_array($v,$image_array)) {
-                            @unlink($v);
-                        }
-                    }
-                }
-                if(isset($val['license']) && $val['license'] != $role_exist['license']) {
-                    @unlink($role_exist['license']);
-                }
-                if($val['id_front'] != $role_exist['id_front']) {
-                    @unlink($role_exist['id_front']);
-                }
-                if($val['id_back'] != $role_exist['id_back']) {
-                    @unlink($role_exist['id_back']);
-                }
+                Db::table('mp_role')->where('uid',$val['uid'])->update($val);
             }else {
                 Db::table('mp_role')->insert($val);
             }
@@ -331,19 +466,51 @@ class My extends Common {
                 'auth' => 1,
                 'org' => $val['org']
             ]);
-        }catch (\Exception $e) {
-            foreach ($image_array as $v) {
-                @unlink($v);
+        }catch (\Exception $e) {//异常删图
+            if($role_exist) {
+                if(isset($val['license']) && $val['license'] != $role_exist['license']) {
+                    @unlink($role_exist['license']);
+                }
+                foreach ($image_array as $v) {
+                    if(!in_array($v,$old_works)) {
+                        @unlink($v);
+                    }
+                }
+            }else {
+                if(isset($val['license'])) {
+                    @unlink($val['license']);
+                }
+                foreach ($image_array as $v) {
+                    @unlink($v);
+                }
+                @unlink($val['cover']);
+                @unlink($val['id_front']);
+                @unlink($val['id_back']);
             }
-            if(isset($val['license'])) {
-                @unlink($val['license']);
-            }
-            @unlink($val['id_front']);
-            @unlink($val['id_back']);
             return ajax($e->getMessage(),-1);
         }
+        if($role_exist) {//正常删图
+            if(isset($val['license']) && $val['license'] != $role_exist['license']) {
+                @unlink($role_exist['license']);
+            }
+            if($val['cover'] != $role_exist['cover']) {
+                @unlink($role_exist['cover']);
+            }
+            if($val['id_front'] != $role_exist['id_front']) {
+                @unlink($role_exist['id_front']);
+            }
+            if($val['id_back'] != $role_exist['id_back']) {
+                @unlink($role_exist['id_back']);
+            }
+            if($val['role'] == 3) {
+                foreach ($old_works as $v) {
+                    if(!in_array($v,$image_array)) {
+                        @unlink($v);
+                    }
+                }
+            }
+        }
         return ajax();
-
     }
     //申请角色发送手机短信
     public function sendSms() {

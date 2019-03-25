@@ -250,7 +250,7 @@ class Api extends Common {
                 ->join("mp_user u","w.uid=u.id","left")
                 ->join("mp_role r","w.uid=r.uid","left")
                 ->where('w.id',$val['id'])
-                ->field("w.id,w.title,w.desc,w.pics,u.avatar,r.name")
+                ->field("w.id,w.title,w.desc,w.pics,w.type,u.avatar,r.name")
                 ->find();
             if(!$exist) {
                 return ajax($val['id'],-4);
@@ -348,7 +348,7 @@ class Api extends Common {
         }
         return ajax($list);
     }
-//设计师
+//设计师展示作品
     public function designerShowWorkList() {
         $val['uid'] = input('post.uid');
         $curr_page = input('post.page',1);
@@ -372,7 +372,7 @@ class Api extends Common {
         }
         return ajax($list);
     }
-//
+//设计师详情
     public function designerDetail() {
         $val['uid'] = input('post.uid');
         $this->checkPost($val);
@@ -387,7 +387,7 @@ class Api extends Common {
         return ajax($info);
 
     }
-
+//充值类目列表
     public function getVipList() {
         try {
             $list = Db::table('mp_vip')->where([
@@ -398,7 +398,7 @@ class Api extends Common {
         }
         return ajax($list);
     }
-
+    //充值
     public function recharge() {
         $val['vip_id'] = input('post.vip_id');
         $val['name'] = input('post.name');
@@ -423,6 +423,114 @@ class Api extends Common {
         return ajax($val);
 
     }
+    //博文列表
+    public function orgList() {
+        $val['role'] = input('post.role');
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        $this->checkPost($val);
+        if(!in_array($val['role'],[1,2])) {
+            return ajax($val['role'],-4);
+        }
+        try {
+            $where = [
+                ['role','=',$val['role']]
+            ];
+            $list = Db::table('mp_role')
+                ->where($where)
+                ->field("uid,cover,role,org,name,desc")
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($list);
+    }
+    //博文详情
+    public function orgDetail() {
+        $val['uid'] = input('post.uid');
+        $this->checkPost($val);
+        $where = [
+            ['uid','=',$val['uid']]
+        ];
+        try {
+            $info = Db::table('mp_role')->where($where)->field("uid,cover,role,org,name,desc")->find();
+            if(!$info) {
+                return ajax($val['id'],-4);
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($info);
+    }
+    //博文笔记
+    public function orgNoteList() {
+        $page = input('page',1);
+        $perpage = input('perpage',10);
+        $val['uid'] = input('post.uid');
+        $this->checkPost($val);
+        $where = [
+            ['n.uid','=',$val['uid']],
+            ['n.del','=',0]
+        ];
+        try {
+            $ret['count'] = Db::table('mp_note')->alias('n')->where($where)->count();
+            $list = Db::table('mp_note')->alias('n')
+                ->join('mp_user u','n.uid=u.id','left')
+                ->where($where)
+                ->field('n.id,n.title,n.pics,n.like,n.status')
+                ->order(['n.create_time'=>'DESC'])
+                ->limit(($page-1)*$perpage,$perpage)->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        foreach ($list as &$v) {
+            $v['pics'] = unserialize($v['pics']);
+        }
+        $ret['list'] = $list;
+        return ajax($ret);
+    }
+    //博文需求列表
+    public function orgReqList() {
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        $val['uid'] = input('post.uid');
+        $this->checkPost($val);
+        $where = [
+            ['r.status','=',1],
+            ['r.show','=',1],
+            ['r.del','=',0],
+            ['r.uid','=',$val['uid']]
+        ];
+        try {
+            $list = Db::table('mp_req')
+                ->alias('r')
+                ->join("mp_user u","r.uid=u.id","left")
+                ->where($where)->order(['r.start_time'=>'ASC'])
+                ->field("r.id,r.title,r.cover,r.part_num,r.start_time,r.end_time,u.org as user_org")
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        foreach ($list as &$v) {
+            $v['start_time'] = date('Y-m-d',strtotime($v['start_time']));
+            $v['end_time'] = date('Y-m-d',strtotime($v['end_time']));
+        }
+        return ajax($list);
+    }
+    //
+
+
+
+
+
+
+
+
+
+
+
 
 //上传图片限制512KB
     public function uploadImage() {
