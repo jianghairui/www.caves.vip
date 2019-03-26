@@ -97,6 +97,7 @@
                 <input type="text" class="input-text" value="{$info.weixin}" placeholder="" name="weixin" readonly>
             </div>
         </div>
+        {if $info['role'] == 3}
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-3">
                 作品6张：
@@ -118,6 +119,7 @@
                 </ul>
             </div>
         </div>
+        {/if}
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-3">
                 资质证明：

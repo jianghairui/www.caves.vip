@@ -23,14 +23,14 @@ class Api extends Common {
                 'video_url' => 'static/sh/video/001.mp4',
                 'poster' => 'static/sh/video/poster-001.JPG'
             ],
-            [
-                'video_url' => 'static/sh/video/002.mp4',
-                'poster' => 'static/sh/video/poster-002.JPG'
-            ],
-            [
-                'video_url' => 'static/sh/video/003.mp4',
-                'poster' => 'static/sh/video/poster-003.JPG'
-            ],
+//            [
+//                'video_url' => 'static/sh/video/002.mp4',
+//                'poster' => 'static/sh/video/poster-002.JPG'
+//            ],
+//            [
+//                'video_url' => 'static/sh/video/003.mp4',
+//                'poster' => 'static/sh/video/poster-003.JPG'
+//            ],
             [
                 'video_url' => 'static/sh/video/004.mp4',
                 'poster' => 'static/sh/video/poster-004.JPG'

@@ -185,7 +185,7 @@ class My extends Common {
             if(!file_exists($image)) {
                 return ajax($image,5);
             }
-            $val['cover'] = $this->rename_file($image);
+            $val['cover'] = $this->rename_file($image,'static/uploads/req/');
         }else {
             return ajax('请传入图片',3);
         }
@@ -216,7 +216,6 @@ class My extends Common {
             }
             if(in_array($user['role'],[1,2])) {
                 $where = [
-                    ['r.status','=',1],
                     ['r.show','=',1],
                     ['r.del','=',0],
                     ['r.uid','=',$val['uid']]
@@ -244,7 +243,7 @@ class My extends Common {
                 ->alias('r')
                 ->join("mp_user u","r.uid=u.id","left")
                 ->where($where)->order(['r.start_time'=>'ASC'])
-                ->field("r.id,r.title,r.cover,r.part_num,r.start_time,r.end_time,u.org as user_org")
+                ->field("r.id,r.title,r.cover,r.part_num,r.status,r.start_time,r.end_time,u.org as user_org")
                 ->limit(($curr_page-1)*$perpage,$perpage)
                 ->select();
         }catch (\Exception $e) {
@@ -262,7 +261,6 @@ class My extends Common {
         $this->checkPost($val);
         try {
             $where = [
-                ['r.status','=',1],
                 ['r.show','=',1],
                 ['r.del','=',0],
                 ['r.id','=',$val['id']],
@@ -320,13 +318,14 @@ class My extends Common {
                 if(!file_exists($image)) {
                     return ajax($image,5);
                 }
-                $val['cover'] = $this->rename_file($image);
+                $val['cover'] = $this->rename_file($image,'static/uploads/req/');
             }else {
                 return ajax('请传入图片',3);
             }
             $val['deadline'] = date('Y-m-d 23:59:59',strtotime($val['deadline']));
             $val['vote_time'] = date('Y-m-d 23:59:59',strtotime($val['vote_time']));
             $val['end_time'] = date('Y-m-d 23:59:59',strtotime($val['end_time']));
+            $val['status'] = 0;
             Db::table('mp_req')->where($where)->update($val);
         }catch (\Exception $e) {
             if(isset($val['cover']) && $val['cover'] != $exist['cover']) {
@@ -339,7 +338,6 @@ class My extends Common {
         }
         return ajax();
     }
-
     //上传展示作品
     public function uploadShowWorks() {
         $val['title'] = input('post.title');
