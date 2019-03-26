@@ -8,11 +8,16 @@
 namespace app\api\controller;
 
 use think\Controller;
+use think\Db;
 
 class Test extends Controller {
 
     public function test() {
-        echo 'HELLO';
+        $req_ids = Db::table('mp_design_works')->where([
+            ['uid','=',2],
+            ['type','=',2]
+        ])->column('req_id');
+        var_dump($req_ids);
     }
 
 }

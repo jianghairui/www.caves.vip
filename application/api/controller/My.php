@@ -203,6 +203,59 @@ class My extends Common {
         return ajax();
 
     }
+    //我发布的需求或我参与的需求列表
+    public function myReqList() {
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        $val['uid'] = $this->myinfo['uid'];
+        $where = [];
+        try {
+            $user = $this->getMyInfo();
+            if($user['auth'] != 2) {
+                return ajax([]);
+            }
+            if(in_array($user['role'],[1,2])) {
+                $where = [
+                    ['r.status','=',1],
+                    ['r.show','=',1],
+                    ['r.del','=',0],
+                    ['r.uid','=',$val['uid']]
+                ];
+            }
+            if($user['role'] == 3) {
+                $req_ids = Db::table('mp_design_works')->where([
+                    ['uid','=',$val['uid']],
+                    ['type','=',2]
+                ])->column('req_id');
+                if(!$req_ids) {
+                    return ajax([]);
+                }
+                $where = [
+                    ['r.status','=',1],
+                    ['r.show','=',1],
+                    ['r.del','=',0],
+                    ['r.id','in',$req_ids]
+                ];
+            }
+            if($user['role'] == 4) {
+                return ajax([]);
+            }
+            $list = Db::table('mp_req')
+                ->alias('r')
+                ->join("mp_user u","r.uid=u.id","left")
+                ->where($where)->order(['r.start_time'=>'ASC'])
+                ->field("r.id,r.title,r.cover,r.part_num,r.start_time,r.end_time,u.org as user_org")
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        foreach ($list as &$v) {
+            $v['start_time'] = date('Y-m-d',strtotime($v['start_time']));
+            $v['end_time'] = date('Y-m-d',strtotime($v['end_time']));
+        }
+        return ajax($list);
+    }
     //获取需求详情
     public function reqDetail() {
         $val['id'] = input('post.id');
@@ -229,43 +282,64 @@ class My extends Common {
     }
     //编辑需求
     public function reqMod() {
-
-    }
-    //我发布的需求或我参与的需求列表
-    public function myReqList() {
-        $curr_page = input('post.page',1);
-        $perpage = input('post.perpage',10);
+        $val['title'] = input('post.title');
+        $val['org'] = input('post.org');
+        $val['explain'] = input('post.explain');
+        $val['theme'] = input('post.theme');
+        $val['part_obj'] = input('post.part_obj');
+        $val['part_way'] = input('post.part_way');
+        $val['linkman'] = input('post.linkman');
+        $val['tel'] = input('post.tel');
+        $val['start_time'] = input('post.start_time');
+        $val['deadline'] = input('post.deadline');
+        $val['vote_time'] = input('post.vote_time');
+        $val['end_time'] = input('post.end_time');
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
         $val['uid'] = $this->myinfo['uid'];
-        $where = [];
+        $val['weixin'] = input('post.weixin');
+
+        $user = $this->getMyInfo();
+        if(!in_array($user['role'],[1,2]) || $user['auth'] != 2) {
+            return ajax('当前角色状态无法发布需求',24);
+        }
         try {
-            $user = $this->getMyInfo();
-            if($user['auth'] != 2) {
-                return ajax([]);
+            $where = [
+                ['id','=',$val['id']],
+                ['uid','=',$val['uid']]
+            ];
+            $exist = Db::table('mp_req')->where($where)->find();
+            if(!$exist) {
+                return ajax($val['id'],-4);
             }
-            if($user['role'] == 1) {
-                $where = [
-                    ['r.status','=',1],
-                    ['r.show','=',1],
-                    ['r.del','=',0],
-                    ['r.uid','=',$val['uid']]
-                ];
+            if($exist['status'] != 2) {
+                return ajax('当前活动状态无法修改',34);
             }
-            $list = Db::table('mp_req')
-                ->alias('r')
-                ->join("mp_user u","r.uid=u.id","left")
-                ->where($where)->order(['r.start_time'=>'ASC'])
-                ->field("r.id,r.title,r.cover,r.part_num,r.start_time,r.end_time,u.org as user_org")
-                ->limit(($curr_page-1)*$perpage,$perpage)
-                ->select();
+            $image = input('post.cover','');
+            if($image) {
+                if(!file_exists($image)) {
+                    return ajax($image,5);
+                }
+                $val['cover'] = $this->rename_file($image);
+            }else {
+                return ajax('请传入图片',3);
+            }
+            $val['deadline'] = date('Y-m-d 23:59:59',strtotime($val['deadline']));
+            $val['vote_time'] = date('Y-m-d 23:59:59',strtotime($val['vote_time']));
+            $val['end_time'] = date('Y-m-d 23:59:59',strtotime($val['end_time']));
+            Db::table('mp_req')->where($where)->update($val);
         }catch (\Exception $e) {
+            if(isset($val['cover']) && $val['cover'] != $exist['cover']) {
+                @unlink($val['cover']);
+            }
             return ajax($e->getMessage(),-1);
         }
-        foreach ($list as &$v) {
-            $v['start_time'] = date('Y-m-d',strtotime($v['start_time']));
-            $v['end_time'] = date('Y-m-d',strtotime($v['end_time']));
+        if(isset($val['cover']) && $val['cover'] != $exist['cover']) {
+            @unlink($exist['cover']);
         }
-        return ajax($list);
+        return ajax();
     }
+
     //上传展示作品
     public function uploadShowWorks() {
         $val['title'] = input('post.title');
