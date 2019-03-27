@@ -12,13 +12,17 @@ class Note extends Common {
     //获取笔记列表
     public function getNoteList()
     {
+        $search = input('post.search','');
         $page = input('page',1);
         $perpage = input('perpage',10);
         $where = [
             ['n.status','=',1],
-            ['n.del','=',0]
-//            ['n.recommend','=',1]
+            ['n.del','=',0],
+            ['n.recommend','=',1]
         ];
+        if($search) {
+            $where[] = ['n.title','like',"%{$search}%"];
+        }
         try {
             $ret['count'] = Db::table('mp_note')->alias('n')->where($where)->count();
             $list = Db::table('mp_note')->alias('n')
@@ -271,6 +275,63 @@ WHERE c.note_id=?",[$val['note_id']]);
         }
         return ajax(true);
     }
+    //判断是否收藏
+    public function ifFocus() {
+        $val['to_uid'] = input('post.to_uid');
+        $this->checkPost($val);
+        $val['uid'] = $this->myinfo['uid'];
+        try {
+            $exist = Db::table('mp_user')->where('id',$val['to_uid'])->find();
+            if(!$exist) {
+                return ajax('invalid to_uid',-4);
+            }
+            $map = [
+                ['uid','=',$val['uid']],
+                ['to_uid','=',$val['to_uid']]
+            ];
+            $exist = Db::table('mp_focus')->where($map)->find();
+            if($exist) {
+                $like = true;
+            }else {
+                $like = false;
+            }
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($like);
+    }
+    //收藏/取消收藏
+    public function iFocus() {
+        $val['to_uid'] = input('post.to_uid');
+        $this->checkPost($val);
+        $val['uid'] = $this->myinfo['uid'];
+        try {
+            $user_exist = Db::table('mp_user')->where('id',$val['to_uid'])->find();
+            if(!$user_exist) {
+                return ajax('invalid to_uid',-4);
+            }
+            if($val['to_uid'] == $val['uid']) {
+                return ajax('我关注我自己',38);
+            }
+            $map = [
+                ['uid','=',$val['uid']],
+                ['to_uid','=',$val['to_uid']]
+            ];
+            $exist = Db::table('mp_focus')->where($map)->find();
+            if($exist) {
+                Db::table('mp_focus')->where($map)->delete();
+                Db::table('mp_user')->where('id',$val['to_uid'])->setDec('focus',1);
+                return ajax(false);
+            }else {
+                Db::table('mp_focus')->insert($val);
+                Db::table('mp_user')->where('id',$val['to_uid'])->setInc('focus',1);
+                return ajax(true);
+            }
+
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+    }
 
     private function sortMerge($node,$pid=0)
     {
@@ -296,6 +357,8 @@ WHERE c.note_id=?",[$val['note_id']]);
         }
         return $to_array;
     }
+
+
 
 
 }

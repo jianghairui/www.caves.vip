@@ -58,11 +58,11 @@
                 </td>
                 <td>
                     {if $li['recommend']}
-                    <a style="text-decoration:none;color:gold;" class="ml-5" onClick="recommend(this,{$li.id})" href="javascript:;" title="编辑">
+                    <a style="text-decoration:none;color:gold;" class="ml-5" onClick="recommend(this,{$li.id})" href="javascript:;" title="取消推荐">
                     <i class="Hui-iconfont">&#xe630;</i>
                     </a>
                     {else /}
-                    <a style="text-decoration:none;color:#aaa" class="ml-5" onClick="recommend(this,{$li.id})" href="javascript:;" title="编辑">
+                    <a style="text-decoration:none;color:#aaa" class="ml-5" onClick="recommend(this,{$li.id})" href="javascript:;" title="推荐">
                         <i class="Hui-iconfont">&#xe630;</i>
                     </a>
                     {/if}
@@ -236,10 +236,10 @@
                     console.log(data);
                     if(data.code == 1) {
                         if(data.data == true) {
-                            $(obj).parent().prepend('<a style="text-decoration:none;color:gold;" class="ml-5" onClick="recommend(this,' + id + ')" href="javascript:;" title="编辑"> <i class="Hui-iconfont">&#xe630;</i>');
+                            $(obj).parent().prepend('<a style="text-decoration:none;color:gold;" class="ml-5" onClick="recommend(this,' + id + ')" href="javascript:;" title="取消推荐"> <i class="Hui-iconfont">&#xe630;</i>');
                             $(obj).remove();
                         }else {
-                            $(obj).parent().prepend('<a style="text-decoration:none;color:#aaa;" class="ml-5" onClick="recommend(this,' + id + ')" href="javascript:;" title="编辑"> <i class="Hui-iconfont">&#xe630;</i>');
+                            $(obj).parent().prepend('<a style="text-decoration:none;color:#aaa;" class="ml-5" onClick="recommend(this,' + id + ')" href="javascript:;" title="推荐"> <i class="Hui-iconfont">&#xe630;</i>');
                             $(obj).remove();
                         }
                         click_lock = true;

@@ -9,6 +9,7 @@ namespace app\api\controller;
 use my\Sendsms;
 use think\Db;
 class My extends Common {
+
     //获取个人信息
     public function mydetail() {
         $map = [
@@ -22,6 +23,40 @@ class My extends Common {
             return ajax($e->getMessage(),-1);
         }
         return ajax($info);
+    }
+    //点击头像编辑个人资料
+    public function modMyInfo() {
+        $val['realname'] = input('post.realname');
+        $val['sex'] = input('post.sex');
+        $val['age'] = input('post.age');
+        $val['tel'] = input('post.tel');
+        $this->checkPost($val);
+        $val['desc'] = input('post.desc','');
+        $val['id'] = $this->myinfo['uid'];
+        $user = $this->getMyInfo();
+        try {
+            $avatar = input('post.avatar');
+            if($avatar) {
+                if (substr($avatar,0,4) == 'http') {
+                    $val['avatar'] = $avatar;
+                }else {
+                    $val['avatar'] = $this->rename_file($avatar,'static/uploads/role/');
+                }
+            }else {
+                return ajax('',3);
+            }
+            Db::table('mp_user')->where('id',$val['id'])->update($val);
+        } catch (\Exception $e) {
+            if ($val['avatar'] != $user['avatar']) {
+                @unlink($val['avatar']);
+            }
+            return ajax($e->getMessage(), -1);
+        }
+        if ($val['avatar'] != $user['avatar']) {
+            @unlink($user['avatar']);
+        }
+        return ajax();
+
     }
     //获取我发的笔记列表
     public function getMyNoteList()
@@ -536,7 +571,8 @@ class My extends Common {
             Db::table('mp_user')->where('id',$val['uid'])->update([
                 'role' => $val['role'],
                 'auth' => 1,
-                'org' => $val['org']
+                'org' => $val['org'],
+                'desc' => $val['desc']
             ]);
         }catch (\Exception $e) {//异常删图
             if($role_exist) {

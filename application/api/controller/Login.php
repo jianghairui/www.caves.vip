@@ -60,6 +60,7 @@ class Login extends Common {
             return ajax($e->getMessage(),-1);
         }
         $json['token'] = $third_session;
+        $json['uid'] = $uid;
         return ajax($json);
     }
     //保存用户信息

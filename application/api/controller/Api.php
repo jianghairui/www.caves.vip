@@ -517,8 +517,7 @@ class Api extends Common
         }
         return ajax($list);
     }
-
-    //充值
+//充值
     public function recharge()
     {
         $val['vip_id'] = input('post.vip_id');
@@ -544,7 +543,6 @@ class Api extends Common
         return ajax($val);
 
     }
-
     //博文列表
     public function orgList()
     {
@@ -569,7 +567,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
     //博文详情
     public function orgDetail()
     {
@@ -589,7 +586,6 @@ class Api extends Common
         }
         return ajax($info);
     }
-
     //博文工设笔记
     public function userNoteList()
     {
@@ -618,7 +614,6 @@ class Api extends Common
         $ret['list'] = $list;
         return ajax($ret);
     }
-
     //博文需求列表
     public function orgReqList()
     {
@@ -649,7 +644,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
     //工厂列表
     public function factoryList()
     {
@@ -667,12 +661,11 @@ class Api extends Common
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
+
         return ajax($list);
     }
-
     //工厂详情
-    public function factoryDetail()
-    {
+    public function factoryDetail() {
         $val['uid'] = input('post.uid');
         $this->checkPost($val);
         $where = [
@@ -689,19 +682,31 @@ class Api extends Common
         }
         return ajax($info);
     }
-
-    //
+    //工厂竞标列表
     public function factoryBiddingList()
     {
         $val['uid'] = input('post.uid');
+        $curr_page = input('post.page', 1);
+        $perpage = input('post.perpage', 10);
         $this->checkPost($val);
-        //            $list = Db::table()
         try {
-
+            $where = [
+                ['b.uid','=',$val['uid']]
+            ];
+            $list = Db::table('mp_bidding')->alias('b')
+                ->join("mp_design_works w","b.work_id=w.id","left")
+                ->join("mp_req r","b.req_id=r.id","left")
+                ->join("mp_role ro","r.uid=ro.uid","left")
+                ->field("b.work_id,b.req_id,b.create_time,w.title as work_title,w.pics,r.title as req_title,ro.org")
+                ->limit(($curr_page - 1) * $perpage, $perpage)
+                ->where($where)->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
-
+        foreach ($list as &$v) {
+            $v['pics'] = unserialize($v['pics']);
+        }
+        return ajax($list);
     }
 
 
