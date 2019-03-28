@@ -72,6 +72,31 @@ class Api extends Common
         return ajax($list);
     }
 
+    public function getActiveList() {
+        $where = [
+            ['r.status', '=', 1],
+            ['r.show', '=', 1],
+            ['r.del', '=', 0],
+            ['r.recommend', '=', 1]
+        ];
+        try {
+            $list = Db::table('mp_req')
+                ->alias('r')
+                ->join("mp_user u", "r.uid=u.id", "left")
+                ->where($where)->order(['r.start_time' => 'ASC'])
+                ->field("r.id,r.title,r.pic,r.cover,r.part_num,r.start_time,r.end_time,u.org as user_org")
+                ->limit(0,3)
+                ->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        foreach ($list as &$v) {
+            $v['start_time'] = date('Y-m-d', strtotime($v['start_time']));
+            $v['end_time'] = date('Y-m-d', strtotime($v['end_time']));
+        }
+        return ajax($list);
+    }
+
 //获取活动详情
     public function getReqDetail()
     {
@@ -329,7 +354,7 @@ class Api extends Common
                 ->join("mp_user u", "w.uid=u.id", "left")
                 ->join("mp_role r", "w.uid=r.uid", "left")
                 ->where('w.id', $val['id'])
-                ->field("w.id,w.title,w.desc,w.pics,w.type,u.avatar,r.name")
+                ->field("w.id,w.title,w.desc,w.pics,w.type,u.avatar,u.nickname,r.name")
                 ->find();
             if (!$exist) {
                 return ajax($val['id'], -4);

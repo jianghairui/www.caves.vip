@@ -24,6 +24,7 @@
         <thead>
         <tr class="text-c">
             <th width="25">#</th>
+            <th width="80">封面</th>
             <th>标题</th>
             <th width="100">发布人</th>
             <th width="150">发布时间</th>
@@ -37,6 +38,9 @@
             {foreach $list as $li}
             <tr class="text-c userinfo">
                 <td>{$li.id}</td>
+                <td>
+                    <div style="width: 80px;height: 80px;background-image: url('/{$li.cover}');background-position: center;background-repeat: no-repeat;background-size: cover"></div>
+                </td>
                 <td>{$li.title}</td>
                 <td>{$li.nickname}</td>
                 <td>{$li.create_time|strtotime|date="Y-m-d H:i"}</td>

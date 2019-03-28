@@ -43,23 +43,27 @@
                 <td>{$li.create_time|date="Y-m-d H:i:s"}</td>
                 <td>
                     {switch $li['status']}
-                    {case -1}
-                    支付失败{/case}
                     {case 0}
-                    待支付{/case}
+                    <span class="label label-warning radius">待支付</span>
+                    {/case}
                     {case 1}
-                    已支付{/case}
+                    <span class="label label-success radius">已支付</span>
+                    {/case}
                     {case 2}
-                    已发货{/case}
-                    {case 3}
-                    已收货{/case}
+                    <span class="label label-success radius">已完成</span>
+                    {/case}
                     {default /}
                     {/switch}
                 </td>
                 <td class="td-manage">
-                    <a title="查看详情" href="javascript:;" onclick="">
+                    <a title="查看详情" href="javascript:;" onclick="detail('订单详情','{:url("Member/rechargeDetail",array("id"=>$li["id"]))}')">
                     <i class="Hui-iconfont">&#xe6df;</i>
                     </a>
+                    {if $li['send'] == 0 && $li['status'] == 1}
+                    <a title="查看详情" href="javascript:;" onclick="">
+                        <i class="Hui-iconfont">&#xe669;</i>
+                    </a>
+                    {/if}
                 </td>
             </tr>
             <tr>

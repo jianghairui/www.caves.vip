@@ -34,7 +34,8 @@ class Login extends Common {
                     'last_login_time'=>time(),
                     'openid'=>$ret['openid']
                 ];
-                $uid = Db::table('mp_user')->insert($insert);
+                Db::table('mp_user')->insert($insert);
+                $uid = Db::table('mp_user')->getLastInsID();
             }
             $third_session = exec('/usr/bin/head -n 80 /dev/urandom | tr -dc A-Za-z0-9 | head -c 168');
             $token_exist = Db::table('mp_token')->where('uid',$uid)->find();

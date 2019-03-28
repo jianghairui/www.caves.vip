@@ -48,7 +48,9 @@ class Note extends Common {
         }catch (\Exception $e) {
             die('SQL错误: ' . $e->getMessage());
         }
-
+        foreach ($list as &$v) {
+            $v['cover'] = unserialize($v['pics'])[0];
+        }
         $this->assign('list',$list);
         $this->assign('page',$page);
         return $this->fetch();

@@ -6,7 +6,7 @@
  * Time: 15:16
  */
 return array(
-    'app_trace' => true,
+    'app_trace' => false,
     'trace'     =>  [
         //支持Html,Console
         'type'  =>  'html',

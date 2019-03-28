@@ -50,7 +50,7 @@ class Member extends Common {
         $page['count'] = $count;
         $page['curr'] = $curr_page;
         $page['totalPage'] = ceil($count/$perpage);
-        $list = Db::table('mp_user')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
+        $list = Db::table('mp_user')->where($where)->order(['id'=>'DESC'])->limit(($curr_page - 1)*$perpage,$perpage)->select();
         $this->assign('list',$list);
         $this->assign('page',$page);
         $this->assign('status',$param['status']);
@@ -265,6 +265,16 @@ class Member extends Common {
 
         $page['query'] = http_build_query(input('param.'));
 
+        if($param['logmin']) {
+            $where[] = ['o.create_time','>=',strtotime(date('Y-m-d 00:00:00',strtotime($param['logmin'])))];
+        }
+        if($param['logmax']) {
+            $where[] = ['create_time','<=',strtotime(date('Y-m-d 23:59:59',strtotime($param['logmax'])))];
+        }
+        if($param['search']) {
+            $where[] = ['nickname|tel','like',"%{$param['search']}%"];
+        }
+
         $curr_page = input('param.page',1);
         $perpage = input('param.perpage',10);
 
@@ -286,6 +296,24 @@ class Member extends Common {
         }
         $this->assign('list',$list);
         $this->assign('page',$page);
+        return $this->fetch();
+    }
+
+    public function rechargeDetail() {
+        $id = input('param.id');
+        try {
+            $where = [
+                ['o.id','=',$id]
+            ];
+            $info = Db::table('mp_vip_order')->alias('o')
+                ->join("mp_vip v","o.vip_id=v.id","left")
+                ->where($where)
+                ->field("o.*,v.title,v.detail,v.pic")
+                ->find();
+        }catch (\Exception $e) {
+            die($e->getMessage());
+        }
+        $this->assign('info',$info);
         return $this->fetch();
     }
 

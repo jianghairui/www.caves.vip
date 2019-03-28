@@ -27,10 +27,12 @@ class My extends Common {
     //点击头像编辑个人资料
     public function modMyInfo() {
         $val['realname'] = input('post.realname');
+        $val['nickname'] = input('post.nickname');
         $val['sex'] = input('post.sex');
         $val['age'] = input('post.age');
         $val['tel'] = input('post.tel');
         $this->checkPost($val);
+
         $val['desc'] = input('post.desc','');
         $val['id'] = $this->myinfo['uid'];
         $user = $this->getMyInfo();
@@ -178,7 +180,7 @@ class My extends Common {
                 ->where($where)->count();
             $list = Db::table('mp_collect')->alias('c')
                 ->join('mp_note n','c.note_id=n.id','left')
-                ->join('mp_user u','c.uid=u.id','left')
+                ->join('mp_user u','n.uid=u.id','left')
                 ->where($where)
                 ->field('n.id,n.title,n.pics,u.nickname,u.avatar,n.like')
                 ->order(['n.create_time'=>'DESC'])
@@ -620,6 +622,32 @@ class My extends Common {
         }
         return ajax();
     }
+//我的竞标列表
+    public function myBiddingList() {
+        $val['uid'] = $this->myinfo['uid'];
+        $curr_page = input('post.page', 1);
+        $perpage = input('post.perpage', 10);
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['b.uid','=',$val['uid']]
+            ];
+            $list = Db::table('mp_bidding')->alias('b')
+                ->join("mp_design_works w","b.work_id=w.id","left")
+                ->join("mp_req r","b.req_id=r.id","left")
+                ->join("mp_role ro","r.uid=ro.uid","left")
+                ->field("b.work_id,b.req_id,b.create_time,w.title as work_title,w.pics,r.title as req_title,ro.org")
+                ->limit(($curr_page - 1) * $perpage, $perpage)
+                ->where($where)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        foreach ($list as &$v) {
+            $v['pics'] = unserialize($v['pics']);
+        }
+        return ajax($list);
+    }
+
     //申请角色发送手机短信
     public function sendSms() {
         $val['tel'] = input('post.tel');

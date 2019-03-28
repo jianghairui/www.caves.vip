@@ -10,8 +10,7 @@ namespace app\api\controller;
 use think\Db;
 class Note extends Common {
     //获取笔记列表
-    public function getNoteList()
-    {
+    public function getNoteList() {
         $search = input('post.search','');
         $page = input('page',1);
         $perpage = input('perpage',10);
