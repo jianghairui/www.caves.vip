@@ -519,9 +519,10 @@ class Api extends Common
         $val['uid'] = input('post.uid');
         $this->checkPost($val);
         try {
-            $info = Db::table('mp_user')
-                ->where('id', $val['uid'])
-                ->field("id,nickname,avatar,focus,age")
+            $info = Db::table('mp_user')->alias('u')
+                ->join("mp_role r","u.id=r.uid","left")
+                ->where('u.id', $val['uid'])
+                ->field("u.id,u.nickname,u.avatar,u.focus,u.age,r.desc")
                 ->find();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
