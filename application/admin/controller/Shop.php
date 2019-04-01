@@ -7,6 +7,8 @@
  */
 namespace app\admin\controller;
 use think\Db;
+use think\facade\Request;
+
 class Shop extends Common {
 
     public function goodsList() {
@@ -37,7 +39,12 @@ class Shop extends Common {
 
     public function goodsAdd() {
         try {
-            $list = Db::table('mp_goods_cate')->where('pid',0)->select();
+            $where = [
+                ['pid','=',0],
+                ['del','=',0],
+                ['status','=',1]
+            ];
+            $list = Db::table('mp_goods_cate')->where($where)->select();
         }catch (\Exception $e) {
             die($e->getMessage());
         }
@@ -45,41 +52,78 @@ class Shop extends Common {
         return $this->fetch();
     }
 
+    public function getCateList() {
+        $pid = input('post.pid');
+        $where = [
+            ['pid','=',$pid],
+            ['del','=',0],
+            ['status','=',1]
+        ];
+        try {
+            $list = Db::table('mp_goods_cate')->where($where)->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($list);
+    }
+
     public function goodsDetail() {
         $id = input('param.id');
-        $info = Db::table('free_goods')->where('id','=',$id)->find();
+        try {
+            $info = Db::table('free_goods')->where('id','=',$id)->find();
+        }catch (\Exception $e) {
+            die($e->getMessage());
+        }
         $this->assign('info',$info);
         return $this->fetch();
     }
 
     public function goodsAddPost() {
         if(Request::isAjax()) {
-            $val['goods_name'] = input('post.goods_name');
+            $val['pcate_id'] = input('post.pcate_id');
+            $val['cate_id'] = input('post.cate_id');
+            $val['name'] = input('post.name');
+            $val['origin_price'] = input('post.origin_price');
             $val['price'] = input('post.price');
-            $val['neednum'] = input('post.neednum');
+            $val['stock'] = input('post.stock');
+            $val['sort'] = input('post.sort');
+            $val['hot'] = input('post.hot');
+            $val['sales'] = input('post.sales');
+            $val['status'] = input('post.status');
+            $val['unit'] = input('post.unit');
+
+            $val['detail'] = input('post.detail');
             $val['status'] = input('post.status');
             $val['create_time'] = time();
             $this->checkPost($val);
-
-            if(isset($_FILES['file1'])) {
-                $info = $this->upload('file1');
-                if($info['error'] === 0) {
-                    $val['pic'] = $info['data'];
-                }else {
-                    return ajax($info['msg'],-1);
+            $image = input('post.pic_url',[]);
+            $image_array = [];
+            if(is_array($image) && !empty($image)) {
+                if(count($image) > 5) {
+                    return ajax('最多上传5张图片',-1);
                 }
+                foreach ($image as $v) {
+                    if(!file_exists($v)) {
+                        return ajax('无效的图片路径',-1);
+                    }
+                }
+                foreach ($image as $v) {
+                    $image_array[] = $this->rename_file($v);
+                }
+            }else {
+                return ajax('请上传图片',-1);
             }
-
+            $val['pics'] = serialize($image_array);
             try {
-                $res = Db::table('free_goods')->insert($val);
+                $res = Db::table('mp_goods')->insert($val);
             }catch (\Exception $e) {
                 return ajax($e->getMessage(),-1);
             }
             if($res) {
                 return ajax([],1);
             }else {
-                if(isset($_FILES['file1'])) {
-                    @unlink('.'.$val['pic']);
+                foreach ($image_array as $v) {
+                    @unlink($v);
                 }
                 return ajax('添加失败',-1);
             }

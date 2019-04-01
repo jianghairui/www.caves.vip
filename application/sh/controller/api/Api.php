@@ -19,10 +19,10 @@ class Api extends Common {
 
     public function getVideo() {
         $list = [
-            [
-                'video_url' => 'static/sh/video/tcy02.mp4',
-                'poster' => 'static/sh/video/poster-tcy02.JPG'
-            ],
+//            [
+//                'video_url' => 'static/sh/video/tcy02.mp4',
+//                'poster' => 'static/sh/video/poster-tcy02.JPG'
+//            ],
             [
                 'video_url' => 'static/sh/video/001.mp4',
                 'poster' => 'static/sh/video/poster-001.JPG'

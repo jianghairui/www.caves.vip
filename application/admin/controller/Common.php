@@ -122,11 +122,11 @@ class Common extends Controller {
 
     protected function checkPost($postArray) {
         if(empty($postArray)) {
-            throw new HttpResponseException(ajax('数据不能为空',-3));
+            throw new HttpResponseException(ajax($postArray,-3));
         }
         foreach ($postArray as $value) {
             if (is_null($value) || $value === '') {
-                throw new HttpResponseException(ajax('数据不能为空',-3));
+                throw new HttpResponseException(ajax($postArray,-3));
             }
         }
         return true;
@@ -157,7 +157,48 @@ class Common extends Controller {
         Db::table('mp_syslog')->insert($insert);
     }
 
+    protected function ajaxUpload($k,$maxsize=512) {
+        $allowType = array(
+            "image/gif",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/pjpeg",
+            "image/bmp"
+        );
+        if($_FILES[$k]["type"] == '') {
+            throw new HttpResponseException(ajax('图片存在中文名或超过2M',20));
+        }
+        if(!in_array($_FILES[$k]["type"],$allowType)) {
+            throw new HttpResponseException(ajax('文件类型不符' . $_FILES[$k]["type"],21));
+        }
+        if($_FILES[$k]["size"] > $maxsize*1024) {
+            throw new HttpResponseException(ajax('图片大小不超过'.$maxsize.'Kb',22));
+        }
+        if ($_FILES[$k]["error"] > 0) {
+            throw new HttpResponseException(ajax("error: " . $_FILES[$k]["error"],-1));
+        }
 
+        $filename_array = explode('.',$_FILES[$k]['name']);
+        $ext = array_pop($filename_array);
+
+        $path =  'static/tmp/';
+        is_dir($path) or mkdir($path,0755,true);
+        //转移临时文件
+        $newname = create_unique_number() . '.' . $ext;
+        move_uploaded_file($_FILES[$k]["tmp_name"], $path . $newname);
+        $filepath = $path . $newname;
+        return $filepath;
+    }
+
+    protected function rename_file($tmp,$path = '') {
+        $filename = substr(strrchr($tmp,"/"),1);
+        $path = $path ? $path : 'static/upload/goods/';
+        $path.= date('Y-m-d') . '/';
+        is_dir($path) or mkdir($path,0755,true);
+        @rename($tmp, $path . $filename);
+        return $path . $filename;
+    }
 
 
 }

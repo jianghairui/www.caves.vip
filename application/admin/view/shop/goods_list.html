@@ -24,11 +24,11 @@
             <th width="25">#</th>
             <th width="100">商品图片</th>
             <th>商品名</th>
-            <th width="60">商品价值</th>
-            <th width="90">有效时长</th>
-            <th width="80">所需人数</th>
-            <th width="80">已完成数量</th>
-            <th width="120">添加时间</th>
+            <th width="60">商品价格</th>
+            <th width="90">库存</th>
+            <th width="80">排序</th>
+            <th width="80">是否热销</th>
+            <th width="80">状态</th>
             <th width="100">操作</th>
         </tr>
         </thead>
@@ -38,14 +38,15 @@
             <tr class="text-c userinfo">
                 <td>{$li.id}</td>
                 <td>
-                    <div style="width: 80px;height: 80px;background-image: url('{if $li['pic']}{$li.pic}{else /}/static/src/image/default.jpg{/if}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                    <?php $image = unserialize($li['pics'])[0];?>
+                    <div style="width: 80px;height: 80px;background-image: url('/{$image}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
                 </td>
-                <td>{$li.goods_name}</td>
+                <td>{$li.name}</td>
                 <td>{$li.price}</td>
-                <td>{$li.times}</td>
-                <td>{$li.neednum}</td>
-                <td>{$li.count}</td>
-                <td>{$li.create_time|date="Y-m-d H:i:s"}</td>
+                <td>{$li.stock}</td>
+                <td>{$li.sort}</td>
+                <td>{$li.hot}</td>
+                <td>{$li.status}</td>
                 <td class="td-manage">
                     {if $li['status'] == '1'}
                     <a style="text-decoration:none" onClick="goods_hide(this,{$li.id})" href="javascript:;" title="下架">
