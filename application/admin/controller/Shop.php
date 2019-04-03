@@ -410,8 +410,40 @@ class Shop extends Common {
         return ajax();
     }
 
+    public function orderList() {
+        $param['search'] = input('param.search');
+        $page['query'] = http_build_query(input('param.'));
 
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $where = [];
+        if($param['search']) {
+            $where[] = ['order_sn|tel','like',"%{$param['search']}%"];
+        }
+        $count = Db::table('mp_order')->where($where)->count();
+        try {
+            $list = Db::table('mp_order')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
+        }catch (\Exception $e) {
+            die('SQL错误: ' . $e->getMessage());
+        }
+        $page['count'] = $count;
+        $page['curr'] = $curr_page;
+        $page['totalPage'] = ceil($count/$perpage);
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
+    }
 
+    public function orderDetail() {
 
+    }
+
+    public function orderModPost() {
+
+    }
+
+    public function orderDel() {
+
+    }
 
 }
