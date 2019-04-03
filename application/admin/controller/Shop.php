@@ -7,6 +7,8 @@
  */
 namespace app\admin\controller;
 use think\Db;
+use think\facade\Request;
+
 class Shop extends Common {
 
     public function goodsList() {
@@ -37,7 +39,12 @@ class Shop extends Common {
 
     public function goodsAdd() {
         try {
-            $list = Db::table('mp_goods_cate')->where('pid',0)->select();
+            $where = [
+                ['pid','=',0],
+                ['del','=',0],
+                ['status','=',1]
+            ];
+            $list = Db::table('mp_goods_cate')->where($where)->select();
         }catch (\Exception $e) {
             die($e->getMessage());
         }
@@ -45,41 +52,96 @@ class Shop extends Common {
         return $this->fetch();
     }
 
+    public function getCateList() {
+        $pid = input('post.pid');
+        $where = [
+            ['pid','=',$pid],
+            ['del','=',0],
+            ['status','=',1]
+        ];
+        try {
+            $list = Db::table('mp_goods_cate')->where($where)->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($list);
+    }
+
     public function goodsDetail() {
         $id = input('param.id');
-        $info = Db::table('free_goods')->where('id','=',$id)->find();
+        try {
+            $where = [
+                ['pid','=',0],
+                ['del','=',0],
+                ['status','=',1]
+            ];
+            $info = Db::table('mp_goods')->where('id','=',$id)->find();
+            $list = Db::table('mp_goods_cate')->where($where)->select();
+
+            $where = [
+                ['pid','=',$info['pcate_id']],
+                ['del','=',0],
+                ['status','=',1]
+            ];
+            $child = Db::table('mp_goods_cate')->where($where)->select();
+        }catch (\Exception $e) {
+            die($e->getMessage());
+        }
+        $this->assign('list',$list);
+        $this->assign('child',$child);
         $this->assign('info',$info);
         return $this->fetch();
     }
 
     public function goodsAddPost() {
         if(Request::isAjax()) {
-            $val['goods_name'] = input('post.goods_name');
+            $val['pcate_id'] = input('post.pcate_id');
+            $val['cate_id'] = input('post.cate_id');
+            $val['name'] = input('post.name');
+            $val['origin_price'] = input('post.origin_price');
             $val['price'] = input('post.price');
-            $val['neednum'] = input('post.neednum');
+            $val['stock'] = input('post.stock');
+            $val['sort'] = input('post.sort');
+            $val['hot'] = input('post.hot');
+            $val['sales'] = input('post.sales');
+            $val['status'] = input('post.status');
+            $val['unit'] = input('post.unit');
+            $val['carriage'] = input('post.carriage');
+            $val['reduction'] = input('post.reduction');
+            $val['service'] = input('post.service');
+            $val['desc'] = input('post.desc');
             $val['status'] = input('post.status');
             $val['create_time'] = time();
             $this->checkPost($val);
-
-            if(isset($_FILES['file1'])) {
-                $info = $this->upload('file1');
-                if($info['error'] === 0) {
-                    $val['pic'] = $info['data'];
-                }else {
-                    return ajax($info['msg'],-1);
+            $val['detail'] = input('post.detail');
+            $image = input('post.pic_url',[]);
+            $image_array = [];
+            if(is_array($image) && !empty($image)) {
+                if(count($image) > 5) {
+                    return ajax('最多上传5张图片',-1);
                 }
+                foreach ($image as $v) {
+                    if(!file_exists($v)) {
+                        return ajax('无效的图片路径',-1);
+                    }
+                }
+                foreach ($image as $v) {
+                    $image_array[] = $this->rename_file($v);
+                }
+            }else {
+                return ajax('请上传图片',-1);
             }
-
+            $val['pics'] = serialize($image_array);
             try {
-                $res = Db::table('free_goods')->insert($val);
+                $res = Db::table('mp_goods')->insert($val);
             }catch (\Exception $e) {
                 return ajax($e->getMessage(),-1);
             }
             if($res) {
                 return ajax([],1);
             }else {
-                if(isset($_FILES['file1'])) {
-                    @unlink('.'.$val['pic']);
+                foreach ($image_array as $v) {
+                    @unlink($v);
                 }
                 return ajax('添加失败',-1);
             }
@@ -88,48 +150,70 @@ class Shop extends Common {
 
     public function goodsModPost() {
         if(Request::isAjax()) {
-            $val['goods_name'] = input('post.goods_name');
+            $val['pcate_id'] = input('post.pcate_id');
+            $val['cate_id'] = input('post.cate_id');
+            $val['name'] = input('post.name');
+            $val['origin_price'] = input('post.origin_price');
             $val['price'] = input('post.price');
-            $val['neednum'] = input('post.neednum');
+            $val['stock'] = input('post.stock');
+            $val['sort'] = input('post.sort');
+            $val['hot'] = input('post.hot');
+            $val['sales'] = input('post.sales');
+            $val['status'] = input('post.status');
+            $val['unit'] = input('post.unit');
+            $val['carriage'] = input('post.carriage');
+            $val['reduction'] = input('post.reduction');
+            $val['service'] = input('post.service');
+            $val['desc'] = input('post.desc');
             $val['status'] = input('post.status');
             $val['id'] = input('post.id');
+            $val['create_time'] = time();
             $this->checkPost($val);
+            $val['detail'] = input('post.detail');
 
+            $image = input('post.pic_url',[]);
             try {
-                $exist = Db::table('free_goods')->where('id','=',$val['id'])->find();
-            }catch (\Exception $e) {
-                return ajax($e->getMessage(),-1);
-            }
-
-            if(!$exist) {
-                return ajax('非法参数',-1);
-            }
-
-            if(isset($_FILES['file1'])) {
-                $info = $this->upload('file1');
-                if($info['error'] === 0) {
-                    $val['pic'] = $info['data'];
+                $map = [
+                    ['id','=',$val['id']],
+                    ['del','=',0]
+                ];
+                $exist = Db::table('mp_goods')->where($map)->find();
+                if(!$exist) {
+                    return ajax('非法参数',-1);
+                }
+                $old_pics = unserialize($exist['pics']);
+                $image_array = [];
+                if(is_array($image) && !empty($image)) {
+                    if(count($image) > 5) {
+                        return ajax('最多上传5张图片',-1);
+                    }
+                    foreach ($image as $v) {
+                        if(!file_exists($v)) {
+                            return ajax('无效的图片路径',-1);
+                        }
+                    }
+                    foreach ($image as $v) {
+                        $image_array[] = $this->rename_file($v);
+                    }
                 }else {
-                    return ajax($info['msg'],-1);
+                    return ajax('请上传图片',-1);
                 }
-            }
-
-            try {
-                $res = Db::table('free_goods')->where('id','=',$val['id'])->update($val);
+                $val['pics'] = serialize($image_array);
+                Db::table('mp_goods')->where($map)->update($val);
             }catch (\Exception $e) {
+                foreach ($image_array as $v) {
+                    if(!in_array($v,$old_pics)) {
+                        @unlink($v);
+                    }
+                }
                 return ajax($e->getMessage(),-1);
             }
-            if($res !== false) {
-                if(isset($_FILES['file1'])) {
-                    @unlink('.'.$exist['pic']);
+            foreach ($old_pics as $v) {
+                if(!in_array($v,$image_array)) {
+                    @unlink($v);
                 }
-                return ajax([],1);
-            }else {
-                if(isset($_FILES['file1'])) {
-                    @unlink('.'.$val['pic']);
-                }
-                return ajax('保存失败',-1);
             }
+            return ajax([],1);
         }
     }
 
@@ -140,7 +224,7 @@ class Shop extends Common {
             ['status','=',1]
         ];
         try {
-            $res = Db::table('free_goods')->where($map)->update(['status'=>0]);
+            $res = Db::table('mp_goods')->where($map)->update(['status'=>0]);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
@@ -152,11 +236,38 @@ class Shop extends Common {
     }
 
     public function goodsShow() {
-
+        $id = input('post.id','0');
+        $map = [
+            ['id','=',$id],
+            ['status','=',0]
+        ];
+        try {
+            $res = Db::table('mp_goods')->where($map)->update(['status'=>1]);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        if($res) {
+            return ajax();
+        }else {
+            return ajax('共修改0条记录',-1);
+        }
     }
 
     public function goodsDel() {
-
+        $id = input('post.id','0');
+        $map = [
+            ['id','=',$id]
+        ];
+        try {
+            $res = Db::table('mp_goods')->where($map)->update(['del'=>1]);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        if($res) {
+            return ajax();
+        }else {
+            return ajax('共修改0条记录',-1);
+        }
     }
 
     public function cateList() {
@@ -299,8 +410,40 @@ class Shop extends Common {
         return ajax();
     }
 
+    public function orderList() {
+        $param['search'] = input('param.search');
+        $page['query'] = http_build_query(input('param.'));
 
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $where = [];
+        if($param['search']) {
+            $where[] = ['order_sn|tel','like',"%{$param['search']}%"];
+        }
+        $count = Db::table('mp_order')->where($where)->count();
+        try {
+            $list = Db::table('mp_order')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
+        }catch (\Exception $e) {
+            die('SQL错误: ' . $e->getMessage());
+        }
+        $page['count'] = $count;
+        $page['curr'] = $curr_page;
+        $page['totalPage'] = ceil($count/$perpage);
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
+    }
 
+    public function orderDetail() {
 
+    }
+
+    public function orderModPost() {
+
+    }
+
+    public function orderDel() {
+
+    }
 
 }

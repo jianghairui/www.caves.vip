@@ -209,6 +209,15 @@ function authcodeToken($str) {
     return md5($key . $str);
 }
 
+function gen_unique_number($letter = '')
+{
+    $time = explode (" ", microtime ());
+    $timeArr = explode('.',$time [0]);
+    $mtime = array_pop($timeArr);
+    $fulltime = $letter.$time[1].$mtime;
+    return $fulltime;
+}
+
 function create_unique_number($letter = '')
 {
     $time = explode (" ", microtime ());

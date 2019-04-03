@@ -46,7 +46,7 @@ class Common extends Controller {
         $noneed = [
             'Login/login',
             'Pay/recharge_notify',
-            'Index/test',
+            'Pay/order_notify'
         ];
         if (in_array(request()->controller() . '/' . request()->action(), $noneed)) {
             return true;
@@ -93,7 +93,6 @@ class Common extends Controller {
         $values = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
         return $values;
     }
-
     /**
      * 工具方法，将一个数组转成 xml 格式
      */

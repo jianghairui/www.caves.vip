@@ -10,21 +10,7 @@ use think\Db;
 use EasyWeChat\Factory;
 class Order extends Common {
 
-    public function orderList() {
 
-    }
-
-    public function orderDetail() {
-
-    }
-
-    public function orderModPost() {
-
-    }
-
-    public function refund() {
-
-    }
 
 
 

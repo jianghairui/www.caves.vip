@@ -37,7 +37,8 @@
             {foreach $list as $li}
             <tr class="text-c userinfo">
                 <td>{$li.id}</td>
-                <td><img src="{if $li['avatar']}{$li.avatar}{else /}/static/src/image/default.jpg{/if}" alt=""></td>
+                <td><img src="{if $li['avatar']}
+                {if substr($li['avatar'],0,4) == 'http'}{$li['avatar']}{else /}/{$li['avatar']}{/if}{else /}/static/src/image/default.jpg{/if}" alt=""></td>
                 <td>{$li.nickname}</td>
                 <td>
                     {switch $li['sex']}
