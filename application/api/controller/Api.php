@@ -72,6 +72,7 @@ class Api extends Common
         return ajax($list);
     }
 
+//获取首页活动标题列表
     public function getActiveList() {
         $where = [
             ['r.status', '=', 1],
@@ -543,6 +544,7 @@ class Api extends Common
         }
         return ajax($list);
     }
+
 //充值
     public function recharge()
     {
@@ -569,7 +571,8 @@ class Api extends Common
         return ajax($val);
 
     }
-    //博文列表
+
+//博文列表
     public function orgList()
     {
         $val['role'] = input('post.role');
@@ -593,7 +596,8 @@ class Api extends Common
         }
         return ajax($list);
     }
-    //博文详情
+
+//博文详情
     public function orgDetail()
     {
         $val['uid'] = input('post.uid');
@@ -612,6 +616,7 @@ class Api extends Common
         }
         return ajax($info);
     }
+
     //博文工设笔记
     public function userNoteList()
     {
@@ -640,6 +645,7 @@ class Api extends Common
         $ret['list'] = $list;
         return ajax($ret);
     }
+
     //博文需求列表
     public function orgReqList()
     {
@@ -670,6 +676,7 @@ class Api extends Common
         }
         return ajax($list);
     }
+
     //工厂列表
     public function factoryList()
     {
@@ -690,6 +697,7 @@ class Api extends Common
 
         return ajax($list);
     }
+
     //工厂详情
     public function factoryDetail() {
         $val['uid'] = input('post.uid');

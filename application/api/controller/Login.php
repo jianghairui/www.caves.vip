@@ -10,6 +10,7 @@ use EasyWeChat\Factory;
 use think\Db;
 
 class Login extends Common {
+
     //小程序登录
     public function login()
     {
@@ -22,7 +23,6 @@ class Login extends Common {
         }
         $ret['openid'] = $info['openid'];
         $ret['session_key'] = $info['session_key'];
-//        $ret['unionid'] = $info['unionid'];
 
         try {
             $exist = Db::table('mp_user')->where('openid',$ret['openid'])->find();
@@ -33,8 +33,7 @@ class Login extends Common {
                 $insert = [
                     'create_time'=>time(),
                     'last_login_time'=>time(),
-                    'openid'=>$ret['openid'],
-//                    'unionid'=>$ret['unionid']
+                    'openid'=>$ret['openid']
                 ];
                 Db::table('mp_user')->insert($insert);
                 $uid = Db::table('mp_user')->getLastInsID();
@@ -64,6 +63,7 @@ class Login extends Common {
         $json['uid'] = $uid;
         return ajax($json);
     }
+
     //保存用户信息
     public function userAuth() {
         $iv = input('post.iv');
@@ -93,6 +93,7 @@ class Login extends Common {
         }
         return ajax('保存成功',1);
     }
+
     //检测用户是否授权
     public function checkUserAuth() {
         $uid = $this->myinfo['uid'];
@@ -107,6 +108,7 @@ class Login extends Common {
             return ajax($e->getMessage(),-1);
         }
     }
+
     //保存手机号
     public function getPhoneNumber() {
 

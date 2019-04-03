@@ -86,33 +86,6 @@ class Common extends Controller {
         return true;
     }
 
-    protected function xml2array($xml)
-    {
-        //禁止引用外部xml实体
-        libxml_disable_entity_loader(true);
-        $values = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
-        return $values;
-    }
-    /**
-     * 工具方法，将一个数组转成 xml 格式
-     */
-    protected function array2xml($arr) {
-        if(!is_array($arr) || count($arr) <= 0) {
-            return false;
-        }
-        $xml = "<xml>";
-        foreach ($arr as $key=>$val)
-        {
-            if (is_numeric($val)){
-                $xml.="<".$key.">".$val."</".$key.">";
-            }else{
-                $xml.="<".$key."><![CDATA[".$val."]]></".$key.">";
-            }
-        }
-        $xml.="</xml>";
-        return $xml;
-    }
-
     protected function upload($k,$maxsize=512) {
         $allowType = array(
             "image/gif",
@@ -178,6 +151,31 @@ class Common extends Controller {
         return urldecode($str);
     }
 
+    protected function xml2array($xml)
+    {
+        //禁止引用外部xml实体
+        libxml_disable_entity_loader(true);
+        $values = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+        return $values;
+    }
+
+    protected function array2xml($arr) {
+        if(!is_array($arr) || count($arr) <= 0) {
+            return false;
+        }
+        $xml = "<xml>";
+        foreach ($arr as $key=>$val)
+        {
+            if (is_numeric($val)){
+                $xml.="<".$key.">".$val."</".$key.">";
+            }else{
+                $xml.="<".$key."><![CDATA[".$val."]]></".$key.">";
+            }
+        }
+        $xml.="</xml>";
+        return $xml;
+    }
+    //获取我的个人信息
     protected function getMyInfo() {
         $where = [
             ['id','=',$this->myinfo['uid']]
@@ -189,7 +187,7 @@ class Common extends Controller {
         }
         return $info;
     }
-
+    //Exception日志
     protected function log($cmd,$str) {
         $file= ROOT_PATH . '/exception_api.txt';
         $text='[Time ' . date('Y-m-d H:i:s') ."]\ncmd:" .$cmd. "\n" .$str. "\n---END---" . "\n";
@@ -199,7 +197,7 @@ class Common extends Controller {
             echo '创建失败';
         }
     }
-
+    //支付回调日志
     protected function paylog($cmd,$str) {
         $file= ROOT_PATH . '/notify.txt';
         $text='[Time ' . date('Y-m-d H:i:s') ."]\ncmd:" .$cmd. "\n" .$str. "\n---END---" . "\n";

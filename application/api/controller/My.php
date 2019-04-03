@@ -622,7 +622,7 @@ class My extends Common {
         }
         return ajax();
     }
-//我的竞标列表
+    //我的竞标列表
     public function myBiddingList() {
         $val['uid'] = $this->myinfo['uid'];
         $curr_page = input('post.page', 1);
@@ -647,7 +647,6 @@ class My extends Common {
         }
         return ajax($list);
     }
-
     //申请角色发送手机短信
     public function sendSms() {
         $val['tel'] = input('post.tel');
@@ -688,6 +687,29 @@ class My extends Common {
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
+    }
+
+    //我的订单列表
+    public function orderList() {
+
+    }
+    //查看订单详情
+    public function orderDetail() {
+
+    }
+    //申请退款
+    public function refundApply() {
+
+    }
+    //确认收货
+    public function orderConfirm() {
+
+    }
+    //
+
+    //我的裂变二维码
+    public function myQrcode() {
+
     }
 
 

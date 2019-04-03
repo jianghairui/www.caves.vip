@@ -10,7 +10,7 @@ use think\Db;
 use think\facade\Request;
 
 class Shop extends Common {
-
+//商品列表
     public function goodsList() {
         $param['search'] = input('param.search');
         $page['query'] = http_build_query(input('param.'));
@@ -27,7 +27,9 @@ class Shop extends Common {
         $page['curr'] = $curr_page;
         $page['totalPage'] = ceil($count/$perpage);
         try {
-            $list = Db::table('mp_goods')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
+            $list = Db::table('mp_goods')
+                ->where($where)
+                ->limit(($curr_page - 1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
             die('SQL错误: ' . $e->getMessage());
         }
@@ -36,7 +38,7 @@ class Shop extends Common {
         $this->assign('page',$page);
         return $this->fetch();
     }
-
+//添加商品
     public function goodsAdd() {
         try {
             $where = [
@@ -51,7 +53,7 @@ class Shop extends Common {
         $this->assign('list',$list);
         return $this->fetch();
     }
-
+//添加修改商品时获取分类列表
     public function getCateList() {
         $pid = input('post.pid');
         $where = [
@@ -66,7 +68,7 @@ class Shop extends Common {
         }
         return ajax($list);
     }
-
+//商品详情
     public function goodsDetail() {
         $id = input('param.id');
         try {
@@ -92,7 +94,7 @@ class Shop extends Common {
         $this->assign('info',$info);
         return $this->fetch();
     }
-
+//添加商品POST
     public function goodsAddPost() {
         if(Request::isAjax()) {
             $val['pcate_id'] = input('post.pcate_id');
@@ -147,7 +149,7 @@ class Shop extends Common {
             }
         }
     }
-
+//修改商品POST
     public function goodsModPost() {
         if(Request::isAjax()) {
             $val['pcate_id'] = input('post.pcate_id');
@@ -216,7 +218,7 @@ class Shop extends Common {
             return ajax([],1);
         }
     }
-
+//下架
     public function goodsHide() {
         $id = input('post.id','0');
         $map = [
@@ -234,7 +236,7 @@ class Shop extends Common {
             return ajax('共修改0条记录',-1);
         }
     }
-
+//上架
     public function goodsShow() {
         $id = input('post.id','0');
         $map = [
@@ -252,7 +254,7 @@ class Shop extends Common {
             return ajax('共修改0条记录',-1);
         }
     }
-
+//删除商品
     public function goodsDel() {
         $id = input('post.id','0');
         $map = [
@@ -269,7 +271,7 @@ class Shop extends Common {
             return ajax('共修改0条记录',-1);
         }
     }
-
+//分类列表
     public function cateList() {
         $pid = input('param.pid',0);
         $where = [
@@ -287,7 +289,7 @@ class Shop extends Common {
         $this->assign('list',$list);
         return $this->fetch();
     }
-
+//添加分类
     public function cateAdd() {
         $pid = input('param.pid',0);
         try {
@@ -299,7 +301,7 @@ class Shop extends Common {
         $this->assign('pid',$pid);
         return $this->fetch();
     }
-
+//添加分类POST
     public function cateAddPost() {
         $val['cate_name'] = input('post.cate_name');
         $val['pid'] = input('post.pid',0);
@@ -323,7 +325,7 @@ class Shop extends Common {
         }
         return ajax([]);
     }
-
+//分类详情
     public function cateDetail() {
         $id = input('param.id');
         try {
@@ -336,7 +338,7 @@ class Shop extends Common {
         $this->assign('list',$list);
         return $this->fetch();
     }
-
+//修改分类POST
     public function cateModPost() {
         $val['cate_name'] = input('post.cate_name');
         $val['pid'] = input('post.pid',0);
@@ -367,7 +369,7 @@ class Shop extends Common {
         }
         return ajax([]);
     }
-
+//隐藏分类
     public function cateHide() {
         $id = input('post.id');
         try {
@@ -381,7 +383,7 @@ class Shop extends Common {
         }
         return ajax();
     }
-
+//显示分类
     public function cateShow() {
         $id = input('post.id');
         try {
@@ -395,7 +397,7 @@ class Shop extends Common {
         }
         return ajax();
     }
-
+//删除分类
     public function cateDel() {
         $id = input('post.id');
         try {
@@ -409,7 +411,7 @@ class Shop extends Common {
         }
         return ajax();
     }
-
+//订单列表
     public function orderList() {
         $param['search'] = input('param.search');
         $page['query'] = http_build_query(input('param.'));
@@ -433,15 +435,23 @@ class Shop extends Common {
         $this->assign('page',$page);
         return $this->fetch();
     }
+//确认发货
+    public function deliver() {
 
+    }
+//订单详情
     public function orderDetail() {
 
     }
-
+//订单修改
     public function orderModPost() {
 
     }
+//退款
+    public function orderRefund() {
 
+    }
+//删除订单
     public function orderDel() {
 
     }

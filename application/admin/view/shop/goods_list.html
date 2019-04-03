@@ -46,7 +46,14 @@
                 <td>{$li.stock}</td>
                 <td>{$li.sort}</td>
                 <td>{$li.hot}</td>
-                <td>{$li.status}</td>
+                <td class="td-status">
+                    {if $li['status'] == '1'}
+                    <span class="label label-success radius">已上架</span>
+                    {/if}
+                    {if $li['status'] == '0'}
+                    <span class="label label-defaunt radius">已下架</span>
+                    {/if}
+                </td>
                 <td class="td-manage">
                     {if $li['status'] == '1'}
                     <a style="text-decoration:none" onClick="goods_hide(this,{$li.id})" href="javascript:;" title="下架">
@@ -77,21 +84,23 @@
 <script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
 <script type="text/javascript">
 
-    var url = '{:url("Shop/goodsList")}' + '?<?php echo $page["query"];?>'
-    var curr = '{$page.curr}'
-    laypage({
-        cont: 'page', //容器。值支持id名、原生dom对象，jquery对象。
-        pages: '{$page.totalPage}', //通过后台拿到的总页数
-        skip: false, //是否开启跳页
-        skin: '#5a98de',
-        curr: curr || 1, //当前页
-        jump: function(obj, first){ //触发分页后的回调
-            // console.log(obj)
-            if(!first) {
-                window.location.href = url+'&page=' + obj.curr;
+    var url = '{:url("Shop/goodsList")}' + '?<?php echo $page["query"];?>';
+    var curr = '{$page.curr}',totalPage='{$page.totalPage}';
+    if(totalPage > 1) {
+        laypage({
+            cont: 'page', //容器。值支持id名、原生dom对象，jquery对象。
+            pages: totalPage, //通过后台拿到的总页数
+            skip: false, //是否开启跳页
+            skin: '#5a98de',
+            curr: curr || 1, //当前页
+            jump: function(obj, first){ //触发分页后的回调
+                // console.log(obj)
+                if(!first) {
+                    window.location.href = url+'&page=' + obj.curr;
+                }
             }
-        }
-    });
+        });
+    }
 
     $("#search-btn").click(function () {
         var search = $("#formAjax").find("#search").val();
@@ -124,6 +133,7 @@
                 success:function(data) {
                     console.log(data)
                     if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已下架</span>');
                         $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="goods_show(this,'+id+')" href="javascript:;" title="上架"><i class="Hui-iconfont">&#xe603;</i></a>');
                         $(obj).remove();
                         layer.msg('已下架!',{icon: 1,time:1000});
@@ -149,6 +159,7 @@
                 success:function(data) {
                     console.log(data);
                     if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已上架</span>');
                         $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="goods_hide(this,'+id+')" href="javascript:;" title="下架"><i class="Hui-iconfont">&#xe6de;</i></a>');
                         $(obj).remove();
                         layer.msg('已上架!',{icon: 1,time:1000});
