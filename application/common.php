@@ -34,6 +34,13 @@ function input_limit($str,$limit_num,$char='utf8') {
     return true;
 }
 
+function if_int($str) {
+    if(!preg_match('/^\d{1,10}$/',$str)) {
+        return false;
+    }
+    return true;
+}
+
 function is_tel($tel) {
     if(!preg_match('/^1[34578]\d{9}$/',$tel)) {
         return false;

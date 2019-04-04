@@ -691,10 +691,48 @@ class My extends Common {
 
     //我的订单列表
     public function orderList() {
-
+        $status = input('post.status','');
+        $where = [
+            ['o.uid','=',$this->myinfo['uid']]
+        ];
+        if($status !== '') {
+            $where[] = ['o.status','=',$status];
+        }
+        try {
+            $list = Db::table('mp_order')->alias('o')
+                ->join("mp_goods g","o.goods_id=g.id","left")
+                ->where($where)
+                ->field("o.*,g.pics")
+                ->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        foreach ($list as &$v) {
+            $v['cover'] = unserialize($v['pics'])[0];
+            unset($v['pics']);
+        }
+        return ajax($list);
     }
     //查看订单详情
     public function orderDetail() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        $where = [
+            ['o.id','=',$val['id']]
+        ];
+        try {
+            $info = Db::table('mp_order')->alias('o')
+                ->join("mp_goods g","o.goods_id=g.id","left")
+                ->where($where)->field("o.*,g.pics")->find();
+            if(!$info) {
+                return ajax($val['id'],-4);
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $info['cover'] = unserialize($info['pics'])[0];
+        unset($info['pics']);
+        return ajax($info);
 
     }
     //申请退款
