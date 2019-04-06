@@ -718,7 +718,8 @@ class My extends Common {
         $val['id'] = input('post.id');
         $this->checkPost($val);
         $where = [
-            ['o.id','=',$val['id']]
+            ['o.id','=',$val['id']],
+            ['o.uid','=',$this->myinfo['uid']]
         ];
         try {
             $info = Db::table('mp_order')->alias('o')
@@ -737,13 +738,76 @@ class My extends Common {
     }
     //申请退款
     public function refundApply() {
-
+        $val['order_sn'] = input('post.order_sn');
+        $val['reason'] = input('post.reason');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['order_sn','=',$val['order_sn']],
+                ['uid','=',$this->myinfo['uid']],
+                ['status','in',[1,2,3]]
+            ];
+            $exist = Db::table('mp_order')->alias('o')->where($where)->find();
+            if(!$exist) {
+                return ajax( 'invalid order_sn',-4);
+            }
+            $update_data = [
+                'refund_apply' => 1,
+                'reason' => $val['reason']
+            ];
+            Db::table('mp_order')->where($where)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
     }
     //确认收货
     public function orderConfirm() {
-
+        $val['order_sn'] = input('post.order_sn');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['order_sn','=',$val['order_sn']],
+                ['uid','=',$this->myinfo['uid']],
+                ['status','=',2]
+            ];
+            $exist = Db::table('mp_order')->alias('o')->where($where)->find();
+            if(!$exist) {
+                return ajax( 'invalid order_sn',-4);
+            }
+            $update_data = [
+                'status' => 3
+            ];
+            Db::table('mp_order')->where($where)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
     }
-    //
+    //删除订单
+    public function orderDel() {
+        $val['pay_order_sn'] = input('post.pay_order_sn');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['pay_order_sn','=',$val['pay_order_sn']],
+                ['uid','=',$this->myinfo['uid']],
+                ['status','=',0]
+            ];
+            $exist = Db::table('mp_order')->alias('o')->where($where)->find();
+            if(!$exist) {
+                return ajax( 'invalid order_sn',-4);
+            }
+            $update_data = [
+                'del' => 1
+            ];
+            Db::table('mp_order')->where($where)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
+
 
     //我的裂变二维码
     public function myQrcode() {
