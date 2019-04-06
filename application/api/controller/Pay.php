@@ -116,10 +116,8 @@ class Pay extends Common {
             if(!$order_exist) {
                 return ajax($val['pay_order_sn'],-4);
             }
-            $total_price = 0;
-            foreach ($order_exist as $v) {
-                $total_price += $v['real_price'];
-            }
+            $total_price = $order_exist['pay_price'];
+
             $result = $app->order->unify([
                 'body' => '山洞文创产品',
                 'out_trade_no' => $val['pay_order_sn'],

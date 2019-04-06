@@ -87,44 +87,6 @@ class Shop extends Common {
         return ajax($list);
 
     }
-    //购买下单
-    public function purchase() {
-        $val['goods_id'] = input('post.goods_id');
-        $val['num'] = input('post.num');
-        $val['receiver'] = input('post.receiver');
-        $val['tel'] = input('post.tel');
-        $val['address'] = input('post.address');
-        $this->checkPost($val);
-        $val['attr'] = input('post.attr','');
-        $val['uid'] = $this->myinfo['uid'];
-        if(!if_int($val['num'])) {
-            return ajax($val['num'],-4);
-        }
-        try {
-            $goods_exist = Db::table('mp_goods')->where('id', $val['goods_id'])->find();
-            if (!$goods_exist) {
-                return ajax('invalid goods_id', -4);
-            }
-            if($val['num'] > $goods_exist['stock']) {
-                return ajax('库存不足',39);
-            }
-            $val['price'] = $goods_exist['price'];
-            $val['goods_name'] = $goods_exist['name'];
-            $val['carriage'] = $goods_exist['carriage'];
-            $val['real_price'] = $goods_exist['price'] * $val['num'] + $goods_exist['carriage'];
-            $val['create_time'] = time();
-            $val['order_sn'] = gen_unique_number('');
-            $val['pay_order_sn'] = create_unique_number('');
-            Db::startTrans();
-            Db::table('mp_order')->insert($val);
-            Db::table('mp_goods')->where('id', $val['goods_id'])->setDec('stock',$val['num']);
-            Db::commit();
-        } catch (\Exception $e) {
-            Db::rollback();
-            return ajax($e->getMessage(), -1);
-        }
-        return ajax($val['pay_order_sn']);
-    }
     //加入购物车
     public function cartAdd() {
         $val['goods_id'] = input('post.goods_id');
@@ -327,6 +289,79 @@ class Shop extends Common {
         }
         return ajax();
     }
+    //购买下单
+    public function purchase() {
+        $data['goods_id'] = input('post.goods_id');
+        $data['num'] = input('post.num');
+        $data['receiver'] = input('post.receiver');
+        $data['tel'] = input('post.tel');
+        $data['address'] = input('post.address');
+        $this->checkPost($data);
+        $data['use_attr'] = input('post.use_attr',0);
+        if(!if_int($data['num'])) {
+            return ajax($data['num'],-4);
+        }
+
+        try {
+            $time = time();
+            $goods_exist = Db::table('mp_goods')->where('id', $data['goods_id'])->find();
+            if (!$goods_exist) {
+                return ajax('invalid goods_id', -4);
+            }
+            if($data['num'] > $goods_exist['stock']) {
+                return ajax('库存不足',39);
+            }
+            if($data['use_attr']) {
+                $attr_id = input('post.attr_id',0);
+                $where_attr = [
+                    ['id','=',$attr_id],
+                    ['goods_id','=',$data['goods_id']],
+                ];
+                $attr_exist = Db::table('mp_goods_attr')->where($where_attr)->find();
+                if(!$attr_exist) {
+                    return ajax('invalid attr_id',-4);
+                }
+                if($data['num'] > $attr_exist['stock']) {
+                    return ajax('库存不足',39);
+                }
+                $unit_price = $attr_exist['price'];
+                $insert_detail['use_attr'] = 1;
+                $insert_detail['attr'] = $attr_exist['value'];
+            }else {
+                $unit_price = $goods_exist['price'];
+            }
+            $insert_data['uid'] = $this->myinfo['uid'];
+            $insert_data['pay_order_sn'] = create_unique_number('');
+            $insert_data['total_price'] = $unit_price * $data['num'] + $goods_exist['carriage'];
+            $insert_data['pay_price'] = $insert_data['total_price'];
+            $insert_data['carriage'] = $goods_exist['carriage'];
+            $insert_data['receiver'] = $data['receiver'];
+            $insert_data['tel'] = $data['tel'];
+            $insert_data['address'] = $data['address'];
+            $insert_data['create_time'] = $time;
+
+            Db::startTrans();
+            $order_id = Db::table('mp_order')->insertGetId($insert_data);
+
+            $insert_detail['order_id'] = $order_id;
+            $insert_detail['goods_id'] = $goods_exist['id'];
+            $insert_detail['goods_name'] = $goods_exist['name'];
+            $insert_detail['num'] = $data['num'];
+            $insert_detail['unit_price'] = $unit_price;
+            $insert_detail['total_price'] = $unit_price * $data['num'] + $goods_exist['carriage'];
+            $insert_detail['carriage'] = $goods_exist['carriage'];
+            $insert_detail['weight'] = $goods_exist['weight'];
+            $insert_detail['create_time'] = $time;
+
+            Db::table('mp_order_detail')->insert($insert_detail);
+            Db::table('mp_goods')->where('id', $data['goods_id'])->setDec('stock',$data['num']);
+            Db::commit();
+        } catch (\Exception $e) {
+            Db::rollback();
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($insert_data['pay_order_sn']);
+    }
     //购物车去支付
     public function cartToPurchase() {
         $cart_ids = input('post.cart_id',[]);
@@ -334,7 +369,6 @@ class Shop extends Common {
         $val['tel'] = input('post.tel');
         $val['address'] = input('post.address');
         $this->checkPost($val);
-        $val['uid'] = $this->myinfo['uid'];
         if(empty($cart_ids)) {
             return ajax('请选择要结算的商品',40);
         }
@@ -342,6 +376,7 @@ class Shop extends Common {
             return ajax($cart_ids,-4);
         }
         try {
+            $time = time();
             $where = [
                 ['c.id','in',$cart_ids],
                 ['c.uid','=',$this->myinfo['uid']]
@@ -350,32 +385,61 @@ class Shop extends Common {
                 ->join("mp_goods g","c.goods_id=g.id","left")
                 ->join("mp_goods_attr a","c.attr_id=a.id","left")
                 ->where($where)
-                ->field("c.*,g.price,g.name,g.carriage,a.price AS attr_price,a.stock,a.value")
+                ->field("c.*,g.price,g.name,g.carriage,g.weight,a.price AS attr_price,a.stock,a.value")
                 ->select();
             if(count($cart_ids) != count($cart_list)) {
                 return ajax($cart_ids,-4);
             }
-            $insert_data = [];
-            $val['pay_order_sn'] = create_unique_number('');
-            foreach ($cart_list as $k=>$v) {
-                $val['price'] = $v['price'];
-                $val['goods_name'] = $v['name'];
-                $val['goods_id'] = $v['goods_id'];
-                $val['num'] = $v['num'];
+            $pay_order_sn = create_unique_number('');
+            $total_price = 0;
+            $carriage = 0;
+            $insert_detail_all = [];
+
+            foreach ($cart_list as $v) {
                 if($v['use_attr']) {
-                    $val['price'] = $v['attr_price'];
-                    if($val['num'] > $v['stock']) {
+                    $where_attr = [
+                        ['id','=',$v['attr_id']],
+                        ['goods_id','=',$v['goods_id']],
+                    ];
+                    $attr_exist = Db::table('mp_goods_attr')->where($where_attr)->find();
+                    if($v['num'] > $attr_exist['stock']) {
                         return ajax('库存不足',39);
                     }
-                    $val['attr'] = $v['value'];
+                    $unit_price = $attr_exist['price'];
+                    $insert_detail['use_attr'] = 1;
+                    $insert_detail['attr'] = $attr_exist['value'];
+                }else {
+                    $unit_price = $v['price'];
                 }
-                $val['carriage'] = $v['carriage'];
-                $val['real_price'] = $v['price'] * $v['num'] + $v['carriage'];
-                $val['create_time'] = time();
-                $val['order_sn'] = gen_unique_number('');
-                $insert_data[] = $val;
+                $total_price += ($unit_price * $v['num'] + $v['carriage']);
+                $carriage += $v['carriage'];
+
+                $insert_detail['goods_id'] = $v['goods_id'];
+                $insert_detail['goods_name'] = $v['name'];
+                $insert_detail['num'] = $v['num'];
+                $insert_detail['unit_price'] = $unit_price;
+                $insert_detail['total_price'] = $unit_price * $v['num'] + $v['carriage'];
+                $insert_detail['carriage'] = $v['carriage'];
+                $insert_detail['weight'] = $v['weight'];
+                $insert_detail['create_time'] = $time;
+                $insert_detail_all[] = $insert_detail;
             }
-            Db::table('mp_order')->insertAll($insert_data);
+
+            $insert_data['uid'] = $this->myinfo['uid'];
+            $insert_data['pay_order_sn'] = $pay_order_sn;
+            $insert_data['total_price'] = $total_price;
+            $insert_data['pay_price'] = $total_price;
+            $insert_data['carriage'] = $carriage;
+            $insert_data['receiver'] = $val['receiver'];
+            $insert_data['tel'] = $val['tel'];
+            $insert_data['address'] = $val['address'];
+            $insert_data['create_time'] = $time;
+
+            $order_id = Db::table('mp_order')->insertGetId($insert_data);
+            foreach ($insert_detail_all as $k=>&$v) {
+                $v['order_id'] = $order_id;
+            }
+            Db::table('mp_order_detail')->insertAll($insert_detail_all);
             $whereDelete = [
                 ['id','in',$cart_ids],
                 ['uid','=',$this->myinfo['uid']]
@@ -384,7 +448,7 @@ class Shop extends Common {
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
-        return ajax($val['pay_order_sn']);
+        return ajax($pay_order_sn);
 
     }
 
