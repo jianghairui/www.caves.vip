@@ -693,22 +693,19 @@ class My extends Common {
         $curr_page = input('post.page',1);
         $perpage = input('post.perpage',10);
         $status = input('post.status','');
-        $where = [
-            ['o.uid','=',$this->myinfo['uid']]
-        ];
+        $where = "uid=".$this->myinfo['uid'];
+        $where .= " AND `status` IN ('0','1','2','3')";
+        $order = " ORDER BY `id` DESC";
         if($status !== '') {
-            $where[] = ['o.status','=',$status];
-            $where[] = ['o.status','in',[0,1,2,3]];
+            $where .= " AND status=" . $status;
         }
         try {
-            $list = Db::table('mp_order')->alias('o')
-                ->join("mp_order_detail d","o.id=d.order_id","left")
-                ->join("mp_goods g","d.goods_id=g.id","left")
-                ->where($where)
-                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.create_time,o.refund_apply,o.status,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,g.pics")
-                ->order(['o.id'=>'DESC'])
-                ->limit(($curr_page-1)*$perpage,$perpage)
-                ->select();
+            $list = Db::query("SELECT 
+`o`.`id`,`o`.`pay_order_sn`,`o`.`pay_price`,`o`.`total_price`,`o`.`carriage`,`o`.`create_time`,`o`.`refund_apply`,`o`.`status`,`o`.`refund_apply`,`d`.`order_id`,`d`.`goods_id`,`d`.`num`,`d`.`unit_price`,`d`.`goods_name`,`d`.`attr`,`g`.`pics` 
+FROM (SELECT * FROM mp_order WHERE " . $where . $order ." LIMIT ".($curr_page-1)*$perpage.",".$perpage.") `o` 
+LEFT JOIN `mp_order_detail` `d` ON `o`.`id`=`d`.`order_id`
+LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
+");
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -722,10 +719,14 @@ class My extends Common {
             $child = [];
             foreach ($list as $li) {
                 if($li['order_id'] == $v) {
+                    $data['id'] = $li['id'];
                     $data['pay_order_sn'] = $li['pay_order_sn'];
                     $data['total_price'] = $li['total_price'];
                     $data['carriage'] = $li['carriage'];
+                    $data['status'] = $li['status'];
+                    $data['refund_apply'] = $li['refund_apply'];
                     $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
+                    $data_child['goods_id'] = $li['goods_id'];
                     $data_child['cover'] = unserialize($li['pics'])[0];
                     $data_child['goods_name'] = $li['goods_name'];
                     $data_child['num'] = $li['num'];
@@ -745,30 +746,25 @@ class My extends Common {
         $curr_page = input('post.page',1);
         $perpage = input('post.perpage',10);
         $type = input('post.status',1);
-        if(!in_array($type,[1,2])) {
+        if(!in_array($type,[1,2,3])) {
             return ajax($type,-4);
         }
+        $where = "uid=".$this->myinfo['uid'] . " AND refund_apply=1";
+        $order = " ORDER BY `id` DESC";
         if($type == 1) {
-            $where = [
-                ['o.uid','=',$this->myinfo['uid']],
-                ['o.refund_apply','=',1]
-            ];
+            $where .= "";
+        }else if($type == 2){
+            $where .= " AND status=4";
         }else {
-            $where = [
-                ['o.uid','=',$this->myinfo['uid']],
-                ['o.refund_apply','=',1],
-                ['o.status','=',4]
-            ];
+            $where .= " AND status!=4";
         }
         try {
-            $list = Db::table('mp_order')->alias('o')
-                ->join("mp_order_detail d","o.id=d.order_id","left")
-                ->join("mp_goods g","d.goods_id=g.id","left")
-                ->where($where)
-                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.create_time,o.refund_apply,o.status,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,g.pics")
-                ->order(['o.id'=>'DESC'])
-                ->limit(($curr_page-1)*$perpage,$perpage)
-                ->select();
+            $list = Db::query("SELECT 
+`o`.`id`,`o`.`pay_order_sn`,`o`.`pay_price`,`o`.`total_price`,`o`.`carriage`,`o`.`create_time`,`o`.`refund_apply`,`o`.`status`,`o`.`refund_apply`,`d`.`order_id`,`d`.`goods_id`,`d`.`num`,`d`.`unit_price`,`d`.`goods_name`,`d`.`attr`,`g`.`pics` 
+FROM (SELECT * FROM mp_order WHERE " . $where . $order . " LIMIT ".($curr_page-1)*$perpage.",".$perpage.") `o` 
+LEFT JOIN `mp_order_detail` `d` ON `o`.`id`=`d`.`order_id`
+LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
+");
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -782,10 +778,14 @@ class My extends Common {
             $child = [];
             foreach ($list as $li) {
                 if($li['order_id'] == $v) {
+                    $data['id'] = $li['id'];
                     $data['pay_order_sn'] = $li['pay_order_sn'];
                     $data['total_price'] = $li['total_price'];
                     $data['carriage'] = $li['carriage'];
+                    $data['status'] = $li['status'];
+                    $data['refund_apply'] = $li['refund_apply'];
                     $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
+                    $data_child['goods_id'] = $li['goods_id'];
                     $data_child['cover'] = unserialize($li['pics'])[0];
                     $data_child['goods_name'] = $li['goods_name'];
                     $data_child['num'] = $li['num'];

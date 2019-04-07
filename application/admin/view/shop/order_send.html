@@ -1,0 +1,74 @@
+<article class="page-container">
+    <form class="form form-horizontal" id="form-admin-add">
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">快递公司：</label>
+            <div class="formControls col-xs-8 col-sm-4"> <span class="select-box">
+				<select class="select" name="tracking_name" id="tracking_name">
+                    {foreach $list as $li}
+					<option value="{$li.name}">{$li.name}</option>
+                    {/foreach}
+				</select>
+				</span>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>快递单号：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder="输入物流单号" id="tracking_num" name="tracking_num">
+            </div>
+        </div>
+        <input type="hidden" name="id" value="{$id}">
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+                <input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+            </div>
+        </div>
+    </form>
+</article>
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+<script type="text/javascript">
+
+    $(function(){
+        var isclick = true;
+        $("#form-admin-add").validate({
+            rules:{
+                tracking_num:{
+                    required:true,
+                    maxlength:30
+                }
+            },
+            focusCleanup:true,
+            success:"valid",
+            submitHandler:function(form){
+                if(isclick) {
+                    isclick = false;
+                    $(form).ajaxSubmit({
+                        type: 'post',
+                        url: "{:url('Shop/deliver')}" ,
+                        success: function(data){
+                            console.log(data)
+                            if(data.code == 1) {
+                                layer.msg('操作成功!',{icon:1,time:1000},function(){
+                                    window.parent.location.reload();
+                                });
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000});
+                                isclick = true
+                            }
+                        },
+                        error: function(msg){
+                            layer.msg('接口请求失败!',{icon:2,time:1000});
+                            isclick = true
+                        }
+                    });
+
+                }
+
+            }
+        });
+    });
+</script>

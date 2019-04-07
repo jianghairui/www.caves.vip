@@ -413,27 +413,46 @@ class Shop extends Common {
     }
 //订单列表
     public function orderList() {
-        $param['search'] = input('param.search');
+        $param['search'] = input('param.search','');
+        $param['status'] = input('param.status','');
+        $param['logmin'] = input('param.logmin');
+        $param['logmax'] = input('param.logmax');
+        $param['refund_apply'] = input('param.refund_apply','');
         $page['query'] = http_build_query(input('param.'));
-
         $curr_page = input('param.page',1);
         $perpage = input('param.perpage',10);
-        $where = [];
+
+        $where = " 1";
+        $order = " ORDER BY `id` DESC";
+        $orderby = " ORDER BY `d`.`id` DESC";
+        if($param['status'] !== '') {
+            $where .= " AND status=" . $param['status'];
+        }
+        if($param['refund_apply']) {
+            $where .= " AND refund_apply=" . $param['refund_apply'];
+        }
+        if($param['logmin']) {
+            $where .= " AND create_time>=" . strtotime(date('Y-m-d 00:00:00',strtotime($param['logmin'])));
+        }
+        if($param['logmax']) {
+            $where .= " AND create_time<=" . strtotime(date('Y-m-d 23:59:59',strtotime($param['logmax'])));
+        }
         if($param['search']) {
-            $where[] = ['o.pay_order_sn|o.tel','like',"%{$param['search']}%"];
+            $where .= " AND (pay_order_sn LIKE '%".$param['search']."%' OR tel LIKE '%".$param['search']."%')";
         }
-        $count = Db::table('mp_order')->alias('o')->where($where)->count();
         try {
-            $list = Db::table('mp_order')->alias('o')
-                ->join("mp_order_detail d","o.id=d.order_id","left")
-                ->join("mp_goods g","d.goods_id=g.id","left")
-                ->order(['id'=>'DESC'])
-                ->where($where)
-                ->field("o.id,o.trans_id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.create_time,o.receiver,o.tel,o.address,o.refund_apply,o.status,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,g.pics")
-                ->limit(($curr_page - 1)*$perpage,$perpage)->select();
-        }catch (\Exception $e) {
-            die('SQL错误: ' . $e->getMessage());
+            $count = Db::query("SELECT count(id) AS total_count FROM mp_order o WHERE " . $where);
+            $sql = "SELECT 
+`o`.`id`,`o`.`pay_order_sn`,`o`.`trans_id`,`o`.`receiver`,`o`.`tel`,`o`.`address`,`o`.`pay_price`,`o`.`total_price`,`o`.`carriage`,`o`.`create_time`,`o`.`refund_apply`,`o`.`status`,`o`.`refund_apply`,`d`.`order_id`,`d`.`goods_id`,`d`.`num`,`d`.`unit_price`,`d`.`goods_name`,`d`.`attr`,`g`.`pics` 
+FROM (SELECT * FROM mp_order WHERE " . $where . $order . " LIMIT ".($curr_page-1)*$perpage.",".$perpage.") `o` 
+LEFT JOIN `mp_order_detail` `d` ON `o`.`id`=`d`.`order_id`
+LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
+" . $orderby;
+            $list = Db::query($sql);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
         }
+        $count = $count[0]['total_count'];
         $order_id = [];
         $newlist = [];
         foreach ($list as $v) {
@@ -448,14 +467,15 @@ class Shop extends Common {
                     $data['pay_order_sn'] = $li['pay_order_sn'];
                     $data['pay_price'] = $li['pay_price'];
                     $data['trans_id'] = $li['trans_id'];
-                    $data['status'] = $li['status'];
-                    $data['refund_apply'] = $li['refund_apply'];
                     $data['receiver'] = $li['receiver'];
                     $data['tel'] = $li['tel'];
                     $data['address'] = $li['address'];
                     $data['total_price'] = $li['total_price'];
                     $data['carriage'] = $li['carriage'];
+                    $data['status'] = $li['status'];
+                    $data['refund_apply'] = $li['refund_apply'];
                     $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
+                    $data_child['goods_id'] = $li['goods_id'];
                     $data_child['cover'] = unserialize($li['pics'])[0];
                     $data_child['goods_name'] = $li['goods_name'];
                     $data_child['num'] = $li['num'];
@@ -468,21 +488,58 @@ class Shop extends Common {
             $data['child'] = $child;
             $newlist[] = $data;
         }
-//        halt($newlist);
         $page['count'] = $count;
         $page['curr'] = $curr_page;
         $page['totalPage'] = ceil($count/$perpage);
+        $this->assign('param',$param);
         $this->assign('list',$newlist);
         $this->assign('page',$page);
         return $this->fetch();
     }
+//订单发货
+    public function orderSend() {
+        $id = input('param.id');
+        try {
+            $where = [
+                ['del','=',0]
+            ];
+            $list = Db::table('mp_tracking')->where($where)->select();
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+        $this->assign('list',$list);
+        $this->assign('id',$id);
+        return $this->fetch();
+    }
 //确认发货
     public function deliver() {
-
+        $val['tracking_name'] = input('post.tracking_name');
+        $val['tracking_num'] = input('post.tracking_num');
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['id','=',$val['id']],
+                ['status','=',1]
+            ];
+            $exist = Db::table('mp_order')->where($where)->find();
+            if(!$exist) {
+                return ajax('订单不存在或状态已改变',-1);
+            }
+            $update_data = [
+                'status' => 2,
+                'tracking_name' => $val['tracking_name'],
+                'tracking_num' => $val['tracking_num']
+            ];
+            Db::table('mp_order')->where($where)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
     }
 //订单详情
     public function orderDetail() {
-
+        die('还没写');
     }
 //订单修改
     public function orderModPost() {
@@ -495,6 +552,50 @@ class Shop extends Common {
 //删除订单
     public function orderDel() {
 
+    }
+
+    public function modAdress() {
+        $val['address'] = input('post.address');
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['id','=',$val['id']]
+            ];
+            $exist = Db::table('mp_order')->where($where)->find();
+            if(!$exist) {
+                return ajax('订单不存在或状态已改变',-1);
+            }
+            $update_data = [
+                'address' => $val['address']
+            ];
+            Db::table('mp_order')->where($where)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
+
+    public function modPrice() {
+        $val['pay_price'] = input('post.pay_price');
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['id','=',$val['id']]
+            ];
+            $exist = Db::table('mp_order')->where($where)->find();
+            if(!$exist) {
+                return ajax('订单不存在或状态已改变',-1);
+            }
+            $update_data = [
+                'pay_price' => $val['pay_price']
+            ];
+            Db::table('mp_order')->where($where)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
     }
 
 }
