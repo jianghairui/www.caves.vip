@@ -179,7 +179,7 @@ class Shop extends Common {
                     $price = $v['price'];
                 }
                 $v['price'] = $price;
-                $v['total_price'] = $price * $v['num'] + $v['carriage'];
+                $v['total_price'] = $price * $v['num'];
                 $v['total_price'] = sprintf ( "%1\$.2f",$v['total_price']);
             }
         } catch (\Exception $e) {
@@ -228,7 +228,7 @@ class Shop extends Common {
         }
         $data['price'] = $price;
         $data['num'] = $cart_exist['num'];
-        $data['total_price'] = $price * $cart_exist['num'] + $goods_exist['carriage'];
+        $data['total_price'] = $price * $cart_exist['num'];
         $data['total_price'] = sprintf ( "%1\$.2f",$data['total_price']);
         return ajax($data);
     }
@@ -266,7 +266,7 @@ class Shop extends Common {
         }
         $data['price'] = $price;
         $data['num'] = $cart_exist['num'];
-        $data['total_price'] = $price * $cart_exist['num'] + $goods_exist['carriage'];
+        $data['total_price'] = $price * $cart_exist['num'];
         $data['total_price'] = sprintf ( "%1\$.2f",$data['total_price']);
         return ajax($data);
     }

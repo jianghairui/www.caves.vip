@@ -1,7 +1,5 @@
 <style>
-    .userinfo>td>img {
-        width:40px;height:40px;border-radius: 50%;
-    }
+    .goods_pics{ width:50px;height: 50px;background-size: cover;background-position: center;}
 </style>
 <nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 订单管理 <span class="c-gray en">&gt;</span> 订单列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
 <div class="page-container">
@@ -24,10 +22,8 @@
             <th width="30">#</th>
             <th width="160">订单号</th>
             <th width="200">微信端单号</th>
-            <th width="80">订单价格</th>
-            <th width="80">单价</th>
-            <th width="60">数量</th>
-            <th>商品</th>
+            <th width="80">实际支付</th>
+            <th width="80">订单总价</th>
             <th width="120">下单时间</th>
             <th width="50">订单状态</th>
             <th width="120">操作</th>
@@ -37,13 +33,11 @@
         <form id="multi-check">
             {foreach $list as $li}
             <tr class="text-c userinfo">
-                <td rowspan="2">{$li.id}</td>
-                <td>{$li.order_sn}</td>
+                <td rowspan="3">{$li.id}</td>
+                <td>{$li.pay_order_sn}</td>
                 <td>{$li.trans_id}</td>
-                <td>{$li.real_price}</td>
-                <td>{$li.price}</td>
-                <td>{$li.num}</td>
-                <td>{$li.goods_name}</td>
+                <td>{$li.pay_price}</td>
+                <td>{$li.total_price}</td>
                 <td>{$li.create_time|date="Y-m-d H:i:s"}</td>
                 <td>
                     {switch $li['status']}
@@ -59,7 +53,7 @@
                     {default /}
                     {/switch}
                 </td>
-                <td class="td-manage">
+                <td class="td-manage" rowspan="2">
                     <a title="查看详情" href="javascript:;" onclick="detail('订单详情','{:url("Shop/orderDetail",array("id"=>$li["id"]))}')">
                     <i class="Hui-iconfont">&#xe6df;</i>
                     </a>
@@ -71,7 +65,14 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="7">
+                <td colspan="6">
+                    {foreach $li['child'] as $vv}
+                    <div id="cover" class="goods_pics" style="background-image: url('/{$vv.cover}');"></div>
+                    {/foreach}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6">
                     <b style="margin-left: 15px;">收货地址</b>: {$li.address} &nbsp;&nbsp;&nbsp;&nbsp;(收货人: {$li.receiver})
                 </td>
                 <td colspan="2">

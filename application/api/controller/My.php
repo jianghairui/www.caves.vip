@@ -688,30 +688,117 @@ class My extends Common {
             return ajax($e->getMessage(),-1);
         }
     }
-
     //我的订单列表
     public function orderList() {
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
         $status = input('post.status','');
         $where = [
             ['o.uid','=',$this->myinfo['uid']]
         ];
         if($status !== '') {
             $where[] = ['o.status','=',$status];
+            $where[] = ['o.status','in',[0,1,2,3]];
         }
         try {
             $list = Db::table('mp_order')->alias('o')
-                ->join("mp_goods g","o.goods_id=g.id","left")
+                ->join("mp_order_detail d","o.id=d.order_id","left")
+                ->join("mp_goods g","d.goods_id=g.id","left")
                 ->where($where)
-                ->field("o.*,g.pics")
+                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.create_time,o.refund_apply,o.status,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,g.pics")
+                ->order(['o.id'=>'DESC'])
+                ->limit(($curr_page-1)*$perpage,$perpage)
                 ->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
-        foreach ($list as &$v) {
-            $v['cover'] = unserialize($v['pics'])[0];
-            unset($v['pics']);
+        $order_id = [];
+        $newlist = [];
+        foreach ($list as $v) {
+            $order_id[] = $v['id'];
         }
-        return ajax($list);
+        $uniq_order_id = array_unique($order_id);
+        foreach ($uniq_order_id as $v) {
+            $child = [];
+            foreach ($list as $li) {
+                if($li['order_id'] == $v) {
+                    $data['pay_order_sn'] = $li['pay_order_sn'];
+                    $data['total_price'] = $li['total_price'];
+                    $data['carriage'] = $li['carriage'];
+                    $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
+                    $data_child['cover'] = unserialize($li['pics'])[0];
+                    $data_child['goods_name'] = $li['goods_name'];
+                    $data_child['num'] = $li['num'];
+                    $data_child['unit_price'] = $li['unit_price'];
+                    $data_child['total_price'] = sprintf ( "%1\$.2f",($li['unit_price'] * $li['num']));
+                    $data_child['attr'] = $li['attr'];
+                    $child[] = $data_child;
+                }
+            }
+            $data['child'] = $child;
+            $newlist[] = $data;
+        }
+        return ajax($newlist);
+    }
+
+    public function refundList() {
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        $type = input('post.status',1);
+        if(!in_array($type,[1,2])) {
+            return ajax($type,-4);
+        }
+        if($type == 1) {
+            $where = [
+                ['o.uid','=',$this->myinfo['uid']],
+                ['o.refund_apply','=',1]
+            ];
+        }else {
+            $where = [
+                ['o.uid','=',$this->myinfo['uid']],
+                ['o.refund_apply','=',1],
+                ['o.status','=',4]
+            ];
+        }
+        try {
+            $list = Db::table('mp_order')->alias('o')
+                ->join("mp_order_detail d","o.id=d.order_id","left")
+                ->join("mp_goods g","d.goods_id=g.id","left")
+                ->where($where)
+                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.create_time,o.refund_apply,o.status,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,g.pics")
+                ->order(['o.id'=>'DESC'])
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $order_id = [];
+        $newlist = [];
+        foreach ($list as $v) {
+            $order_id[] = $v['id'];
+        }
+        $uniq_order_id = array_unique($order_id);
+        foreach ($uniq_order_id as $v) {
+            $child = [];
+            foreach ($list as $li) {
+                if($li['order_id'] == $v) {
+                    $data['pay_order_sn'] = $li['pay_order_sn'];
+                    $data['total_price'] = $li['total_price'];
+                    $data['carriage'] = $li['carriage'];
+                    $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
+                    $data_child['cover'] = unserialize($li['pics'])[0];
+                    $data_child['goods_name'] = $li['goods_name'];
+                    $data_child['num'] = $li['num'];
+                    $data_child['unit_price'] = $li['unit_price'];
+                    $data_child['total_price'] = sprintf ( "%1\$.2f",($li['unit_price'] * $li['num']));
+                    $data_child['attr'] = $li['attr'];
+                    $child[] = $data_child;
+                }
+            }
+            $data['child'] = $child;
+            $newlist[] = $data;
+        }
+        return ajax($newlist);
     }
     //查看订单详情
     public function orderDetail() {
@@ -722,18 +809,41 @@ class My extends Common {
             ['o.uid','=',$this->myinfo['uid']]
         ];
         try {
-            $info = Db::table('mp_order')->alias('o')
-                ->join("mp_goods g","o.goods_id=g.id","left")
-                ->where($where)->field("o.*,g.pics")->find();
-            if(!$info) {
+            $list = Db::table('mp_order')->alias('o')
+                ->join("mp_order_detail d","o.id=d.order_id","left")
+                ->join("mp_goods g","d.goods_id=g.id","left")
+                ->where($where)
+                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.receiver,o.tel,o.address,o.create_time,o.refund_apply,o.status,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,g.pics")->select();
+            if(!$list) {
                 return ajax($val['id'],-4);
             }
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
-        $info['cover'] = unserialize($info['pics'])[0];
-        unset($info['pics']);
-        return ajax($info);
+        $data = [];
+        $child = [];
+        foreach ($list as $li) {
+            $data['pay_order_sn'] = $li['pay_order_sn'];
+            $data['receiver'] = $li['receiver'];
+            $data['tel'] = $li['tel'];
+            $data['address'] = $li['address'];
+            $data['total_price'] = $li['total_price'];
+            $data['carriage'] = $li['carriage'];
+            $data['amount'] = $li['total_price'] - $data['carriage'];
+            $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
+            $data['refund_apply'] = $li['refund_apply'];
+            $data['status'] = $li['status'];
+            $data_child['cover'] = unserialize($li['pics'])[0];
+            $data_child['goods_name'] = $li['goods_name'];
+            $data_child['num'] = $li['num'];
+            $data_child['unit_price'] = $li['unit_price'];
+            $data_child['total_price'] = sprintf ( "%1\$.2f",($li['unit_price'] * $li['num']));
+            $data_child['attr'] = $li['attr'];
+            $data_child['cover'] = unserialize($li['pics'])[0];
+            $child[] = $data_child;
+        }
+        $data['child'] = $child;
+        return ajax($data);
 
     }
     //申请退款
@@ -807,8 +917,6 @@ class My extends Common {
         }
         return ajax();
     }
-
-
 
     //我的裂变二维码
     public function myQrcode() {

@@ -420,18 +420,59 @@ class Shop extends Common {
         $perpage = input('param.perpage',10);
         $where = [];
         if($param['search']) {
-            $where[] = ['order_sn|tel','like',"%{$param['search']}%"];
+            $where[] = ['o.pay_order_sn|o.tel','like',"%{$param['search']}%"];
         }
-        $count = Db::table('mp_order')->where($where)->count();
+        $count = Db::table('mp_order')->alias('o')->where($where)->count();
         try {
-            $list = Db::table('mp_order')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
+            $list = Db::table('mp_order')->alias('o')
+                ->join("mp_order_detail d","o.id=d.order_id","left")
+                ->join("mp_goods g","d.goods_id=g.id","left")
+                ->order(['id'=>'DESC'])
+                ->where($where)
+                ->field("o.id,o.trans_id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.create_time,o.receiver,o.tel,o.address,o.refund_apply,o.status,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,g.pics")
+                ->limit(($curr_page - 1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
             die('SQL错误: ' . $e->getMessage());
         }
+        $order_id = [];
+        $newlist = [];
+        foreach ($list as $v) {
+            $order_id[] = $v['id'];
+        }
+        $uniq_order_id = array_unique($order_id);
+        foreach ($uniq_order_id as $v) {
+            $child = [];
+            foreach ($list as $li) {
+                if($li['order_id'] == $v) {
+                    $data['id'] = $li['id'];
+                    $data['pay_order_sn'] = $li['pay_order_sn'];
+                    $data['pay_price'] = $li['pay_price'];
+                    $data['trans_id'] = $li['trans_id'];
+                    $data['status'] = $li['status'];
+                    $data['refund_apply'] = $li['refund_apply'];
+                    $data['receiver'] = $li['receiver'];
+                    $data['tel'] = $li['tel'];
+                    $data['address'] = $li['address'];
+                    $data['total_price'] = $li['total_price'];
+                    $data['carriage'] = $li['carriage'];
+                    $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
+                    $data_child['cover'] = unserialize($li['pics'])[0];
+                    $data_child['goods_name'] = $li['goods_name'];
+                    $data_child['num'] = $li['num'];
+                    $data_child['unit_price'] = $li['unit_price'];
+                    $data_child['total_price'] = sprintf ( "%1\$.2f",($li['unit_price'] * $li['num']));
+                    $data_child['attr'] = $li['attr'];
+                    $child[] = $data_child;
+                }
+            }
+            $data['child'] = $child;
+            $newlist[] = $data;
+        }
+//        halt($newlist);
         $page['count'] = $count;
         $page['curr'] = $curr_page;
         $page['totalPage'] = ceil($count/$perpage);
-        $this->assign('list',$list);
+        $this->assign('list',$newlist);
         $this->assign('page',$page);
         return $this->fetch();
     }

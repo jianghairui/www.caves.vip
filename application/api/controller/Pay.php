@@ -112,12 +112,11 @@ class Pay extends Common {
         ];
         $app = Factory::payment($this->mp_config);
         try {
-            $order_exist = Db::table('mp_order')->where($where)->select();
+            $order_exist = Db::table('mp_order')->where($where)->find();
             if(!$order_exist) {
                 return ajax($val['pay_order_sn'],-4);
             }
             $total_price = $order_exist['pay_price'];
-
             $result = $app->order->unify([
                 'body' => '山洞文创产品',
                 'out_trade_no' => $val['pay_order_sn'],
