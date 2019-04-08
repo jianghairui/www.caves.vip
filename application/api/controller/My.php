@@ -694,8 +694,9 @@ class My extends Common {
         $perpage = input('post.perpage',10);
         $status = input('post.status','');
         $where = "uid=".$this->myinfo['uid'];
-        $where .= " AND `status` IN ('0','1','2','3')";
+        $where .= " AND `status` IN ('0','1','2','3') AND `del`=0";
         $order = " ORDER BY `id` DESC";
+        $orderby = " ORDER BY `d`.`id` DESC";
         if($status !== '') {
             $where .= " AND status=" . $status;
         }
@@ -705,7 +706,7 @@ class My extends Common {
 FROM (SELECT * FROM mp_order WHERE " . $where . $order ." LIMIT ".($curr_page-1)*$perpage.",".$perpage.") `o` 
 LEFT JOIN `mp_order_detail` `d` ON `o`.`id`=`d`.`order_id`
 LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
-");
+" . $orderby);
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -745,18 +746,19 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
     public function refundList() {
         $curr_page = input('post.page',1);
         $perpage = input('post.perpage',10);
-        $type = input('post.status',1);
+        $type = input('post.type',1);
         if(!in_array($type,[1,2,3])) {
             return ajax($type,-4);
         }
-        $where = "uid=".$this->myinfo['uid'] . " AND refund_apply=1";
+        $where = "uid=".$this->myinfo['uid'];
         $order = " ORDER BY `id` DESC";
+        $orderby = " ORDER BY `d`.`id` DESC";
         if($type == 1) {
-            $where .= "";
+            $where .= " AND refund_apply=1";
         }else if($type == 2){
-            $where .= " AND status=4";
+            $where .= " AND refund_apply=2";
         }else {
-            $where .= " AND status!=4";
+            $where .= " AND refund_apply IN (1,2)";
         }
         try {
             $list = Db::query("SELECT 
@@ -764,7 +766,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
 FROM (SELECT * FROM mp_order WHERE " . $where . $order . " LIMIT ".($curr_page-1)*$perpage.",".$perpage.") `o` 
 LEFT JOIN `mp_order_detail` `d` ON `o`.`id`=`d`.`order_id`
 LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
-");
+".$orderby);
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -848,18 +850,18 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
     }
     //申请退款
     public function refundApply() {
-        $val['order_sn'] = input('post.order_sn');
+        $val['pay_order_sn'] = input('post.pay_order_sn');
         $val['reason'] = input('post.reason');
         $this->checkPost($val);
         try {
             $where = [
-                ['order_sn','=',$val['order_sn']],
+                ['pay_order_sn','=',$val['pay_order_sn']],
                 ['uid','=',$this->myinfo['uid']],
                 ['status','in',[1,2,3]]
             ];
             $exist = Db::table('mp_order')->alias('o')->where($where)->find();
             if(!$exist) {
-                return ajax( 'invalid order_sn',-4);
+                return ajax( 'invalid pay_order_sn',44);
             }
             $update_data = [
                 'refund_apply' => 1,
@@ -873,17 +875,17 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
     }
     //确认收货
     public function orderConfirm() {
-        $val['order_sn'] = input('post.order_sn');
+        $val['pay_order_sn'] = input('post.pay_order_sn');
         $this->checkPost($val);
         try {
             $where = [
-                ['order_sn','=',$val['order_sn']],
+                ['pay_order_sn','=',$val['pay_order_sn']],
                 ['uid','=',$this->myinfo['uid']],
                 ['status','=',2]
             ];
             $exist = Db::table('mp_order')->alias('o')->where($where)->find();
             if(!$exist) {
-                return ajax( 'invalid order_sn',-4);
+                return ajax( 'invalid pay_order_sn',44);
             }
             $update_data = [
                 'status' => 3
@@ -894,19 +896,20 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         }
         return ajax();
     }
-    //删除订单
-    public function orderDel() {
+    //取消订单
+    public function orderCancel() {
         $val['pay_order_sn'] = input('post.pay_order_sn');
         $this->checkPost($val);
         try {
             $where = [
                 ['pay_order_sn','=',$val['pay_order_sn']],
                 ['uid','=',$this->myinfo['uid']],
-                ['status','=',0]
+                ['status','=',0],
+                ['del','=',0]
             ];
             $exist = Db::table('mp_order')->alias('o')->where($where)->find();
             if(!$exist) {
-                return ajax( 'invalid order_sn',-4);
+                return ajax( 'invalid pay_order_sn',44);
             }
             $update_data = [
                 'del' => 1
@@ -917,7 +920,6 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         }
         return ajax();
     }
-
     //我的裂变二维码
     public function myQrcode() {
 
