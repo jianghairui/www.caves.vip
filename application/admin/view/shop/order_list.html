@@ -55,35 +55,62 @@
                 <td rowspan="3">{$li.id}</td>
                 <td>{$li.pay_order_sn}</td>
                 <td>{$li.trans_id}</td>
-                <td><span class="order-font-price">{$li.pay_price}</span>元</td>
+                <td><span class="order-font-price" onclick="mod_price(this,{$li.id},{$li.pay_price})">{$li.pay_price}</span>元</td>
                 <td><span class="order-font-price">{$li.total_price}</span>元 (运费:<span style="color: green">{$li.carriage}</span>元)</td>
                 <td>{$li.create_time|date="Y-m-d H:i:s"}</td>
                 <td class="td-status">
-                    {switch $li['status']}
-                    {case 0}
-                    <span class="label label-defaunt radius">待付款</span>
-                    {/case}
-                    {case 1}
-                    <span class="label label-warning radius">待发货</span>
-                    {/case}
-                    {case 2}
-                    <span class="label label-primary radius">待收货</span>
-                    {/case}
-                    {case 3}
-                    <span class="label label-success radius">已完成</span>
-                    {/case}
-                    {default /}
-                    {/switch}
+                    <span id="pay-status">
+                        {switch $li['status']}
+                        {case 0}
+                            <span class="label label-defaunt radius">待付款</span>
+                        {/case}
+                        {case 1}
+                            <span class="label label-warning radius">待发货</span>
+                        {/case}
+                        {case 2}
+                            <span class="label label-primary radius">待收货</span>
+                        {/case}
+                        {case 3}
+                            <span class="label label-success radius">已完成</span>
+                        {/case}
+                        {default /}
+                        {/switch}
+                    </span>
+                    <span id="refund-status">
+                        {switch $li['refund_apply']}
+                        {case 1}
+                            <span class="label label-danger radius">申请退款</span>
+                        {/case}
+                        {case 2}
+                            <span class="label label-danger radius">已退款</span>
+                        {/case}
+                        {default /}
+                        {/switch}
+                    </span>
+
                 </td>
                 <td class="td-manage" rowspan="3">
-                    <a title="查看详情" href="javascript:;" onclick="detail('订单详情','{:url("Shop/orderDetail",array("id"=>$li["id"]))}')">
-                    <i class="Hui-iconfont">&#xe6df;</i>
-                    </a>
-                    {if $li['status'] == 1}
-                    <a title="发货" href="javascript:;" onclick="order_send('订单发货','{:url("Shop/orderSend",array("id"=>$li["id"]))}','600','400')"">
+                    <span>
+                        <a title="查看详情" href="javascript:;" onclick="detail('订单详情','{:url("Shop/orderDetail",array("id"=>$li["id"]))}')">
+                        <i class="Hui-iconfont">&#xe6df;</i>
+                        </a>
+                    </span>
+                    <span id="send-btn">
+                        {if $li['status'] == 1 && $li['refund_apply'] == 0}
+                        <a title="发货" href="javascript:;" onclick="order_send('订单发货','{:url("Shop/orderSend",array("id"=>$li["id"]))}','600','400')"">
                         <i class="Hui-iconfont">&#xe669;</i>
-                    </a>
-                    {/if}
+                        </a>
+                        {/if}
+                    </span>
+                    <span id="refund-btn">
+                        {if $li['refund_apply'] == 1}
+                        <a title="退款" href="javascript:;" onclick="refund(this,{$li.id})">
+                        <i class="Hui-iconfont">&#xe66b;</i>
+                        </a>
+                        {/if}
+                    </span>
+
+
                 </td>
             </tr>
             <tr>
@@ -192,7 +219,7 @@
             if(click_lock) {
                 click_lock = false;
                 $.ajax({
-                    url:"{:url('Shop/modAddress123')}",
+                    url:"{:url('Shop/modAddress')}",
                     type:'post',
                     dataType:'json',
                     data:{id:id,address:address},
@@ -215,8 +242,68 @@
         });
     }
     /*修改价格*/
-    function  mod_price(obj,id) {
+    function  mod_price(obj,id,old_price) {
+        layer.prompt({
+            formType: 3,
+            value: old_price,
+            title: '修改支付金额',
+            maxlength:11
+        }, function(value, index, elem){
+            pay_price = value;
+            if(!(/^\d{1,8}(\.\d{1,2})?$/.test(pay_price))) {
+                layer.alert('金额格式不符');
+                return false;
+            }
+            layer.close(index);
+            if(click_lock) {
+                click_lock = false;
+                $.ajax({
+                    url:"{:url('Shop/modPrice')}",
+                    type:'post',
+                    dataType:'json',
+                    data:{id:id,pay_price:pay_price},
+                    success:function(data) {
+                        console.log(data);
+                        if(data.code == 1) {
+                            $(obj).text(value);
+                            click_lock = true
+                        }else {
+                            layer.msg(data.data,{icon:2,time:1000});
+                        }
+                        click_lock = true
+                    },
+                    error:function(data) {
+                        layer.msg('请求失败!',{icon:5,time:1000});
+                        click_lock = true
+                    }
+                })
+            }
+        });
+    }
 
+    function refund(obj,id) {
+        layer.confirm('确认要退款吗？',function(index){
+            $.ajax({
+                url: "{:url('Shop/orderRefund')}",
+                type: 'POST',
+                dataType: 'json',
+                data:{id:id},
+                success: function(data){
+                    console.log(data);
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find("#refund-status").html('<span class="label label-danger radius">已退款</span>');
+                        $(obj).parents("tr").find("#send-btn").remove();
+                        $(obj).remove();
+                        layer.msg('已退款!',{icon:1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000});
+                    }
+                },
+                error:function(data) {
+                    layer.msg('接口请求失败',{icon:5,time:1000});
+                }
+            });
+        });
     }
 
 

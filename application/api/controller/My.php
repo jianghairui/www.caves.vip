@@ -74,7 +74,7 @@ class My extends Common {
             $list = Db::table('mp_note')->alias('n')
                 ->join('mp_user u','n.uid=u.id','left')
                 ->where($where)
-                ->field('n.id,n.title,n.pics,u.nickname,n.like,n.status')
+                ->field('n.id,n.title,n.pics,n.width,n.height,u.nickname,n.like,n.status')
                 ->order(['n.create_time'=>'DESC'])
                 ->limit(($page-1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
@@ -115,6 +115,8 @@ class My extends Common {
         $val['id'] = input('post.id');
         $val['title'] = input('post.title');
         $val['content'] = input('post.content');
+        $val['width'] = input('post.width',1);
+        $val['height'] = input('post.height',1);
         $this->checkPost($val);
         $val['uid'] = $this->myinfo['uid'];
         $image = input('post.pics',[]);
@@ -182,7 +184,7 @@ class My extends Common {
                 ->join('mp_note n','c.note_id=n.id','left')
                 ->join('mp_user u','n.uid=u.id','left')
                 ->where($where)
-                ->field('n.id,n.title,n.pics,u.nickname,u.avatar,n.like')
+                ->field('n.id,n.title,n.pics,n.width,n.height,u.nickname,u.avatar,n.like')
                 ->order(['n.create_time'=>'DESC'])
                 ->limit(($page-1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
@@ -694,7 +696,7 @@ class My extends Common {
         $perpage = input('post.perpage',10);
         $status = input('post.status','');
         $where = "uid=".$this->myinfo['uid'];
-        $where .= " AND `status` IN ('0','1','2','3') AND `del`=0";
+        $where .= " AND `status` IN ('0','1','2','3') AND `del`=0 AND `refund_apply`=0";
         $order = " ORDER BY `id` DESC";
         $orderby = " ORDER BY `d`.`id` DESC";
         if($status !== '') {
@@ -888,7 +890,8 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 return ajax( 'invalid pay_order_sn',44);
             }
             $update_data = [
-                'status' => 3
+                'status' => 3,
+                'finish_time' => time()
             ];
             Db::table('mp_order')->where($where)->update($update_data);
         } catch (\Exception $e) {

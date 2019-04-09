@@ -27,7 +27,7 @@ class Note extends Common {
             $list = Db::table('mp_note')->alias('n')
                 ->join('mp_user u','n.uid=u.id','left')
                 ->where($where)
-                ->field('n.id,n.title,n.pics,u.nickname,n.like,u.avatar')
+                ->field('n.id,n.title,n.pics,u.nickname,n.like,u.avatar,n.width,n.height')
                 ->order(['n.create_time'=>'DESC'])
                 ->limit(($page-1)*$perpage,$perpage)->select();
         }catch (\Exception $e) {
@@ -44,6 +44,8 @@ class Note extends Common {
     {
         $val['title'] = input('post.title');
         $val['content'] = input('post.content');
+        $val['width'] = input('post.width',1);
+        $val['height'] = input('post.height',1);
         $this->checkPost($val);
         $val['uid'] = $this->myinfo['uid'];
         $image = input('post.pics',[]);

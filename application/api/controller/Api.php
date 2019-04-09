@@ -633,7 +633,7 @@ class Api extends Common
             $list = Db::table('mp_note')->alias('n')
                 ->join('mp_user u', 'n.uid=u.id', 'left')
                 ->where($where)
-                ->field('n.id,n.title,n.pics,n.like,n.status')
+                ->field('n.id,n.title,n.pics,n.width,n.height,n.like,n.status')
                 ->order(['n.create_time' => 'DESC'])
                 ->limit(($page - 1) * $perpage, $perpage)->select();
         } catch (\Exception $e) {

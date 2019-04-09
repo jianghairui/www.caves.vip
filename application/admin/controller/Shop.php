@@ -528,6 +528,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             }
             $update_data = [
                 'status' => 2,
+                'send_time' => time(),
                 'tracking_name' => $val['tracking_name'],
                 'tracking_num' => $val['tracking_num']
             ];
@@ -547,7 +548,55 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
     }
 //退款
     public function orderRefund() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['id','=',$val['id']],
+                ['status','in',[1,2,3]]
+            ];
+            $exist = Db::table('mp_order')->where($where)->find();
+            if(!$exist) {
+                return ajax('订单不存在或状态已改变',-1);
+            }
+            $pay_order_sn = $exist['pay_order_sn'];
+            $exist['pay_price'] = 0.01;
+            $arr = [
+                'appid' => $this->config['app_id'],
+                'mch_id'=> $this->config['mch_id'],
+                'nonce_str'=>$this->randomkeys(32),
+                'sign_type'=>'MD5',
+                'transaction_id'=> $exist['trans_id'],
+                'out_trade_no'=> $pay_order_sn,
+                'out_refund_no'=> 'r' . $pay_order_sn,
+                'total_fee'=> floatval($exist['pay_price'])*100,
+                'refund_fee'=> floatval($exist['pay_price'])*100,
+                'refund_fee_type'=> 'CNY',
+                'refund_desc'=> '订单退款',
+                'notify_url'=> $_SERVER['REQUEST_SCHEME'] . '://'.$_SERVER['HTTP_HOST'].'/wxRefundNotify',
+                'refund_account' => 'REFUND_SOURCE_UNSETTLED_FUNDS'
+            ];
 
+            $arr['sign'] = $this->getSign($arr);
+            $url = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
+            $res = $this->curl_post_datas($url,$this->array2xml($arr),true);
+            if($res && $res['return_code'] == 'SUCCESS') {
+                if($res['result_code'] == 'SUCCESS') {
+                    $update_data = [
+                        'refund_apply' => 2,
+                        'refund_time' => time()
+                    ];
+                    Db::table('mp_order')->where($where)->update($update_data);
+                    return ajax();
+                }else {
+                    return ajax($res['err_code_des'],-1);
+                }
+            }else {
+                return ajax('退款通知失败',-1);
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
     }
 //删除订单
     public function orderDel() {

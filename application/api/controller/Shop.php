@@ -41,7 +41,7 @@ class Shop extends Common {
             $where[] = ['cate_id','=',$cate_id];
         }
         try {
-            $list = Db::table('mp_goods')->where($where)->field("id,name,origin_price,price,desc,pics")->limit(($curr_page-1)*$perpage,$perpage)->select();
+            $list = Db::table('mp_goods')->where($where)->field("id,name,origin_price,price,desc,pics,width,height")->limit(($curr_page-1)*$perpage,$perpage)->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
