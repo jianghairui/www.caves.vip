@@ -511,18 +511,26 @@ class Api extends Common
         return ajax($list);
     }
 //设计师详情
-    public function designerDetail()
-    {
+    public function designerDetail() {
         $val['uid'] = input('post.uid');
         $this->checkPost($val);
         try {
+            $whereFocus = [
+                ['uid','=',$this->myinfo['uid']]
+            ];
+            $myFocus = Db::table('mp_focus')->where($whereFocus)->column('to_uid');
             $info = Db::table('mp_user')->alias('u')
                 ->join("mp_role r","u.id=r.uid","left")
                 ->where('u.id', $val['uid'])
-                ->field("u.id,u.nickname,u.avatar,u.focus,u.age,r.desc")
+                ->field("u.id,u.nickname,u.avatar,u.sex,u.focus,u.age,r.desc")
                 ->find();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
+        }
+        if(in_array($info['id'],$myFocus)) {
+            $info['if_focus'] = true;
+        }else {
+            $info['if_focus'] = false;
         }
         return ajax($info);
 
