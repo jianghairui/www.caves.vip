@@ -42,6 +42,8 @@
                 <td>{$li.nickname}</td>
                 <td>
                     {switch $li['sex']}
+                    {case 0}
+                    <span>保密</span>{/case}
                     {case 1}
                     <span>男</span>{/case}
                     {case 2}

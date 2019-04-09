@@ -9,7 +9,6 @@ namespace app\api\controller;
 use my\Sendsms;
 use think\Db;
 class My extends Common {
-
     //获取个人信息
     public function mydetail() {
         $map = [
@@ -56,6 +55,31 @@ class My extends Common {
         }
         if ($val['avatar'] != $user['avatar']) {
             @unlink($user['avatar']);
+        }
+        return ajax();
+
+    }
+    //点击头像编辑角色资料
+    public function modMyRole() {
+        $val['desc'] = input('post.desc','');
+        $val['cover'] = input('post.cover','');
+        $this->checkPost($val);
+        $val['uid'] = $this->myinfo['uid'];
+        try {
+            $role = Db::table('mp_role')->where('uid',$val['uid'])->find();
+            if(!file_exists($val['cover'])) {
+                return ajax('',5);
+            }
+            $val['cover'] = $this->rename_file($val['cover'],'static/uploads/role/');
+            Db::table('mp_role')->where('uid',$val['id'])->update($val);
+        } catch (\Exception $e) {
+            if ($val['cover'] != $role['cover']) {
+                @unlink($val['cover']);
+            }
+            return ajax($e->getMessage(), -1);
+        }
+        if ($val['cover'] != $role['cover']) {
+            @unlink($role['cover']);
         }
         return ajax();
 

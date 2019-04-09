@@ -134,6 +134,14 @@ class Shop extends Common {
                 return ajax('请上传图片',-1);
             }
             $val['pics'] = serialize($image_array);
+            $imginfo = @getimagesize($image_array[0]);
+            if($imginfo) {
+                $val['width'] = $imginfo[0];
+                $val['height'] = $imginfo[1];
+            }else {
+                $val['width'] = 1;
+                $val['height'] = 1;
+            }
             try {
                 $res = Db::table('mp_goods')->insert($val);
             }catch (\Exception $e) {
@@ -201,6 +209,14 @@ class Shop extends Common {
                     return ajax('请上传图片',-1);
                 }
                 $val['pics'] = serialize($image_array);
+                $imginfo = @getimagesize($image_array[0]);
+                if($imginfo) {
+                    $val['width'] = $imginfo[0];
+                    $val['height'] = $imginfo[1];
+                }else {
+                    $val['width'] = 1;
+                    $val['height'] = 1;
+                }
                 Db::table('mp_goods')->where($map)->update($val);
             }catch (\Exception $e) {
                 foreach ($image_array as $v) {

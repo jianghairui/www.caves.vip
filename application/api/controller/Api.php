@@ -25,7 +25,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
 //获取活动列表
     public function getReqList()
     {
@@ -71,7 +70,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
 //获取首页活动标题列表
     public function getActiveList() {
         $where = [
@@ -97,7 +95,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
 //获取活动详情
     public function getReqDetail()
     {
@@ -141,7 +138,6 @@ class Api extends Common
         }
         return ajax($info);
     }
-
 //竞标
     public function bidding()
     {
@@ -189,7 +185,6 @@ class Api extends Common
         }
         return ajax();
     }
-
 //我要参加
     public function takePartIn()
     {
@@ -233,7 +228,6 @@ class Api extends Common
         }
         return ajax();
     }
-
 //上传参赛作品
     public function uploadWorks()
     {
@@ -317,7 +311,6 @@ class Api extends Common
         }
         return ajax();
     }
-
 //获取参赛作品列表
     public function worksList()
     {
@@ -344,7 +337,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
 //参赛作品详情
     public function worksDetail()
     {
@@ -375,7 +367,6 @@ class Api extends Common
         $exist['pics'] = unserialize($exist['pics']);
         return ajax($exist);
     }
-
 //获取竞标列表
     public function biddingList()
     {
@@ -394,7 +385,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
 //投票
     public function vote()
     {
@@ -442,16 +432,18 @@ class Api extends Common
         }
         return ajax();
     }
-
 //设计师列表
-    public function designerList()
-    {
+    public function designerList() {
         $curr_page = input('post.page', 1);
         $perpage = input('post.perpage', 10);
         try {
             $where = [
                 ['role', '=', 3]
             ];
+            $whereFocus = [
+                ['uid','=',$this->myinfo['uid']]
+            ];
+            $myFocus = Db::table('mp_focus')->where($whereFocus)->column('to_uid');
             $list = Db::table('mp_user')
                 ->where($where)
                 ->field("id,nickname,avatar,focus,sex,age")
@@ -459,9 +451,15 @@ class Api extends Common
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
+        foreach ($list as &$v) {
+            if(in_array($v['id'],$myFocus)) {
+                $v['if_focus'] = true;
+            }else {
+                $v['if_focus'] = false;
+            }
+        }
         return ajax($list);
     }
-
 //设计师参赛作品
     public function designerReqWorkList()
     {
@@ -487,7 +485,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
 //设计师展示作品
     public function designerShowWorkList()
     {
@@ -513,7 +510,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
 //设计师详情
     public function designerDetail()
     {
@@ -531,7 +527,6 @@ class Api extends Common
         return ajax($info);
 
     }
-
 //充值类目列表
     public function getVipList()
     {
@@ -544,7 +539,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
 //充值
     public function recharge()
     {
@@ -571,7 +565,6 @@ class Api extends Common
         return ajax($val);
 
     }
-
 //博文列表
     public function orgList()
     {
@@ -596,7 +589,6 @@ class Api extends Common
         }
         return ajax($list);
     }
-
 //博文详情
     public function orgDetail()
     {
@@ -616,8 +608,7 @@ class Api extends Common
         }
         return ajax($info);
     }
-
-    //博文工设笔记
+//博文工设笔记
     public function userNoteList()
     {
         $page = input('page', 1);
@@ -645,8 +636,7 @@ class Api extends Common
         $ret['list'] = $list;
         return ajax($ret);
     }
-
-    //博文需求列表
+//博文需求列表
     public function orgReqList()
     {
         $curr_page = input('post.page', 1);
@@ -676,8 +666,7 @@ class Api extends Common
         }
         return ajax($list);
     }
-
-    //工厂列表
+//工厂列表
     public function factoryList()
     {
         $curr_page = input('post.page', 1);
@@ -697,8 +686,7 @@ class Api extends Common
 
         return ajax($list);
     }
-
-    //工厂详情
+//工厂详情
     public function factoryDetail() {
         $val['uid'] = input('post.uid');
         $this->checkPost($val);
@@ -716,7 +704,7 @@ class Api extends Common
         }
         return ajax($info);
     }
-    //工厂竞标列表
+//工厂竞标列表
     public function factoryBiddingList()
     {
         $val['uid'] = input('post.uid');

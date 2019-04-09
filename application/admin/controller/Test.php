@@ -36,6 +36,19 @@ class Test extends Controller {
 //
 //    }
 
+    public function test() {
+        $info = @getimagesize('dfasd.jpg');
+        var_dump($info);
+        if($info) {
+            $data['width'] = $info[0];
+            $data['height'] = $info[1];
+        }else {
+            $data['width'] = 1;
+            $data['height'] = 1;
+        }
+        halt($data);
+    }
+
 
 
 }
