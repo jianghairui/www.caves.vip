@@ -54,6 +54,21 @@
             </div>
         </div>
         <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">使用规格：</label>
+            <div class="formControls col-xs-8 col-sm-9 skin-minimal">
+                <div class="check-box">
+                        <input type="checkbox" id="use_attr" name="use_attr" value="1">
+                        <label for="use_attr">&nbsp;</label>
+                </div>
+            </div>
+        </div>
+        <div class="row cl" id="attr_detail">
+            <label class="form-label col-xs-4 col-sm-2">规格组：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="" placeholder=“(如颜色、尺寸)" id="attr" name="attr">
+            </div>
+        </div>
+        <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">运费：</label>
             <div class="formControls col-xs-8 col-sm-9">
                 <input type="text" class="input-text" value="" placeholder="金额格式 0.00" id="carriage" name="carriage" oninput="this.value=/^\d{1,8}(\.\d{0,2})?$/.test(this.value) ? this.value : this.value.substring(0,this.value.length-1)">

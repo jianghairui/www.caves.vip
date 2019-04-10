@@ -37,16 +37,28 @@ class Test extends Controller {
 //    }
 
     public function test() {
-        $info = @getimagesize('dfasd.jpg');
-        var_dump($info);
-        if($info) {
-            $data['width'] = $info[0];
-            $data['height'] = $info[1];
-        }else {
-            $data['width'] = 1;
-            $data['height'] = 1;
-        }
-        halt($data);
+//        $files = scandir('fake/fact');
+//        $insert_data = [];
+//        $list = Db::table('mp_user')->where([
+//            ['fake','=',1],
+//            ['role','=',0]
+//        ])->column('id');
+//        unset($files[0]);
+//        unset($files[1]);
+//        foreach ($files as $k=>$v) {
+//            $data['cover'] = 'fake/fact/' . $v;
+//            $data['uid'] = $list[$k];
+//            $data['name'] = 'fake';
+//            $data['role'] = 4;
+//            $data['fake'] = 1;
+//            $insert_data[] = $data;
+//        }
+//        $res = Db::table('mp_role')->insertAll($insert_data);
+//        halt($res);
+//        $uids = Db::table('mp_role')->where('fake',1)->column('uid');
+//        $res = Db::table('mp_user')->where('id','in',$uids)->update(['auth'=>1,'role'=>3]);
+//        halt($res);
+
     }
 
 

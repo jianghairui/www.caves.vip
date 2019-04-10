@@ -250,7 +250,7 @@
                         success:function(data) {
                             console.log(data)
                             if(data.code == 1) {
-                                $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">未通过</span>');
+                                $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已拒绝</span>');
                                 $(obj).parent().html('<span class="btn btn-link radius"></span>');
                                 layer.msg('已拒绝', {icon:1,time:1000});
                             }else {

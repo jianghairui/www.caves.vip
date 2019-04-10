@@ -71,7 +71,7 @@ class My extends Common {
                 return ajax('',5);
             }
             $val['cover'] = $this->rename_file($val['cover'],'static/uploads/role/');
-            Db::table('mp_role')->where('uid',$val['id'])->update($val);
+            Db::table('mp_role')->where('uid',$val['uid'])->update($val);
         } catch (\Exception $e) {
             if ($val['cover'] != $role['cover']) {
                 @unlink($val['cover']);
@@ -226,10 +226,9 @@ class My extends Common {
         $val['org'] = input('post.org');
         $val['explain'] = input('post.explain');
         $val['theme'] = input('post.theme');
-        $val['part_obj'] = input('post.part_obj');
-        $val['part_way'] = input('post.part_way');
         $val['linkman'] = input('post.linkman');
         $val['tel'] = input('post.tel');
+        $val['phone'] = input('post.phone');
         $val['start_time'] = input('post.start_time');
         $val['deadline'] = input('post.deadline');
         $val['vote_time'] = input('post.vote_time');
@@ -237,22 +236,25 @@ class My extends Common {
         $val['uid'] = $this->myinfo['uid'];
         $this->checkPost($val);
         $val['weixin'] = input('post.weixin');
-
-        $user = Db::table('mp_user')->where('id',$val['uid'])->find();
-        if(!in_array($user['role'],[1,2]) || $user['auth'] != 2) {
-            return ajax('当前角色状态无法发布需求',24);
-        }
-
-        $image = input('post.cover','');
-        if($image) {
-            if(!file_exists($image)) {
-                return ajax($image,5);
-            }
-            $val['cover'] = $this->rename_file($image,'static/uploads/req/');
-        }else {
-            return ajax('请传入图片',3);
+        if(!preg_match('/0\d{2}-\d{7,8}/',$val['phone'])) {
+            return ajax('无效的座机号',46);
         }
         try {
+            $user = Db::table('mp_user')->where('id',$val['uid'])->find();
+            if(!in_array($user['role'],[1,2]) || $user['auth'] != 2) {
+                return ajax('当前角色状态无法发布需求',24);
+            }
+
+            $image = input('post.cover','');
+            if($image) {
+                if(!file_exists($image)) {
+                    return ajax($image,5);
+                }
+                $val['cover'] = $this->rename_file($image,'static/uploads/req/');
+            }else {
+                return ajax('请传入图片',3);
+            }
+
             $val['deadline'] = date('Y-m-d 23:59:59',strtotime($val['deadline']));
             $val['vote_time'] = date('Y-m-d 23:59:59',strtotime($val['vote_time']));
             $val['end_time'] = date('Y-m-d 23:59:59',strtotime($val['end_time']));
@@ -347,10 +349,9 @@ class My extends Common {
         $val['org'] = input('post.org');
         $val['explain'] = input('post.explain');
         $val['theme'] = input('post.theme');
-        $val['part_obj'] = input('post.part_obj');
-        $val['part_way'] = input('post.part_way');
         $val['linkman'] = input('post.linkman');
         $val['tel'] = input('post.tel');
+        $val['phone'] = input('post.phone');
         $val['start_time'] = input('post.start_time');
         $val['deadline'] = input('post.deadline');
         $val['vote_time'] = input('post.vote_time');
@@ -599,8 +600,7 @@ class My extends Common {
             Db::table('mp_user')->where('id',$val['uid'])->update([
                 'role' => $val['role'],
                 'auth' => 1,
-                'org' => $val['org'],
-                'desc' => $val['desc']
+                'org' => $val['org']
             ]);
         }catch (\Exception $e) {//异常删图
             if($role_exist) {
