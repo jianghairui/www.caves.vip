@@ -576,7 +576,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 return ajax('订单不存在或状态已改变',-1);
             }
             $pay_order_sn = $exist['pay_order_sn'];
-            $exist['pay_price'] = 0.01;
+//            $exist['pay_price'] = 0.01;
             $arr = [
                 'appid' => $this->config['app_id'],
                 'mch_id'=> $this->config['mch_id'],

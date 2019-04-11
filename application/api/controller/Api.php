@@ -115,9 +115,9 @@ class Api extends Common
             if (!$info) {
                 return ajax($val['id'], -4);
             }
-            if (date('Y-m-d 23:59:59', strtotime($info['end_time'])) <= date('Y-m-d H:i:s')) {
-                return ajax('活动已结束,无法查看', 25);
-            }
+//            if (date('Y-m-d 23:59:59', strtotime($info['end_time'])) <= date('Y-m-d H:i:s')) {
+//                return ajax('活动已结束,无法查看', 25);
+//            }
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }

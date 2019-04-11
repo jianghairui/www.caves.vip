@@ -55,8 +55,11 @@ class Test extends Controller {
 //        }
 //        $res = Db::table('mp_role')->insertAll($insert_data);
 //        halt($res);
-//        $uids = Db::table('mp_role')->where('fake',1)->column('uid');
-//        $res = Db::table('mp_user')->where('id','in',$uids)->update(['auth'=>1,'role'=>3]);
+//        $uids = Db::table('mp_role')->where([
+//            ['fake','=',1],
+//            ['role','=',4]
+//        ])->column('uid');
+//        $res = Db::table('mp_user')->where('id','in',$uids)->update(['auth'=>1,'role'=>4]);
 //        halt($res);
 
     }

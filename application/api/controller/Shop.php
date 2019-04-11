@@ -66,6 +66,8 @@ class Shop extends Common {
             if(!$info) {
                 return ajax($val['id'],-4);
             }
+            $attr_list = Db::table('mp_goods_attr')->where('goods_id',$val['id'])->select();
+            $info['attr_list'] = $attr_list;
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -92,7 +94,8 @@ class Shop extends Common {
         $val['goods_id'] = input('post.goods_id');
         $val['num'] = input('post.num');
         $this->checkPost($val);
-        $val['use_attr'] = input('post.use_attr',0);
+        $val['attr_id'] = input('post.attr_id',0);
+        $val['use_attr'] = 0;
         $val['uid'] = $this->myinfo['uid'];
         if(!if_int($val['num'])) {
             return ajax($val['num'],-4);
@@ -105,16 +108,13 @@ class Shop extends Common {
             if(!$goods_exist) {
                 return ajax($val['goods_id'],-4);
             }
-            if($val['num'] > $goods_exist['limit']) {
-                return ajax('超出限购数量',42);
-            }
             $map = [
                 ['goods_id','=',$val['goods_id']],
                 ['uid','=',$this->myinfo['uid']]
             ];
             //是否使用规格
-            if($val['use_attr']) {
-                $val['attr_id'] = input('post.attr_id');
+            if($val['attr_id']) {
+                $val['use_attr'] = 1;
                 $map_attr = [
                     ['id','=',$val['attr_id']],
                     ['goods_id','=',$val['goods_id']]
@@ -124,26 +124,49 @@ class Shop extends Common {
                     return ajax($val['attr_id'],-4);
                 }
                 if($val['num'] > $attr_exist['stock']) {
-                    return ajax('此规格库存不足',41);
+                    return ajax('库存不足',39);
                 }
+                if($val['num'] > $goods_exist['limit']) {
+                    return ajax('超出单笔限购数量',42);
+                }
+                $val['attr'] = $attr_exist['value'];
                 $map[] = ['attr_id','=',$val['attr_id']];
+                $cart_exist = Db::table('mp_cart')->where($map)->find();//购物车是否已经存在此商品
+                if($cart_exist) {
+                    if(($val['num'] + $cart_exist['num']) > $attr_exist['stock']) {
+                        return ajax('商品+购件数(含购物车)超出库存',48);
+                    }
+                    if(($val['num'] + $cart_exist['num']) > $goods_exist['limit']) {
+                        return ajax('超出单笔限购数量',42);
+                    }
+                    Db::table('mp_cart')->where($map)->setInc('num',$val['num']);
+                }else {
+                    $val['create_time'] = time();
+                    Db::table('mp_cart')->insert($val);
+                }
             }else {
                 if($val['num'] > $goods_exist['stock']) {
                     return ajax('库存不足',39);
                 }
-                $map[] = ['attr_id','NULL',true];
-            }
-            $cart_exist = Db::table('mp_cart')->where($map)->find();
-            //购物车是否已经存在此商品
-            if($cart_exist) {
-                if(($val['num'] + $cart_exist['num']) > $goods_exist['limit']) {
-                    return ajax('超出限购数量',42);
+                if($val['num'] > $goods_exist['limit']) {
+                    return ajax('超出单笔限购数量',42);
                 }
-                Db::table('mp_cart')->where($map)->setInc('num',$val['num']);
-            }else {
-                $val['create_time'] = time();
-                Db::table('mp_cart')->insert($val);
+                $map[] = ['attr_id','NULL',true];
+                $cart_exist = Db::table('mp_cart')->where($map)->find();//购物车是否已经存在此商品
+                if($cart_exist) {
+                    if(($val['num'] + $cart_exist['num']) > $goods_exist['stock']) {
+                        return ajax('商品+购件数(含购物车)超出库存',48);
+                    }
+                    if(($val['num'] + $cart_exist['num']) > $goods_exist['limit']) {
+                        return ajax('超出单笔限购数量',42);
+                    }
+                    Db::table('mp_cart')->where($map)->setInc('num',$val['num']);
+                }else {
+                    $val['create_time'] = time();
+                    Db::table('mp_cart')->insert($val);
+                }
             }
+
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -157,7 +180,8 @@ class Shop extends Common {
             ];
             $list = Db::table('mp_cart')->alias('c')
                 ->join("mp_goods g","c.goods_id=g.id","left")
-                ->field("c.id,c.uid,c.goods_id,c.num,c.use_attr,c.attr_id,g.name,g.pics,g.price,g.carriage,g.stock,g.limit")
+                ->join("mp_goods_attr a","c.attr_id=a.id","left")
+                ->field("c.id,c.uid,c.goods_id,c.num,c.use_attr,c.attr,c.attr_id,g.name,g.pics,g.price,g.carriage,g.stock,g.limit")
                 ->where($where)->select();
             foreach ($list as &$v) {
                 $v['cover'] = unserialize($v['pics'])[0];
@@ -168,14 +192,9 @@ class Shop extends Common {
                         ['goods_id','=',$v['goods_id']]
                     ];
                     $attr_exist = Db::table('mp_goods_attr')->where($map_attr)->find();
-                    if($v['num'] > $attr_exist['stock']) {
-                        return ajax('此规格库存不足',41);
-                    }
+
                     $price = $attr_exist['price'];
                 }else {
-                    if($v['num'] > $v['stock']) {
-                        return ajax('库存不足',39);
-                    }
                     $price = $v['price'];
                 }
                 $v['price'] = $price;
@@ -297,7 +316,8 @@ class Shop extends Common {
         $data['tel'] = input('post.tel');
         $data['address'] = input('post.address');
         $this->checkPost($data);
-        $data['use_attr'] = input('post.use_attr',0);
+        $data['attr_id'] = input('post.attr_id',0);
+        $data['use_attr'] = 0;
         if(!if_int($data['num'])) {
             return ajax($data['num'],-4);
         }
@@ -311,8 +331,9 @@ class Shop extends Common {
             if($data['num'] > $goods_exist['stock']) {
                 return ajax('库存不足',39);
             }
-            if($data['use_attr']) {
-                $attr_id = input('post.attr_id',0);
+            if($data['attr_id']) {
+                $attr_id = input('post.attr_id');
+                $data['use_attr'] = 1;
                 $where_attr = [
                     ['id','=',$attr_id],
                     ['goods_id','=',$data['goods_id']],
@@ -355,6 +376,9 @@ class Shop extends Common {
 
             Db::table('mp_order_detail')->insert($insert_detail);
             Db::table('mp_goods')->where('id', $data['goods_id'])->setDec('stock',$data['num']);
+            if($data['attr_id']) {
+                Db::table('mp_goods_attr')->where($where_attr)->setDec('stock',$data['num']);
+            }
             Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
@@ -395,6 +419,7 @@ class Shop extends Common {
             $carriage = 0;
             $insert_detail_all = [];
 
+            $card_delete_ids = [];
             foreach ($cart_list as $v) {
                 if($v['use_attr']) {
                     $where_attr = [
@@ -403,12 +428,15 @@ class Shop extends Common {
                     ];
                     $attr_exist = Db::table('mp_goods_attr')->where($where_attr)->find();
                     if($v['num'] > $attr_exist['stock']) {
-                        return ajax('库存不足',39);
+                        $card_delete_ids[] = $v['id'];
                     }
                     $unit_price = $attr_exist['price'];
                     $insert_detail['use_attr'] = 1;
                     $insert_detail['attr'] = $attr_exist['value'];
                 }else {
+                    if($v['num'] > $v['stock']) {
+                        $card_delete_ids[] = $v['id'];
+                    }
                     $unit_price = $v['price'];
                 }
                 $total_price += ($unit_price * $v['num'] + $v['carriage']);
@@ -423,6 +451,14 @@ class Shop extends Common {
                 $insert_detail['weight'] = $v['weight'];
                 $insert_detail['create_time'] = $time;
                 $insert_detail_all[] = $insert_detail;
+            }
+            if(!empty($card_delete_ids)) {
+                $whereDelete = [
+                    ['id','in',$card_delete_ids],
+                    ['uid','=',$this->myinfo['uid']]
+                ];
+                Db::table('mp_cart')->where($whereDelete)->delete();
+                return ajax('部分商品库存不足,请重新结算',47);
             }
 
             $insert_data['uid'] = $this->myinfo['uid'];
@@ -440,6 +476,17 @@ class Shop extends Common {
                 $v['order_id'] = $order_id;
             }
             Db::table('mp_order_detail')->insertAll($insert_detail_all);
+
+            foreach ($cart_list as $v) {
+                Db::table('mp_goods')->where('id',$v['goods_id'])->setDec('stock',$v['num']);
+                if($v['use_attr']) {
+                    $where_attr = [
+                        ['id','=',$v['attr_id']],
+                        ['goods_id','=',$v['goods_id']],
+                    ];
+                    Db::table('mp_goods_attr')->where($where_attr)->setDec('stock',$v['num']);
+                }
+            }
             $whereDelete = [
                 ['id','in',$cart_ids],
                 ['uid','=',$this->myinfo['uid']]

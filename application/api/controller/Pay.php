@@ -31,8 +31,8 @@ class Pay extends Common {
             $result = $app->order->unify([
                 'body' => 'VIP充值',
                 'out_trade_no' => $val['order_sn'],
-                'total_fee' => 1,
-//                'total_fee' => floatval($order_exist['price'])*100,
+//                'total_fee' => 1,
+                'total_fee' => floatval($order_exist['price'])*100,
                 'notify_url' => $this->weburl . 'api/pay/recharge_notify',
                 'trade_type' => 'JSAPI',
                 'openid' => $this->myinfo['openid'],
@@ -120,8 +120,8 @@ class Pay extends Common {
             $result = $app->order->unify([
                 'body' => '山洞文创产品',
                 'out_trade_no' => $val['pay_order_sn'],
-                'total_fee' => 1,
-//                'total_fee' => floatval($total_price)*100,
+//                'total_fee' => 1,
+                'total_fee' => floatval($total_price)*100,
                 'notify_url' => $this->weburl . 'api/pay/order_notify',
                 'trade_type' => 'JSAPI',
                 'openid' => $this->myinfo['openid']
