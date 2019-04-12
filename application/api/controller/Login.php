@@ -81,13 +81,33 @@ class Login extends Common {
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
+        $user = $this->getMyInfo();
+        $inviter_id = input('post.inviter_id');
         try {
-            $data['nickname'] = $decryptedData['nickName'];
-            $data['avatar'] = $decryptedData['avatarUrl'];
-            $data['sex'] = $decryptedData['gender'];
-            $data['unionid'] = $decryptedData['unionId'];
-            $data['user_auth'] = 1;
-            Db::table('mp_user')->where('openid','=',$decryptedData['openId'])->update($data);
+            if(!$user['user_auth']) {
+                $data['nickname'] = $decryptedData['nickName'];
+                $data['avatar'] = $decryptedData['avatarUrl'];
+                $data['sex'] = $decryptedData['gender'];
+                $data['unionid'] = $decryptedData['unionId'];
+                $data['user_auth'] = 1;
+                if($inviter_id) {
+                    $money = 0.5;
+                    $data['inviter_id'] = $inviter_id;
+                    $insert_data = [
+                        'inviter_id' => $inviter_id,
+                        'to_uid' => $this->myinfo['uid'],
+                        'money' => $money,
+                        'create_time' => time()
+                    ];
+                    Db::table('mp_user')->where('id','=',$this->myinfo['uid'])->update($data);
+                    Db::table('mp_invite')->insert($insert_data);
+                    Db::table('mp_user')->where('id',$inviter_id)->setInc('balance',$money);
+                }else {
+                    Db::table('mp_user')->where('id','=',$this->myinfo['uid'])->update($data);
+                }
+            }else {
+                return ajax();
+            }
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
