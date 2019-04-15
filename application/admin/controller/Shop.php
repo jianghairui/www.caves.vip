@@ -86,10 +86,12 @@ class Shop extends Common {
                 ['status','=',1]
             ];
             $child = Db::table('mp_goods_cate')->where($where)->select();
+            $attr_list = Db::table('mp_goods_attr')->where('goods_id','=',$id)->select();
         }catch (\Exception $e) {
             die($e->getMessage());
         }
         $this->assign('list',$list);
+        $this->assign('attr_list',$attr_list);
         $this->assign('child',$child);
         $this->assign('info',$info);
         return $this->fetch();
@@ -116,6 +118,19 @@ class Shop extends Common {
             $val['create_time'] = time();
             $this->checkPost($val);
             $val['detail'] = input('post.detail');
+            $val['use_attr'] = input('post.use_attr','');
+            $val['attr'] = input('post.attr','');
+            if($val['use_attr']) {
+                $attr1 = input('post.attr1',[]);
+                $attr2 = input('post.attr2',[]);
+                $attr3 = input('post.attr3',[]);
+                if(!$val['attr'] || empty($attr1)) {
+                    return ajax('至少添加一个规格',-1);
+                }
+                if(count($attr1) !== count($attr2) || count($attr1) !== count($attr3)) {
+                    return ajax('操作异常',-1);
+                }
+            }
             $image = input('post.pic_url',[]);
             $image_array = [];
             if(is_array($image) && !empty($image)) {
@@ -143,18 +158,25 @@ class Shop extends Common {
                 $val['height'] = 1;
             }
             try {
-                $res = Db::table('mp_goods')->insert($val);
+                $new_id = Db::table('mp_goods')->insertGetId($val);
+                if($val['use_attr']) {
+                    $attr_insert = [];
+                    foreach ($attr1 as $k=>$v) {
+                        $data['goods_id'] = $new_id;
+                        $data['value'] = $attr1[$k];
+                        $data['price'] = $attr2[$k];
+                        $data['stock'] = $attr3[$k];
+                        $attr_insert[] = $data;
+                    }
+                    Db::table('mp_goods_attr')->insertAll($attr_insert);
+                }
             }catch (\Exception $e) {
-                return ajax($e->getMessage(),-1);
-            }
-            if($res) {
-                return ajax([],1);
-            }else {
                 foreach ($image_array as $v) {
                     @unlink($v);
                 }
-                return ajax('添加失败',-1);
+                return ajax($e->getMessage(),-1);
             }
+            return ajax([],1);
         }
     }
 //修改商品POST
@@ -180,7 +202,19 @@ class Shop extends Common {
             $val['create_time'] = time();
             $this->checkPost($val);
             $val['detail'] = input('post.detail');
-
+            $val['use_attr'] = input('post.use_attr','');
+            $val['attr'] = input('post.attr','');
+            if($val['use_attr']) {
+                $attr1 = input('post.attr1',[]);
+                $attr2 = input('post.attr2',[]);
+                $attr3 = input('post.attr3',[]);
+                if(!$val['attr'] || empty($attr1)) {
+                    return ajax('至少添加一个规格',-1);
+                }
+                if(count($attr1) !== count($attr2) || count($attr1) !== count($attr3)) {
+                    return ajax('操作异常',-1);
+                }
+            }
             $image = input('post.pic_url',[]);
             try {
                 $map = [
@@ -218,6 +252,18 @@ class Shop extends Common {
                     $val['height'] = 1;
                 }
                 Db::table('mp_goods')->where($map)->update($val);
+                if($val['use_attr']) {
+                    Db::table('mp_goods_attr')->where('goods_id',$val['id'])->delete();
+                    $attr_insert = [];
+                    foreach ($attr1 as $k=>$v) {
+                        $data['goods_id'] = $val['id'];
+                        $data['value'] = $attr1[$k];
+                        $data['price'] = $attr2[$k];
+                        $data['stock'] = $attr3[$k];
+                        $attr_insert[] = $data;
+                    }
+                    Db::table('mp_goods_attr')->insertAll($attr_insert);
+                }
             }catch (\Exception $e) {
                 foreach ($image_array as $v) {
                     if(!in_array($v,$old_pics)) {

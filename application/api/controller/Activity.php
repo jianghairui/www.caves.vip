@@ -18,18 +18,18 @@ class Activity extends Common {
                 'title' => '文创代言现金红包',
                 'end' => 0,
             ],
-            [
-                'id' => 2,
-                'cover' => 'static/uploads/activity/test.jpg',
-                'title' => '集齐卡片获精美礼品',
-                'end' => 0,
-            ],
-            [
-                'id' => 3,
-                'cover' => 'static/uploads/activity/test.jpg',
-                'title' => '揭开文创面纱',
-                'end' => 0,
-            ]
+//            [
+//                'id' => 2,
+//                'cover' => 'static/uploads/activity/test.jpg',
+//                'title' => '集齐卡片获精美礼品',
+//                'end' => 0,
+//            ],
+//            [
+//                'id' => 3,
+//                'cover' => 'static/uploads/activity/test.jpg',
+//                'title' => '揭开文创面纱',
+//                'end' => 0,
+//            ]
         ];
         return ajax($list);
     }
@@ -50,5 +50,26 @@ class Activity extends Common {
         }
         return ajax($save_path . $png);
     }
+
+    public function getInviteList() {
+        try {
+            $where = [
+                ['i.inviter_id','=',$this->myinfo['uid']]
+            ];
+            $list = Db::table('mp_user')->alias('u')
+                ->join("mp_invite i","u.id=i.to_uid","left")
+                ->where($where)
+                ->field("u.nickname,i.*")
+                ->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $rule = "新手任务中有多个任务，好友需根据要求，完成所有任务并全部获得奖励后，才会被计算为一个有效好友。";
+        $data['list'] = $list;
+        $data['rule'] = $rule;
+        return ajax($data);
+    }
+
+
 
 }
