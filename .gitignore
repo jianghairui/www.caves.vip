@@ -1,5 +1,6 @@
 .idea
 config/database.php
 public/cert
+public/ueditor
 *.log
 .DS_Store
