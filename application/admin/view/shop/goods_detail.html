@@ -85,6 +85,7 @@
                     <i class="Hui-iconfont">&#xe6e2;</i></a>
                 </label>
                 <div class="formControls col-sm-2">
+                    <input type="hidden" class="input-text" value="{$li.id}" name="attr0[]">
                     <input type="text" class="input-text" value="{$li.value}" name="attr1[]">
                 </div>
                 <div class="formControls col-sm-2">
@@ -284,17 +285,21 @@
                     }
                 }
                 $("input[name='attr1[]']").each(function(i, el) {
+                    if(isclick === true && $(this).val() == '') {
+                        alert('属性值不能为空');
+                        isclick = false;
+                    }
                     attr1[i] =$(this).val();
                 });
                 $("input[name='attr2[]']").each(function(i, el) {
-                    if(!(/^\d{1,8}(\.\d{0,2})?$/.test($(this).val()))) {
+                    if(isclick === true && !(/^\d{1,8}(\.\d{0,2})?$/.test($(this).val()))) {
                         alert('金额格式不符');
                         isclick = false;
                     }
                     attr2[i] =$(this).val();
                 });
                 $("input[name='attr3[]']").each(function(i, el) {
-                    if(!(/^\d{1,8}$/.test($(this).val()))) {
+                    if(isclick === true && !(/^\d{1,8}$/.test($(this).val()))) {
                         alert('数量格式不正符');
                         isclick = false;
                     }
@@ -416,7 +421,7 @@
                 return false;
             }
             $("#attr_detail").append(
-                '<div class="row cl"><label class="form-label col-sm-2"><a style="text-decoration:none" class="ml-5" title="删除" onclick="javascript:$(this).parent().parent().remove();"><i class="Hui-iconfont">&#xe6e2;</i></a></label><div class="formControls col-sm-2"><input type="text" class="input-text" value="" name="attr1[]"></div><div class="formControls col-sm-2"><input type="text" class="input-text" value="" name="attr2[]"></div><div class="formControls col-sm-2"><input type="number" class="input-text" value="" name="attr3[]"></div></div>'
+                '<div class="row cl"><label class="form-label col-sm-2"><a style="text-decoration:none" class="ml-5" title="删除" onclick="javascript:$(this).parent().parent().remove();"><i class="Hui-iconfont">&#xe6e2;</i></a></label><div class="formControls col-sm-2"><input type="hidden" class="input-text" value="" name="attr0[]"><input type="text" class="input-text" value="" name="attr1[]"></div><div class="formControls col-sm-2"><input type="text" class="input-text" value="" name="attr2[]"></div><div class="formControls col-sm-2"><input type="number" class="input-text" value="" name="attr3[]"></div></div>'
             );
         })
 

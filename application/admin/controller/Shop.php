@@ -86,7 +86,11 @@ class Shop extends Common {
                 ['status','=',1]
             ];
             $child = Db::table('mp_goods_cate')->where($where)->select();
-            $attr_list = Db::table('mp_goods_attr')->where('goods_id','=',$id)->select();
+            $where_attr = [
+                ['goods_id','=',$id],
+                ['del','=',0]
+            ];
+            $attr_list = Db::table('mp_goods_attr')->where($where_attr)->select();
         }catch (\Exception $e) {
             die($e->getMessage());
         }
@@ -119,11 +123,12 @@ class Shop extends Common {
             $this->checkPost($val);
             $val['detail'] = input('post.detail');
             $val['use_attr'] = input('post.use_attr','');
-            $val['attr'] = input('post.attr','');
             if($val['use_attr']) {
                 $attr1 = input('post.attr1',[]);
                 $attr2 = input('post.attr2',[]);
                 $attr3 = input('post.attr3',[]);
+
+                $val['attr'] = input('post.attr','');
                 if(!$val['attr'] || empty($attr1)) {
                     return ajax('至少添加一个规格',-1);
                 }
@@ -166,6 +171,7 @@ class Shop extends Common {
                         $data['value'] = $attr1[$k];
                         $data['price'] = $attr2[$k];
                         $data['stock'] = $attr3[$k];
+                        $data['create_time'] = time();
                         $attr_insert[] = $data;
                     }
                     Db::table('mp_goods_attr')->insertAll($attr_insert);
@@ -202,16 +208,18 @@ class Shop extends Common {
             $val['create_time'] = time();
             $this->checkPost($val);
             $val['detail'] = input('post.detail');
-            $val['use_attr'] = input('post.use_attr','');
-            $val['attr'] = input('post.attr','');
+            $val['use_attr'] = input('post.use_attr',0);
             if($val['use_attr']) {
+                $attr0 = input('post.attr0',[]);
                 $attr1 = input('post.attr1',[]);
                 $attr2 = input('post.attr2',[]);
                 $attr3 = input('post.attr3',[]);
+
+                $val['attr'] = input('post.attr','');
                 if(!$val['attr'] || empty($attr1)) {
                     return ajax('至少添加一个规格',-1);
                 }
-                if(count($attr1) !== count($attr2) || count($attr1) !== count($attr3)) {
+                if(count($attr1) !== count($attr2) || count($attr1) !== count($attr3) || count($attr1) !== count($attr0)) {
                     return ajax('操作异常',-1);
                 }
             }
@@ -253,16 +261,31 @@ class Shop extends Common {
                 }
                 Db::table('mp_goods')->where($map)->update($val);
                 if($val['use_attr']) {
-                    Db::table('mp_goods_attr')->where('goods_id',$val['id'])->delete();
+                    $attr_ids = Db::table('mp_goods_attr')->where('goods_id',$val['id'])->column('id');
                     $attr_insert = [];
                     foreach ($attr1 as $k=>$v) {
                         $data['goods_id'] = $val['id'];
                         $data['value'] = $attr1[$k];
                         $data['price'] = $attr2[$k];
                         $data['stock'] = $attr3[$k];
-                        $attr_insert[] = $data;
+                        if($attr0[$k] == '') {
+                            $data['create_time'] = time();
+                            $attr_insert[] = $data;
+                        }else {
+                            Db::table('mp_goods_attr')->where('id','=',$attr0[$k])->update($data);
+                        }
+
                     }
                     Db::table('mp_goods_attr')->insertAll($attr_insert);
+                    $whereDelete = [];
+                    foreach ($attr_ids as $v) {
+                        if(!in_array($v,$attr0)) {
+                            $whereDelete[] = $v;
+                        }
+                    }
+                    if(!empty($whereDelete)) {
+                        Db::table('mp_goods_attr')->where('id','in',$whereDelete)->update(['del'=>1]);
+                    }
                 }
             }catch (\Exception $e) {
                 foreach ($image_array as $v) {

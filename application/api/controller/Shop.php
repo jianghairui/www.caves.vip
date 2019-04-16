@@ -443,6 +443,9 @@ class Shop extends Common {
                         $card_delete_ids[] = $v['id'];
                     }
                     $unit_price = $v['price'];
+                    $insert_detail['use_attr'] = 0;
+                    $insert_detail['attr_id'] = NULL;
+                    $insert_detail['attr'] = '默认';
                 }
                 $total_price += ($unit_price * $v['num'] + $v['carriage']);
                 $carriage += $v['carriage'];

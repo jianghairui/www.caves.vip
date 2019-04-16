@@ -942,6 +942,13 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 'del' => 1
             ];
             Db::table('mp_order')->where($where)->update($update_data);
+            $detail_list = Db::table('mp_order_detail')->where('order_id','=',$exist['id'])->select();
+            foreach ($detail_list as $v) {
+                if($v['use_attr'] == 1) {
+                    Db::table('mp_goods_attr')->where('id','=',$v['attr_id'])->setInc('stock',$v['num']);
+                }
+                Db::table('mp_goods')->where('id','=',$v['goods_id'])->setInc('stock',$v['num']);
+            }
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
