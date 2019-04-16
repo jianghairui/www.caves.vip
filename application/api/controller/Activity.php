@@ -37,8 +37,8 @@ class Activity extends Common {
     public function getQrcode() {
         $uid = $this->myinfo['uid'];
         $app = Factory::miniProgram($this->mp_config);
-        $response = $app->app_code->getUnlimit('inviter_id=' . $uid, [
-            'page'  => 'pages/notes/notes',
+        $response = $app->app_code->getUnlimit($uid, [
+            'page'  => 'pages/auth/auth',
             'width' => '300'
         ]);
         $png = $uid . '.png';

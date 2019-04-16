@@ -347,6 +347,7 @@ class Shop extends Common {
                 }
                 $unit_price = $attr_exist['price'];
                 $insert_detail['use_attr'] = 1;
+                $insert_detail['attr_id'] = $data['attr_id'];
                 $insert_detail['attr'] = $attr_exist['value'];
             }else {
                 $unit_price = $goods_exist['price'];
@@ -409,7 +410,7 @@ class Shop extends Common {
                 ->join("mp_goods g","c.goods_id=g.id","left")
                 ->join("mp_goods_attr a","c.attr_id=a.id","left")
                 ->where($where)
-                ->field("c.*,g.price,g.name,g.carriage,g.weight,a.price AS attr_price,a.stock,a.value")
+                ->field("c.*,g.price,g.name,g.carriage,g.weight,g.stock AS total_stock,a.price AS attr_price,a.stock,a.value")
                 ->select();
             if(count($cart_ids) != count($cart_list)) {
                 return ajax($cart_ids,-4);
@@ -427,14 +428,18 @@ class Shop extends Common {
                         ['goods_id','=',$v['goods_id']],
                     ];
                     $attr_exist = Db::table('mp_goods_attr')->where($where_attr)->find();
+                    if(!$attr_exist) {
+                        return ajax('invalid attr_id',-4);
+                    }
                     if($v['num'] > $attr_exist['stock']) {
                         $card_delete_ids[] = $v['id'];
                     }
                     $unit_price = $attr_exist['price'];
                     $insert_detail['use_attr'] = 1;
+                    $insert_detail['attr_id'] = $v['attr_id'];
                     $insert_detail['attr'] = $attr_exist['value'];
                 }else {
-                    if($v['num'] > $v['stock']) {
+                    if($v['num'] > $v['total_stock']) {
                         $card_delete_ids[] = $v['id'];
                     }
                     $unit_price = $v['price'];
