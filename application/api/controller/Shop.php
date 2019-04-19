@@ -151,7 +151,7 @@ class Shop extends Common {
                 if($val['num'] > $goods_exist['limit']) {
                     return ajax('超出单笔限购数量',42);
                 }
-                $map[] = ['attr_id','NULL',true];
+                $map[] = ['attr_id','=',0];
                 $cart_exist = Db::table('mp_cart')->where($map)->find();//购物车是否已经存在此商品
                 if($cart_exist) {
                     if(($val['num'] + $cart_exist['num']) > $goods_exist['stock']) {
@@ -444,7 +444,7 @@ class Shop extends Common {
                     }
                     $unit_price = $v['price'];
                     $insert_detail['use_attr'] = 0;
-                    $insert_detail['attr_id'] = NULL;
+                    $insert_detail['attr_id'] = 0;
                     $insert_detail['attr'] = '默认';
                 }
                 $total_price += ($unit_price * $v['num'] + $v['carriage']);

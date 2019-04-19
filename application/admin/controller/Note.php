@@ -24,11 +24,11 @@ class Note extends Common {
         ];
 
         if($param['logmin']) {
-            $where[] = ['n.created_at','>=',date('Y-m-d 00:00:00',strtotime($param['logmin']))];
+            $where[] = ['n.create_time','>=',date('Y-m-d 00:00:00',strtotime($param['logmin']))];
         }
 
         if($param['logmax']) {
-            $where[] = ['n.created_at','<=',date('Y-m-d 23:59:59',strtotime($param['logmax']))];
+            $where[] = ['n.create_time','<=',date('Y-m-d 23:59:59',strtotime($param['logmax']))];
         }
 
         if($param['search']) {
