@@ -236,7 +236,7 @@ class My extends Common {
         $val['uid'] = $this->myinfo['uid'];
         $this->checkPost($val);
         $val['weixin'] = input('post.weixin');
-        if(!preg_match('/0\d{2}-\d{7,8}/',$val['phone'])) {
+        if(!preg_match('/0\d{2,3}-\d{7,8}/',$val['phone'])) {
             return ajax('无效的座机号',46);
         }
         try {
