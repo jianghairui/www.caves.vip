@@ -14,7 +14,7 @@ class Activity extends Common {
         $list = [
             [
                 'id' => 1,
-                'cover' => 'static/uploads/activity/test.jpg',
+                'cover' => 'static/uploads/activity/test.png',
                 'title' => '文创代言现金红包',
                 'end' => 0,
             ],
