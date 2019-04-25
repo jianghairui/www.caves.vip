@@ -82,7 +82,7 @@ class Api extends Common
             $list = Db::table('mp_req')
                 ->alias('r')
                 ->join("mp_user u", "r.uid=u.id", "left")
-                ->where($where)->order(['r.start_time' => 'ASC'])
+                ->where($where)->order(['r.id' => 'DESC'])
                 ->field("r.id,r.title,r.pic,r.cover,r.part_num,r.start_time,r.end_time,u.org as user_org")
                 ->limit(0,3)
                 ->select();
