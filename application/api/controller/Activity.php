@@ -5,12 +5,18 @@
  * Date: 2019/4/12
  * Time: 10:23
  */
+
 namespace app\api\controller;
+
 use think\Db;
 use EasyWeChat\Factory;
-class Activity extends Common {
+use think\Exception;
 
-    public function activityList() {
+class Activity extends Common
+{
+
+    public function activityList()
+    {
         $list = [
             [
                 'id' => 1,
@@ -18,12 +24,12 @@ class Activity extends Common {
                 'title' => '文创代言现金红包',
                 'end' => 0,
             ],
-//            [
-//                'id' => 2,
-//                'cover' => 'static/uploads/activity/test.jpg',
-//                'title' => '集齐卡片获精美礼品',
-//                'end' => 0,
-//            ],
+            [
+                'id' => 2,
+                'cover' => 'static/uploads/activity/test.png',
+                'title' => '集齐卡片获精美礼品',
+                'end' => 0,
+            ],
 //            [
 //                'id' => 3,
 //                'cover' => 'static/uploads/activity/test.jpg',
@@ -34,30 +40,32 @@ class Activity extends Common {
         return ajax($list);
     }
 
-    public function getQrcode() {
+    public function getQrcode()
+    {
         $uid = $this->myinfo['uid'];
         $app = Factory::miniProgram($this->mp_config);
         $response = $app->app_code->getUnlimit($uid, [
-            'page'  => 'pages/auth/auth',
+            'page' => 'pages/auth/auth',
             'width' => '300'
         ]);
         $png = $uid . '.png';
         $save_path = 'static/uploads/appcode/';
         if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
             $filename = $response->saveAs($save_path, $png);
-        }else {
-            return ajax($response,-1);
+        } else {
+            return ajax($response, -1);
         }
         return ajax($save_path . $png);
     }
 
-    public function getInviteList() {
+    public function getInviteList()
+    {
         try {
             $where = [
-                ['i.inviter_id','=',$this->myinfo['uid']]
+                ['i.inviter_id', '=', $this->myinfo['uid']]
             ];
             $list = Db::table('mp_user')->alias('u')
-                ->join("mp_invite i","u.id=i.to_uid","left")
+                ->join("mp_invite i", "u.id=i.to_uid", "left")
                 ->where($where)
                 ->field("u.nickname,i.*")
                 ->select();
@@ -70,6 +78,295 @@ class Activity extends Common {
         return ajax($data);
     }
 
+    // 获取卡片列表
+    public function getCardList()
+    {
+        try {
+            $list = Db::table('mp_card')->alias('c')
+                ->join('mp_user_card uc', 'uc.cid = c.id AND uc.uid = ' . $this->myinfo['uid'], 'left')
+                ->group('c.id')
+                ->field('c.id, c.title, c.pic, c.pic_back, count(uc.id) as card_amount')
+                ->select();
 
+            $lucky_draw_times = Db::table('mp_user')
+                ->where([['id', '=', $this->myinfo['uid']]])
+                ->value('lucky_draw_times');
+
+            $data = [
+                'list' => $list,
+                'lucky_draw_times' => $lucky_draw_times
+            ];
+            return ajax($data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+    }
+
+    // 抽卡
+    public function getCard()
+    {
+        try {
+            $lucky_draw_times = Db::table('mp_user')
+                ->where([['id', '=', $this->myinfo['uid']]])
+                ->value('lucky_draw_times');
+
+            if (!$lucky_draw_times) {
+                return ajax('您已经没有抽卡机会了', 49);
+            } else {
+                $cid = $this->get_rand_card();
+
+                Db::startTrans();
+                $data = [
+                    'cid' => $cid,
+                    'uid' => $this->myinfo['uid'],
+                    'create_time' => time()
+                ];
+                Db::table('mp_user_card')->insert($data);
+
+                Db::table('mp_user')
+                    ->where([['id', '=', $this->myinfo['uid']]])
+                    ->setDec('lucky_draw_times', 1);
+
+                $get_gift = 0;  // 0.未获得礼物 1.获得文创礼品 2.获得奖金
+                if ($cid == 5) {
+                    // 查看是否得到过现金奖励，未获得过则获得现金奖励
+                    $cash_gift = Db::table('mp_card_cash_gift')
+                        ->where([['uid', '=', $this->myinfo['uid']]])
+                        ->find();
+
+                    if (!$cash_gift) {
+                        $data = [
+                            'uid' => $this->myinfo['uid'],
+                            'money' => number_format(config('card_gift_cash'), 2),
+                            'create_time' => time()
+                        ];
+                        Db::table('mp_card_cash_gift')->insert($data);
+
+                        Db::table('mp_user')
+                            ->where([['id', '=', $this->myinfo['uid']]])
+                            ->setInc('balance', config('card_gift_cash'));
+
+                        $get_gift = 2;
+                    }
+                } else {
+                    // 查看是否获得过文创礼品，没有获得过文创礼品查看是否得到全部8张卡片，如果集齐则获得文创礼品
+                    $cul_gift = Db::table('mp_card_cul_gift')
+                        ->where([['uid', '=', $this->myinfo['uid']]])
+                        ->find();
+                    if (!$cul_gift) {
+                        $w = [
+                            ['uc.uid', '=', $this->myinfo['uid']],
+                            ['c.id', '<>', 5]
+                        ];
+                        $user_has_list = Db::table('mp_card')->alias('c')
+                            ->join('mp_user_card uc', 'uc.cid = c.id')
+                            ->where($w)
+                            ->group('c.id')
+                            ->field('c.id')
+                            ->select();
+
+                        // 如果是8张则为集齐
+                        if (count($user_has_list) == 8) {
+                            // 生成二维码图片
+                            $qr_code_path = 'static/uploads/activity/gift_qrcode/' . md5($this->myinfo['uid'] . rand(1, 1000000000)) . '.png';
+                            $qr_code = create_qrcode($this->myinfo['uid'], $qr_code_path);
+                            if (!$qr_code) {
+                                throw new Exception('生成二维码失败');
+                            }
+
+                            $data = [
+                                'uid' => $this->myinfo['uid'],
+                                'create_time' => time(),
+                                'qrcode' => $qr_code_path
+                            ];
+                            Db::table('mp_card_cul_gift')->insert($data);
+
+                            $get_gift = 1;
+                        }
+                    }
+                }
+                Db::commit();
+            }
+
+            $data = [
+                'card_id' => $cid,
+                'get_gift' => $get_gift
+            ];
+            return ajax($data);
+        } catch (\Exception $e) {
+            // 如果已经生成了二维码图片则删除它
+            if ($qr_code_path) {
+                @unlink($qr_code_path);
+            }
+            Db::rollback();
+            return ajax($e->getMessage(), -1);
+        }
+    }
+
+    // 生成卡片码（赠送用）
+    public function createCardCode() {
+        $post['cid'] = input('post.cid');
+        $this->checkPost($post);
+
+        $cid = $post['cid'];
+
+        // 合法的卡号
+        if (!preg_match('/^[1-9]$/', $cid)) {
+            return ajax('卡片id不合法', 49);
+        }
+
+        try {
+            $w = [
+                ['uid', '=', $this->myinfo['uid']],
+                ['cid', '=', $cid]
+            ];
+            $card_count = Db::table('mp_user_card')
+                ->where($w)
+                ->count();
+
+            if ($card_count < 2) {
+                return ajax('您需要有两张及以上的卡才可以赠送', 49);
+            }
+
+            $card = Db::table('mp_user_card')
+                ->where($w)
+                ->find();
+
+            $card_code = md5($this->myinfo['uid'] . rand(1, 1000000000));
+            $data = [
+                'card_code' => $card_code
+            ];
+
+            Db::table('mp_user_card')
+                ->where([['id', '=', $card['id']]])
+                ->update($data);
+
+            return ajax($card_code);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+    }
+
+    // 文创礼品核销
+    public function culVerify() {
+        $post = [
+            'uid' => input('post.uid'),  // 这个是核销用户的uid
+            'content' => input('post.content')
+        ];
+        $this->checkPost($post);
+
+        try {
+            $cul_gift = Db::table('mp_card_cul_gift')
+                ->where([['uid', '=', $post['uid']]])
+                ->find();
+
+            if (!$cul_gift) {
+                return ajax('该用户并未获得文创礼品', 49);
+            } else if ($cul_gift['status'] == 1) {
+                return ajax('该用户的文创礼品已核销', 49);
+            }
+
+            $my = Db::table('mp_user')
+                ->where([['id', '=', $this->myinfo['uid']]])
+                ->find();
+
+            if (!($my['auth'] == 2 && $my['role'] == 1)) {
+                return ajax('只有认证博物馆才能核销文创礼品', 49);
+            }
+
+            $data = [
+                'm_uid' => $this->myinfo['uid'],
+                'content' => $post['content'],
+                'verify_time' => time(),
+                'status' => 1
+            ];
+            Db::table('mp_card_cul_gift')
+                ->where([['id', '=', $cul_gift['id']]])
+                ->update($data);
+
+            return ajax();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+    }
+
+    //
+    public function get_cul() {
+
+    }
+
+    // 测试
+    public function test()
+    {
+    }
+
+    // 测试检查token版
+    public function test_user() {
+        dump($this->myinfo);
+    }
+
+    /* 工具方法、私有方法 */
+    // 测试卡牌概率，只是测试的时候有用
+    private function test_card($times = 10000)
+    {
+        $card_count = [
+            '1' => 0,
+            '2' => 0,
+            '3' => 0,
+            '4' => 0,
+            '5' => 0,
+            '6' => 0,
+            '7' => 0,
+            '8' => 0,
+            '9' => 0
+        ];
+        for ($i = 0; $i < $times; $i++) {
+            $cid = $this->get_rand_card();
+            $card_count[$cid]++;
+        }
+        print_r($card_count);
+    }
+
+    // 定义卡牌数组，调用get_rand返回指定卡牌
+    private function get_rand_card()
+    {
+        $prize_arr = [
+            ['id' => 1, 'probability' => 200],
+            ['id' => 2, 'probability' => 150],
+            ['id' => 3, 'probability' => 100],
+            ['id' => 4, 'probability' => 150],
+            ['id' => 5, 'probability' => 1],
+            ['id' => 6, 'probability' => 199],
+            ['id' => 7, 'probability' => 50],
+            ['id' => 8, 'probability' => 50],
+            ['id' => 9, 'probability' => 100]
+        ];
+
+        foreach ($prize_arr as $key => $val) {
+            $arr[$val['id']] = $val['probability'];
+        }
+
+        return $this->get_rand($arr);
+    }
+
+    // 根据卡牌数组返回指定卡牌
+    private function get_rand($proArr)
+    {
+        $result = '';
+        //概率数组的总概率精度
+        $proSum = array_sum($proArr);
+        //概率数组循环
+        foreach ($proArr as $key => $proCur) {
+            $randNum = mt_rand(1, $proSum);
+            if ($randNum <= $proCur) {
+                $result = $key;
+                break;
+            } else {
+                $proSum -= $proCur;
+            }
+        }
+        unset ($proArr);
+        return $result;
+    }
 
 }

@@ -46,7 +46,8 @@ class Common extends Controller {
         $noneed = [
             'Login/login',
             'Pay/recharge_notify',
-            'Pay/order_notify'
+            'Pay/order_notify',
+            'Activity/test'
         ];
         if (in_array(request()->controller() . '/' . request()->action(), $noneed)) {
             return true;

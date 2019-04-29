@@ -11,4 +11,5 @@ return array(
         //支持Html,Console
         'type'  =>  'html',
     ],
+    'card_gift_cash' => 300
 );

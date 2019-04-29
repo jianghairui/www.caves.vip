@@ -62,12 +62,19 @@ class Note extends Common {
             ['id','=',input('post.id',0)]
         ];
         try {
+            Db::startTrans();
+
             $exist = Db::table('mp_note')->where($map)->find();
             if(!$exist) {
                 return ajax('非法操作',-1);
             }
             Db::table('mp_note')->where($map)->update(['status'=>1]);
+
+            Db::table('mp_user')->where([['id', '=', $exist['uid']]])->setInc('lucky_draw_times', 5);
+
+            Db::commit();
         }catch (\Exception $e) {
+            Db::rollback();
             return ajax($e->getMessage(),-1);
         }
         return ajax([],1);
