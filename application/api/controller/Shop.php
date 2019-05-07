@@ -507,6 +507,20 @@ class Shop extends Common {
 
     }
 
+    public function getDefaultAddress() {
+        $uid = $this->myinfo['uid'];
+        $where = [
+            ['default','=',1],
+            ['uid','=',$uid]
+        ];
+        try {
+            $info = Db::table('mp_address')->where($where)->find();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($info);
+    }
+
     private function recursion($array,$pid=0) {
         $to_array = [];
         foreach ($array as $v) {

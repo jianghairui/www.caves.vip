@@ -317,6 +317,49 @@ class Member extends Common {
         return $this->fetch();
     }
 
+    //订单发货
+    public function orderSend() {
+        $id = input('param.id');
+        try {
+            $where = [
+                ['del','=',0]
+            ];
+            $list = Db::table('mp_tracking')->where($where)->select();
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+        $this->assign('list',$list);
+        $this->assign('id',$id);
+        return $this->fetch();
+    }
+
+    //确认发货
+    public function deliver() {
+        $val['tracking_name'] = input('post.tracking_name');
+        $val['tracking_num'] = input('post.tracking_num');
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['id','=',$val['id']],
+                ['status','=',1]
+            ];
+            $exist = Db::table('mp_vip_order')->where($where)->find();
+            if(!$exist) {
+                return ajax('订单不存在或状态已改变',-1);
+            }
+            $update_data = [
+                'status' => 2,
+                'send_time' => time(),
+                'tracking_name' => $val['tracking_name'],
+                'tracking_num' => $val['tracking_num']
+            ];
+            Db::table('mp_vip_order')->where($where)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
 
 
 }

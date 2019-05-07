@@ -24,6 +24,7 @@
             <th width="25">#</th>
             <th width="60">头像</th>
             <th>昵称</th>
+            <th width="80">余额</th>
             <th width="90">性别</th>
             <th width="120">手机号</th>
             <th width="120">用户角色</th>
@@ -40,6 +41,7 @@
                 <td><img src="{if $li['avatar']}
                 {if substr($li['avatar'],0,4) == 'http'}{$li['avatar']}{else /}/{$li['avatar']}{/if}{else /}/static/src/image/default.jpg{/if}" alt=""></td>
                 <td>{$li.nickname}</td>
+                <td>￥：{$li.balance}</td>
                 <td>
                     {switch $li['sex']}
                     {case 0}
@@ -107,7 +109,7 @@
         </form>
 
         <tr>
-            <td colspan="9" id="page" class="text-r"></td>
+            <td colspan="11" id="page" class="text-r"></td>
         </tr>
         </tbody>
     </table>

@@ -954,12 +954,105 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         }
         return ajax();
     }
-    //我的裂变二维码
-    public function myQrcode() {
 
+    public function addressList() {
+        $uid = $this->myinfo['uid'];
+        try {
+            $where = [
+                ['uid','=',$uid]
+            ];
+            $list = Db::table('mp_address')->where($where)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($list);
     }
 
+    public function addressAdd() {
+        $val['uid'] = $this->myinfo['uid'];
+        $val['provincename'] = input('post.provincename');
+        $val['cityname'] = input('post.cityname');
+        $val['countyname'] = input('post.countyname');
+        $val['detail'] = input('post.detail');
+        $val['postalcode'] = input('post.postalcode');
+        $val['tel'] = input('post.tel');
+        $val['username'] = input('post.username');
+        $val['default'] = input('post.default',0);
+        $this->checkPost($val);
+        if(!is_tel($val['tel'])) {
+            return ajax('',6);
+        }
+        try {
+            $id = Db::table('mp_address')->insertGetId($val);
+            if($val['default']) {
+                $whereDefault = [
+                    ['id','<>',$id],
+                    ['uid','=',$val['uid']]
+                ];
+                Db::table('mp_address')->where($whereDefault)->update(['default'=>0]);
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
 
+    public function addressDetail() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        $uid = $this->myinfo['uid'];
+        $where = [
+            ['id','=',$val['id']],
+            ['uid','=',$uid]
+        ];
+        try {
+            $info = Db::table('mp_address')->where($where)->find();
+            if(!$info) {
+                return ajax('',-4);
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($info);
+    }
+
+    public function addressMod() {
+        $val['id'] = input('post.id');
+        $uid = $this->myinfo['uid'];
+        $val['provincename'] = input('post.provincename');
+        $val['cityname'] = input('post.cityname');
+        $val['countyname'] = input('post.countyname');
+        $val['detail'] = input('post.detail');
+        $val['postalcode'] = input('post.postalcode');
+        $val['tel'] = input('post.tel');
+        $val['username'] = input('post.username');
+        $val['default'] = input('post.default',0);
+        $this->checkPost($val);
+        if(!is_tel($val['tel'])) {
+            return ajax('',6);
+        }
+        $where = [
+            ['id','=',$val['id']],
+            ['uid','=',$uid]
+        ];
+        try {
+            $info = Db::table('mp_address')->where($where)->find();
+            if(!$info) {
+                return ajax('',-4);
+            }
+            Db::table('mp_address')->where($where)->update($val);
+            if($val['default']) {
+                $whereDefault = [
+                    ['id','<>',$val['id']],
+                    ['uid','=',$uid]
+                ];
+                Db::table('mp_address')->where($whereDefault)->update(['default'=>0]);
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
 
 
 
