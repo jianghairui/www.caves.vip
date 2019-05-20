@@ -30,11 +30,20 @@ class Note extends Common {
                 ->field('n.id,n.title,n.pics,u.nickname,n.like,u.avatar,n.width,n.height')
                 ->order(['n.create_time'=>'DESC'])
                 ->limit(($page-1)*$perpage,$perpage)->select();
+            $map = [
+                ['uid','=',$this->myinfo['uid']]
+            ];
+            $like_ids = Db::table('mp_like')->where($map)->column('note_id');
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
         foreach ($list as &$v) {
             $v['pics'] = unserialize($v['pics']);
+            if(in_array($v['id'],$like_ids)) {
+                $v['ilike'] = 1;
+            }else {
+                $v['ilike'] = 0;
+            }
         }
         $ret['list'] = $list;
         return ajax($ret);
