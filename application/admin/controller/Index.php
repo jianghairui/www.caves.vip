@@ -151,6 +151,28 @@ class Index extends Common
         return ajax([],1);
     }
 
+    public function reqRecommend() {
+        $val['id'] = input('post.id');
+        $this->checkPost($val);
+        try {
+            $where = [
+                ['id','=',$val['id']]
+            ];
+            $exist = Db::table('mp_req')->where($where)->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
+            if($exist['recommend'] == 1) {
+                Db::table('mp_req')->where($where)->update(['recommend'=>0]);
+                return ajax(0);
+            }else {
+                Db::table('mp_req')->where($where)->update(['recommend'=>1]);
+                return ajax(1);
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+    }
 
     //上传图片限制512KB
     public function uploadImage()

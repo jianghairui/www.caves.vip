@@ -27,6 +27,7 @@ class Test extends Controller {
             'sslcert_path' => '/mnt/www.caves.vip/public/cert/bwg_cert/apiclient_cert.pem',
             'sslkey_path' => '/mnt/www.caves.vip/public/cert/bwg_cert/apiclient_key.pem'
         ];
+        die('YOU DIE');
     }
     //企业付款到用户(提现用)
     public function transfers() {

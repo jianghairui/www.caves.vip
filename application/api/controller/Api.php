@@ -83,8 +83,8 @@ class Api extends Common
                 ->alias('r')
                 ->join("mp_user u", "r.uid=u.id", "left")
                 ->where($where)->order(['r.id' => 'DESC'])
-                ->field("r.id,r.title,r.pic,r.cover,r.part_num,r.start_time,r.end_time,u.org as user_org")
-                ->limit(0,3)
+                ->field("r.id,r.title,r.cover AS pic,r.part_num,r.start_time,r.end_time,u.org as user_org")
+                ->limit(0,10)
                 ->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);

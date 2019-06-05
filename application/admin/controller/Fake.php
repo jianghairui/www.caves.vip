@@ -16,27 +16,28 @@ class Fake extends Controller {
  *
  * */
     public function index() {
-        $dir =  'fake/fact/2';
+        $dir =  'fake/avatar/3';
 //        $insert_data = [];
         $files = scandir($dir);
         unset($files[0]);unset($files[1]);
-//        foreach ($files as $v) {
-//            $data['sex'] = mt_rand(1,2);
-//            $data['age'] = mt_rand(35,55);
-//            $data['avatar'] = $dir .'/'. $v;
-//            $data['fake'] = 1;
-//            $data['role'] = 4;
-//            $data['user_auth'] = 1;
-//            $data['auth'] = 2;
-//            $data['create_time'] = time();
-//            $insert_data[] = $data;
-//        }
-//        try {
-//            $res = Db::table('mp_user')->insertAll($insert_data);
-//        } catch (\Exception $e) {
-//            die($e->getMessage());
-//        }
-//        halt($res);
+        foreach ($files as $v) {
+            $data['sex'] = mt_rand(1,2);
+            $data['age'] = mt_rand(35,55);
+            $data['avatar'] = $dir .'/'. $v;
+            $data['fake'] = 1;
+            $data['role'] = 4;
+            $data['user_auth'] = 1;
+            $data['auth'] = 2;
+            $data['create_time'] = time();
+            $insert_data[] = $data;
+        }
+        halt($insert_data);
+        try {
+            $res = Db::table('mp_user')->insertAll($insert_data);
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+        halt($res);
 //        $res($insert_data);
 //        try {
 //            $where = [
