@@ -20,13 +20,13 @@ class Activity extends Common
         $list = [
             [
                 'id' => 1,
-                'cover' => 'static/uploads/activity/test.png',
+                'cover' => 'static/uploads/activity/ac01.png',
                 'title' => '文创代言现金红包',
                 'end' => 0,
             ],
             [
                 'id' => 2,
-                'cover' => 'static/uploads/activity/test.png',
+                'cover' => 'static/uploads/activity/ac02.png',
                 'title' => '集齐卡片获精美礼品',
                 'end' => 0,
             ],

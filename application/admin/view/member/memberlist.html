@@ -21,7 +21,7 @@
     <table class="table table-border table-bordered table-bg">
         <thead>
         <tr class="text-c">
-            <th width="25">#</th>
+            <th width="35">#</th>
             <th width="60">头像</th>
             <th>昵称</th>
             <th width="80">余额</th>
@@ -30,6 +30,7 @@
             <th width="120">用户角色</th>
             <th width="60">认证状态</th>
             <th width="60">用户状态</th>
+            <th width="130">注册时间</th>
             <th width="100">操作</th>
         </tr>
         </thead>
@@ -89,6 +90,9 @@
                     {default /}
                     {/switch}
 
+                </td>
+                <td>
+                    {$li.create_time|date="Y-m-d H:i:s"}
                 </td>
                 <td class="td-manage">
                     {if $li['status'] != 2}
