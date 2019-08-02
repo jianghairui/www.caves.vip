@@ -43,6 +43,7 @@ class Activity extends Common
     public function getQrcode()
     {
         $uid = $this->myinfo['uid'];
+//        $uid = 1999;
         $app = Factory::miniProgram($this->mp_config);
         $response = $app->app_code->getUnlimit($uid, [
             'page' => 'pages/auth/auth',
@@ -55,6 +56,7 @@ class Activity extends Common
         } else {
             return ajax($response, -1);
         }
+        halt($response);
         return ajax($save_path . $png);
     }
 

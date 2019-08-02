@@ -47,7 +47,8 @@ class Common extends Controller {
             'Login/login',
             'Pay/recharge_notify',
             'Pay/order_notify',
-            'Activity/test'
+            'Activity/test',
+//            'Activity/getqrcode'
         ];
         if (in_array(request()->controller() . '/' . request()->action(), $noneed)) {
             return true;
