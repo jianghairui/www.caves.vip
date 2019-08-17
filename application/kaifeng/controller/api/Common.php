@@ -28,7 +28,7 @@ class Common extends Controller {
             'app_id' => 'wx60823ccbac8c4e09',
             'secret' => 'e101ef1f8d8dc2d7b97d3d394d8769b0',
             'mch_id'             => '1490402642',
-            'key'                => 'TIANJINTAOCIYUAN20190111SHWHCOPY',   // API 密钥
+            'key'                => '',   // API 密钥
             // 如需使用敏感接口（如退款、发送红包等）需要配置 API 证书路径(登录商户平台下载 API 证书)
             'cert_path'          =>  '/mnt/www.caves.vip/public/cert/apiclient_cert.pem',
             'key_path'           =>  '/mnt/www.caves.vip/public/cert/apiclient_key.pem',

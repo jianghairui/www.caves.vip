@@ -27,7 +27,7 @@ class Common extends Controller {
             'secret' => 'bad0c74c8353df8584d10887ec65cb8c',
 
             'mch_id'             => '1490402642',
-            'key'                => 'TIANJINTAOCIYUAN20190111SHWHCOPY',
+            'key'                => '',
             'cert_path'          =>  '/mnt/www.caves.vip/public/cert/apiclient_cert.pem',
             'key_path'           =>  '/mnt/www.caves.vip/public/cert/apiclient_key.pem',
             'response_type' => 'array',
