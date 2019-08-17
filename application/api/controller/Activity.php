@@ -56,7 +56,6 @@ class Activity extends Common
         } else {
             return ajax($response, -1);
         }
-        halt($response);
         return ajax($save_path . $png);
     }
 
