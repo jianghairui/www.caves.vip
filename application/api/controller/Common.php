@@ -25,13 +25,13 @@ class Common extends Controller {
         $this->domain = 'www.caves.vip';
         $this->weburl = 'https://www.caves.vip/';
         $this->mp_config = [
-            'app_id' => 'wxe7bbb3344157bd09',
-            'secret' => '7326d844c3399bc923a7aec7699fdd67',
-            'mch_id'             => '1490402642',
-            'key'                => 'TIANJINTAOCIYUAN20190111SHWHCOPY',   // API 密钥
+            'app_id' => config('appid'),
+            'secret' => config('app_secret'),
+            'mch_id'             => config('mch_id'),
+            'key'                => config('mch_key'),   // API 密钥
             // 如需使用敏感接口（如退款、发送红包等）需要配置 API 证书路径(登录商户平台下载 API 证书)
-            'cert_path'          =>  '/mnt/www.caves.vip/public/cert/apiclient_cert.pem',
-            'key_path'           =>  '/mnt/www.caves.vip/public/cert/apiclient_key.pem',
+            'cert_path'          =>  config('cert_path'),
+            'key_path'           =>  config('key_path'),
             // 下面为可选项,指定 API 调用返回结果的类型：array(default)/collection/object/raw/自定义类名
             'response_type' => 'array',
             'log' => [

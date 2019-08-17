@@ -23,13 +23,13 @@ class Common extends Controller {
         $this->cmd = request()->controller() . '/' . request()->action();
         $this->weburl = 'www.caves.vip';
         $this->config = [
-            'app_id' => 'wxe7bbb3344157bd09',
-            'secret' => '7326d844c3399bc923a7aec7699fdd67',
-
-            'mch_id'             => '1490402642',
-            'key'                => 'TIANJINTAOCIYUAN20190111SHWHCOPY',
-            'cert_path'          =>  '/mnt/www.caves.vip/public/cert/apiclient_cert.pem',
-            'key_path'           =>  '/mnt/www.caves.vip/public/cert/apiclient_key.pem',
+            'app_id' => config('appid'),
+            'secret' => config('app_secret'),
+            'mch_id'             => config('mch_id'),
+            'key'                => config('mch_key'),   // API 密钥
+            // 如需使用敏感接口（如退款、发送红包等）需要配置 API 证书路径(登录商户平台下载 API 证书)
+            'cert_path'          =>  config('cert_path'),
+            'key_path'           =>  config('key_path'),
             'response_type' => 'array',
             'log' => [
                 'level' => 'debug',
