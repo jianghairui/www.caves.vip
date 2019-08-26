@@ -20,19 +20,19 @@ class Test extends Controller {
         $this->cmd = request()->controller() . '/' . request()->action();
         $this->weburl = 'www.caves.vip';
         $this->config = [
-            'appid' => 'wx1ef69d837c12a709',
-            'app_secret' => 'b95d230bfbd56c0e1944e7f5d36b01f2',
-            'mch_id' => '1251831001',
-            'appkey' => '123654aaaZZZcaifu888aaazzzaaazzz',
-            'sslcert_path' => '/mnt/www.caves.vip/public/cert/bwg_cert/apiclient_cert.pem',
-            'sslkey_path' => '/mnt/www.caves.vip/public/cert/bwg_cert/apiclient_key.pem'
+            'appid' => '',
+            'app_secret' => '',
+            'mch_id' => '',
+            'appkey' => '',
+            'sslcert_path' => '',
+            'sslkey_path' => ''
         ];
         die('YOU DIE');
     }
     //企业付款到用户(提现用)
     public function transfers() {
         $total_amount = 100;
-        $re_openid = 'oNEu_s8TWzpK6p6-kUFnFHaS1GiI';
+        $re_openid = '';
         $check_name = '姜海蕤';
         $desc = '山洞提现';
 
