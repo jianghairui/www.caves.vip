@@ -9,7 +9,7 @@ namespace app\kaifeng\controller\api;
 
 use think\Db;
 class Note extends Common {
-    //获取笔记列表
+    //获取笔记列表***
     public function getNoteList()
     {
         $page = input('page',1);
