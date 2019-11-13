@@ -26,7 +26,16 @@ class Login extends Common {
             $data['mp_password'] = '';
             $data['remember_pwd'] = 0;
         }
+        $host = $_SERVER['HTTP_HOST'];
+        $icp = '';
+        if($host == 'www.caves.vip') {
+            $icp = '津ICP备17002251号-2';
+        }
+        if($host == 'www.bwg.art') {
+            $icp = '津ICP备17002251号-3';
+        }
         $this->assign('data',$data);
+        $this->assign('icp',$icp);
         return $this->fetch();
     }
 
