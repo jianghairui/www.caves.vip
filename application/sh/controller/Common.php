@@ -58,7 +58,7 @@ class Common extends Controller {
         if (in_array(request()->controller() . '/' . request()->action(), $noNeedSession)) {
             return true;
         }else {
-            if(session('username') && session('mploginstatus') && session('mploginstatus') == md5(session('username') . 'jiang')) {
+            if(session('username') && session('mploginstatus') && session('mploginstatus') == md5(session('username') . config('login_key'))) {
                 if(session('username') !== config('superman')) {
                     $auth = new Auth();
                     $bool = $auth->check($this->cmd,session('admin_id'));

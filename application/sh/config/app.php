@@ -12,13 +12,13 @@ return array(
     'page'   =>  1,
     'perpage'   =>  5,
 
-    'login_key' => 'jiang',
+    'login_key' => 'shwh',
     'app_trace' => true,
     'trace'     =>  [
         //支持Html,Console
         'type'  =>  'html',
     ],
-    'superman'  => 'jianghairui',
+    'superman'  => 'root',
     'auth'  => [
         'auth_on' => true,
         'auth_type'         => 1, // 认证方式，1为实时认证；2为登录认证。

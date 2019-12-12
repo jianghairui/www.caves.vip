@@ -38,6 +38,7 @@ class Login extends Common {
             }
             $where['username'] = input('post.username');
             $where['password'] = md5(input('post.password') . config('login_key'));
+
             try {
                 $result = Db::table('mp_admin')->where($where)->find();
             }catch (\Exception $e) {
