@@ -267,7 +267,7 @@ function generateVerify($width, $height, $type, $length, $fontsize)
             break;
     }
     for ($i = 0; $i < $length; $i++) {
-        imagettftext($image, $fontsize, mt_rand(-30, 30), $i * ($width / $length) + 5, mt_rand(($height / 2) + ($fontsize / 2), ($height / 2) + ($fontsize / 2)), randColor($image), 'static/src/fonts/PingFang-Regular.ttf', $str[$i]);
+        imagettftext($image, $fontsize, mt_rand(-30, 30), $i * ($width / $length) + 5, mt_rand(($height / 2) + ($fontsize / 2), ($height / 2) + ($fontsize / 2)), randColor($image), 'static/src/fonts/ELEGGARI.TTF', $str[$i]);
     }
     //添加像素点
     for ($i = 1; $i <= 100; $i++) {
