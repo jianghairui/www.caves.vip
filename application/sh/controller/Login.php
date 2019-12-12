@@ -8,6 +8,7 @@
 namespace app\sh\controller;
 use think\Db;
 use think\Loader;
+
 class Login extends Common {
 
     public function index() {
@@ -15,7 +16,6 @@ class Login extends Common {
             $this->redirect('Index/index');
             exit();
         }
-
         $cookie = cookie('mp_password');
         if(isset($cookie) && $cookie != '') {
             $data['mp_username'] = cookie('mp_username');
