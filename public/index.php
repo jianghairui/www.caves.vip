@@ -21,7 +21,3 @@ require __DIR__ . '/../thinkphp/base.php';
 Container::get('app')->run()->send();
 
 require ROOT_PATH . '/vendor/autoload.php';
-
-
-
-
