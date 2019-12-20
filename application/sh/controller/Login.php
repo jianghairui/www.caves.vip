@@ -26,6 +26,7 @@ class Login extends Common {
             $data['mp_password'] = '';
             $data['remember_pwd'] = 0;
         }
+        $this->assign('http_host',$_SERVER['HTTP_HOST']);
         $this->assign('data',$data);
         return $this->fetch();
     }
