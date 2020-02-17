@@ -9,7 +9,7 @@ namespace app\sh\controller\api;
 use EasyWeChat\Factory;
 use think\Db;
 use think\Exception;
-
+use my\Sendsms;
 class Api extends Common {
 
     public function index() {
@@ -359,87 +359,154 @@ class Api extends Common {
         return ajax($array);
     }
 
-    //小程序入驻下单
-    public function order() {
-        $val['uid'] = input('post.uid');
-        $val['linkman'] = input('post.linkman');
+
+
+
+    //提交表单发送手机短信
+    public function sendSms() {
         $val['tel'] = input('post.tel');
-        $val['email'] = input('post.email');
-        $val['set'] = input('post.set');
-        $this->checkPost($val);
-        $val['cert'] = input('post.cert');
+        checkPost($val);
+        $sms = new Sendsms();
+        $tel = $val['tel'];
 
-
-        if(!in_array($val['set'],[1,2,3])) {
-            return ajax($val['set'],-3);
-        }
-        if(!is_tel($val['tel'])) {
-            return ajax('',6);
-        }
-        if(!is_email($val['email'])) {
-            return ajax('',7);
+        if(!is_tel($tel)) {
+            return ajax('无效的手机号',2);
         }
         try {
-            $user_exist = Db::table('hjmallind_user')->where('id',$val['uid'])->find();
-            if(!$user_exist) {
-                return ajax($val['uid'],-3);
-            }
-            $order_exist = Db::table('mp_order')->where('uid',$val['uid'])->find();
-            if($order_exist) {
-                if($order_exist['enter'] == 1) {
-                    return ajax('',8);
+            $code = mt_rand(100000,999999);
+            $insert_data = [
+                'tel' => $tel,
+                'code' => $code,
+                'create_time' => time()
+            ];
+            $sms_data['tel'] = $val['tel'];
+            $sms_data['param'] = [
+                'code' => $code
+            ];
+            $exist = Db::table('mp_verify')->where('tel','=',$tel)->find();
+            if($exist) {
+                if((time() - $exist['create_time']) < 60) {
+                    return ajax('1分钟内不可重复发送',4);
                 }
-                $val['order_sn'] = $order_exist['order_sn'];
-                $order_exist = true;
+                $res = $sms->send($sms_data,'SMS_174925606');
+                if($res->Code === 'OK') {
+                    Db::table('mp_verify')->where('tel',$tel)->update($insert_data);
+                    return ajax();
+                }else {
+                    return ajax($res->Message,-1);
+                }
             }else {
-                $order_exist = false;
+                $res = $sms->send($sms_data);
+                if($res->Code === 'OK') {
+                    Db::table('mp_verify')->insert($insert_data);
+                    return ajax();
+                }else {
+                    return ajax($res->Message,-1);
+                }
             }
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
-        $cert = $val['cert'];
-        if($cert) {
-            if(!file_exists($cert)) {
-                return ajax($cert,5);
-            }
-            $val['cert'] = $this->rename_file($cert);
-        }else {
-            unset($val['cert']);
+    }
+
+    //小程序购买套餐下单支付
+    public function order() {
+        $val['name'] = input('post.name');
+        $val['tel'] = input('post.tel');
+        $val['code'] = input('post.code');
+        checkPost($val);
+        $uid = $this->myinfo['uid'];
+        if(!is_tel($val['tel'])) {
+            return ajax('无效的手机号',2);
         }
-
-        $taocan = [
-            '1'=>[
-                'title' => '1元套餐',
-                'price' => 1
-            ],
-            '2'=>[
-                'title' => '2元套餐',
-                'price' => 2
-            ],
-            '3'=>[
-                'title' => '3元套餐',
-                'price' => 3
-            ]
-        ];
-
-        $val['title'] = $taocan[$val['set']]['title'];
-        $val['price'] = $taocan[$val['set']]['price'];
-        $val['openid'] = $user_exist['wechat_open_id'];
         try {
-            if($order_exist) {
-                $val['enter'] = 0;
-                Db::table('mp_order')->where('uid',$val['uid'])->update($val);
+            //    //todo 检验短信验证码
+            $whereCode = [
+                ['tel','=',$val['tel']],
+                ['code','=',$val['code']]
+            ];
+            $code_exist = Db::table('mp_verify')->where($whereCode)->find();
+            if($code_exist) {
+                if((time() - $code_exist['create_time']) > 60*5) {
+                    return ajax('验证码过期',5);
+                }
             }else {
-                $val['order_sn'] = create_unique_number('m');
-                $val['create_time'] = time();
-                Db::table('mp_order')->insert($val);
+                return ajax('验证码无效',6);
             }
+
+            $price = 19800;
+            $order_sn = create_unique_number('');
+
+            $insert_data = [
+                'uid' => $uid,
+                'order_sn' => $order_sn,
+                'price' => $price,
+                'name' => $val['name'],
+                'tel' => $val['tel'],
+                'create_time' => time(),
+            ];
+
+            Db::table('mp_vip_order')->insert($insert_data);
+
+            $app = Factory::payment($this->mp_config);
+            $total_price = $price;
+            $result = $app->order->unify([
+                'body' => '山海服务套餐',
+                'out_trade_no' => $order_sn,
+            'total_fee' => 1,
+//                    'total_fee' => floatval($total_price)*100,
+                'notify_url' => $this->weburl . 'api/pay/funding_notify',
+                'trade_type' => 'JSAPI',
+                'openid' => $this->myinfo['openid']
+            ]);
+
+            if($result['return_code'] == 'FAIL') {
+                return ajax($result['return_msg'],-1);
+            }else if($result['return_code'] != 'SUCCESS' || $result['result_code'] != 'SUCCESS') {
+                return ajax($result['err_code_des'],-1);
+            }
+
+            $sign['appId'] = $result['appid'];
+            $sign['timeStamp'] = strval(time());
+            $sign['nonceStr'] = $result['nonce_str'];
+            $sign['signType'] = 'MD5';
+            $sign['package'] = 'prepay_id=' . $result['prepay_id'];
+            $sign['paySign'] = getSign($sign);
+
         }catch (\Exception $e) {
+            $this->log($this->cmd ,$e->getMessage());
             return ajax($e->getMessage(),-1);
         }
-        return ajax($val);
+
+        return ajax($sign);
 
     }
+
+    public function orderList() {
+        try {
+            $whereOrder = [
+                ['uid','=',$this->myinfo['uid']]
+            ];
+            $orderby = ['id'=>'DESC'];
+            $list = Db::table('mp_vip_order')->where($whereOrder)->order($orderby)->select();
+        } catch(\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($list);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public function uploadImage() {
         if(!empty($_FILES)) {

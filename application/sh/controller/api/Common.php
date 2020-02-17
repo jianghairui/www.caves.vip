@@ -28,7 +28,7 @@ class Common extends Controller {
             'secret' => config('app_secret'),
 
             'mch_id'             => config('mch_id'),
-            'key'                => config('key'),
+            'key'                => config('mch_key'),
             'cert_path'          =>  config('cert_path'),
             'key_path'           =>  config('key_path'),
             'response_type' => 'array',
@@ -42,14 +42,17 @@ class Common extends Controller {
 
     private function checkSession() {
         $noneed = [
-            'Api.api/userauth'
+            'Api.api/userauth',
+            'Api.api/sendsms',
+            'Api.api/order',
+            'Api.api/orderlist',
         ];
         if (!in_array(request()->controller() . '/' . request()->action(), $noneed)) {
             return true;
         }else {
             $token = input('post.token');
             if(!$token) {
-                throw new HttpResponseException(ajax('invalid token',-3));
+                throw new HttpResponseException(ajax('token不能为空',-3));
             }
             try {
                 $exist = Db::table('mp_token')->where([
@@ -61,6 +64,7 @@ class Common extends Controller {
             }
             if($exist) {
                 $this->myinfo = unserialize($exist['value']);
+                $this->myinfo['uid'] = $exist['uid'];
                 return true;
             }else {
                 throw new HttpResponseException(ajax('invalid token',-3));
