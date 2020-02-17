@@ -14,12 +14,13 @@ class Pay extends Common {
 
     //订单支付回调接口
     public function order_notify() {
-
         //将返回的XML格式的参数转换成php数组格式
         $xml = file_get_contents('php://input');
+
         $data = xml2array($xml);
-        $this->paylog($this->cmd,var_export($data,true));
         if($data) {
+            $this->paylog($this->cmd,var_export($data,true));
+
             if($data['return_code'] == 'SUCCESS' && $data['result_code'] == 'SUCCESS') {
                 $whereOrder = [
                     ['order_sn','=',$data['out_trade_no']],
@@ -40,6 +41,7 @@ class Pay extends Common {
                     $this->log($this->cmd,$e->getMessage());
                 }
             }
+
         }
         exit(array2xml(['return_code'=>'SUCCESS','return_msg'=>'OK']));
 

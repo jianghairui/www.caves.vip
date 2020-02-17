@@ -380,6 +380,7 @@ class Api extends Common {
                 'create_time' => time()
             ];
             $sms_data['tel'] = $val['tel'];
+            $sms_data['tpl_code'] = 'SMS_174925606';
             $sms_data['param'] = [
                 'code' => $code
             ];
@@ -388,7 +389,7 @@ class Api extends Common {
                 if((time() - $exist['create_time']) < 60) {
                     return ajax('1分钟内不可重复发送',4);
                 }
-                $res = $sms->send($sms_data,'SMS_174925606');
+                $res = $sms->send($sms_data);
                 if($res->Code === 'OK') {
                     Db::table('mp_verify')->where('tel',$tel)->update($insert_data);
                     return ajax();
@@ -455,7 +456,7 @@ class Api extends Common {
                 'out_trade_no' => $order_sn,
             'total_fee' => 1,
 //                    'total_fee' => floatval($total_price)*100,
-                'notify_url' => $this->weburl . 'api/pay/funding_notify',
+                'notify_url' => $this->weburl . '/sh/api.pay/order_notify',
                 'trade_type' => 'JSAPI',
                 'openid' => $this->myinfo['openid']
             ]);
@@ -485,7 +486,8 @@ class Api extends Common {
     public function orderList() {
         try {
             $whereOrder = [
-                ['uid','=',$this->myinfo['uid']]
+                ['uid','=',$this->myinfo['uid']],
+                ['status','=',1]
             ];
             $orderby = ['id'=>'DESC'];
             $list = Db::table('mp_vip_order')->where($whereOrder)->order($orderby)->select();
@@ -493,6 +495,24 @@ class Api extends Common {
             return ajax($e->getMessage(),-1);
         }
         return ajax($list);
+    }
+
+    public function checkPay() {
+        try {
+            $whereOrder = [
+                ['uid','=',$this->myinfo['uid']],
+                ['status','=',1]
+            ];
+            $exist = Db::table('mp_vip_order')->where($whereOrder)->find();
+            if($exist) {
+                $res = true;
+            }else {
+                $res  = false;
+            }
+        } catch(\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($res);
     }
 
 
